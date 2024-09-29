@@ -10,8 +10,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        color1: "#231F20", // warna hitam
+        color2: "#C9D1D9", // warna text
+        color3: "#0D1117", // warna sidebar
+        color4: "#05080D", // warna navbar
+        color5: "#21262D", // sidebar hover
+        color6: "#161B22", // navbar hover
       },
     },
   },
