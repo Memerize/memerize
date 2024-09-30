@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Sidebar() {
   return (
-    <ul className="menu bg-color3 w-64">
+    <ul className="menu bg-color3 w-64 h-full">
       <li>
         <Link
           className="text-md text-color2 focus:text-color2 hover:bg-color5 focus:bg-color5"
