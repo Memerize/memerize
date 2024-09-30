@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { z } from "zod";
 
 export const UserSchema = z.object({
@@ -13,3 +14,17 @@ export const UserSchema = z.object({
 });
 
 export type UserTypes = z.infer<typeof UserSchema>;
+
+const PostSchema = z.object({
+  _id: z.instanceof(ObjectId).optional(),
+  userId: z.instanceof(ObjectId),
+  title: z.string(),
+  image: z.string(),
+  likes: z.array(z.any()),
+  tags: z.array(z.string()),
+  comments: z.array(z.any()),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type PostTypes = z.infer<typeof PostSchema>;
