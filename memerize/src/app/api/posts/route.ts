@@ -22,14 +22,15 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json(); // *^title, image, tags
-    const userId = new ObjectId(body.userId); // *^sementara userId didapat dari body
+    const body = await request.json(); // title, image, tags
+    const userId = new ObjectId(body.userId); // userId masih hardcode
+    
     const parsedData = PostSchema.parse({
       ...body,
       userId,
     });
 
-    const slug = createSlug(parsedData.title);
+    const slug = await createSlug(parsedData.title); 
 
     const postData = {
       ...parsedData,
