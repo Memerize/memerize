@@ -20,4 +20,8 @@ export class PostModel {
   static async findByTitle(title: string) {
     return await this.collection().findOne({ title: title });
   }
+
+  static async create(postData: PostTypes) {
+    return this.collection().insertOne(postData);
+  }
 }

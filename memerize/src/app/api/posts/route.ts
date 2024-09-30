@@ -1,5 +1,8 @@
+import { createSlug } from "@/action";
 import { handleError } from "@/helpers/handleError";
 import { PostModel } from "@/models/PostModel";
+import { PostSchema } from "@/types";
+import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -11,6 +14,38 @@ export async function GET(request: Request) {
 
     return new NextResponse(JSON.stringify(posts), {
       headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json(); // *^title, image, tags
+    const userId = new ObjectId(body.userId); // *^sementara userId didapat dari body
+    const parsedData = PostSchema.parse({
+      ...body,
+      userId,
+    });
+
+    const slug = createSlug(parsedData.title);
+
+    const postData = {
+      ...parsedData,
+      slug,
+      comments: [],
+      likes: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    const newPost = await PostModel.create(postData);
+
+    return new NextResponse(JSON.stringify(newPost), {
+      headers: { 
+        "Content-Type": "application/json" 
+      }
     });
   } catch (error) {
     return handleError(error);

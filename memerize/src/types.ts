@@ -15,16 +15,17 @@ export const UserSchema = z.object({
 
 export type UserTypes = z.infer<typeof UserSchema>;
 
-const PostSchema = z.object({
+export const PostSchema = z.object({
   _id: z.instanceof(ObjectId).optional(),
   userId: z.instanceof(ObjectId),
-  title: z.string(),
+  title: z.string(),  
+  slug: z.string().optional(),
   image: z.string(),
-  likes: z.array(z.any()),
-  tags: z.array(z.string()),
-  comments: z.array(z.any()),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  likes: z.array(z.any()).optional(),
+  tags: z.array(z.string()).optional(),
+  comments: z.array(z.any()).optional(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
 });
 
 export type PostTypes = z.infer<typeof PostSchema>;
