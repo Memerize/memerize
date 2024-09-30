@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-export default function Home() {
+export default function ProfileUser() {
   return (
     <div className="bg-gray-100 min-h-screen">
       {/* Main Content */}
@@ -16,8 +16,8 @@ export default function Home() {
 
           {/* Meme Post */}
           <div className="bg-white shadow p-4 rounded">
-            <div className="flex space-x-4">
-              <span className="font-bold text-black">User</span> 
+            <div className="flex flex-col space-y-4">
+              <span className="font-bold text-black">User</span>
               <span className="font-bold text-black">Title</span>
             </div>
             <div className="bg-gray-300 text-center text-4xl py-16 mt-4 text-black">
@@ -25,12 +25,12 @@ export default function Home() {
             </div>
             <div className="flex justify-between items-center mt-4">
               <div className="space-x-4">
-                <button className="text-blue-600">Vote</button>
-                <button className="text-blue-600">Comments</button>
+                <button className="text-blue-600 text-black">Vote</button>
+                <button className="text-blue-600 text-black">Comments</button>
               </div>
               <div className="space-x-4">
-                <button className="text-blue-600">Save</button>
-                <button className="text-blue-600">Share</button>
+                <button className="text-blue-600 text-black">Save</button>
+                <button className="text-blue-600 text-black">Share</button>
               </div>
             </div>
           </div>
@@ -38,4 +38,6 @@ export default function Home() {
       </div>
     </div>
   );
-};
+}
+
+;

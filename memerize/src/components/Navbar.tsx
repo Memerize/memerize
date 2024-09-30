@@ -4,12 +4,12 @@ export default function Navbar() {
       <div className="flex-1">
         <a className="btn hover:bg-color6 btn-ghost text-xl">Memerize</a>
       </div>
-      <div className="flex-none gap-2">
-        <div className="form-control">
+      <div className="flex-none gap-2 ">
+        <div className="form-control ">
           <input
             type="text"
             placeholder="Search"
-            className="input input-bordered w-24 md:w-auto"
+            className="input input-bordered w-24 md:w-auto bg-white"
           />
         </div>
         <div className="dropdown dropdown-end">
@@ -27,12 +27,12 @@ export default function Navbar() {
           </div>
           <ul
             tabIndex={0}
-            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+            className="menu menu-sm dropdown-content bg-white rounded-box z-[1] mt-3 w-52 p-2 shadow  "
           >
             <li>
               <a className="justify-between text-color1">
                 Profile
-                <span className="badge text-color1">New</span>
+                <span className="badge text-color1 bg-white ">New</span>
               </a>
             </li>
             <li>
