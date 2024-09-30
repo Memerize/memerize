@@ -27,6 +27,30 @@ const CreateMeme: React.FC = () => {
         img.onload = () => {
             setImage(img);
             setImageDimensions({ width: img.width, height: img.height });
+            setTexts([
+                {
+                    id: 1,
+                    text: "Top Text",
+                    x: img.width / 2 - 70,
+                    y: 20,
+                    fontSize: 40,
+                    fill: textColor,
+                    stroke: "black",
+                    strokeWidth: 2,
+                    fontFamily: fontFamily,
+                },
+                {
+                    id: 2,
+                    text: "Bottom Text",
+                    x: img.width / 2 - 100,
+                    y: img.height - 60,
+                    fontSize: 40,
+                    fill: textColor,
+                    stroke: "black",
+                    strokeWidth: 2,
+                    fontFamily: fontFamily,
+                },
+            ]);
         };
     }, [backgroundImageUrl]);
 
@@ -87,18 +111,39 @@ const CreateMeme: React.FC = () => {
     // Handle drag end with boundary check
     const handleDragEnd = (e: Konva.DragEvent, id: number) => {
         const text = e.target;
+
+        // Coordinates before dragging
+        const oldX = text.getAttr('x');
+        const oldY = text.getAttr('y');
+        console.log(`Before drag - X: ${oldX}, Y: ${oldY}`);
+
+        // Coordinates after dragging
         const newX = text.x();
         const newY = text.y();
+        console.log(`After drag - X: ${newX}, Y: ${newY}`);
+
         const textWidth = text.width();
         const textHeight = text.height();
 
         // Ensure the text does not go out of bounds
         const newPosition = preventTextOutOfBounds(newX, newY, textWidth, textHeight);
 
+        // Coordinates after applying preventTextOutOfBounds
+        console.log(`After filtering (preventTextOutOfBounds) - X: ${newPosition.x}, Y: ${newPosition.y}`);
+
+        // Set the position explicitly to ensure the text stays within bounds
+        text.position({
+            x: newPosition.x,
+            y: newPosition.y,
+        });
+
+        // Update the text state with the clamped position
         setTexts((prevTexts) =>
             prevTexts.map((t) => (t.id === id ? { ...t, x: newPosition.x, y: newPosition.y } : t))
         );
     };
+
+
 
     const addText = () => {
         const newTextId = texts.length > 0 ? Math.max(...texts.map((t) => t.id)) + 1 : 1;
