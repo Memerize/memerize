@@ -33,8 +33,13 @@ export default function RootLayout({
       >
         <Toast />
         <Navbar />
-        <div className="flex h-screen">
-          <Sidebar />
+        <div className="flex">
+          <aside
+            className="sticky top-16"
+            style={{ height: "calc(100vh - 4rem)" }}
+          >
+            <Sidebar />
+          </aside>
           <main className="w-full m-8">{children}</main>
         </div>
       </body>
