@@ -21,6 +21,7 @@ async function auth(request: NextRequest) {
   requestHeaders.set("x-user-id", payload._id.toString());
   requestHeaders.set("x-user-email", payload.email);
   requestHeaders.set("x-user-username", payload.username);
+  requestHeaders.set("x-user-image", payload.image);
 
   return requestHeaders;
 }
