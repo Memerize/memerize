@@ -31,10 +31,11 @@ export async function POST(request: Request) {
     });
 
     const slug = await createSlug(parsedData.title); 
+    const uniqueSlug = `${slug}-${Date.now()}`;
 
     const postData = {
       ...parsedData,
-      slug,
+      uniqueSlug,
       comments: [],
       likes: [],
       createdAt: new Date(),
