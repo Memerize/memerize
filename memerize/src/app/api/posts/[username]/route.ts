@@ -6,7 +6,6 @@ export async function GET(request: Request, { params }: { params: { username: st
   const { username } = params;
   try {
     const posts = await PostModel.findAllByUsername(username);
-
     return NextResponse.json(posts);
   } catch (error) {
     return handleError(error);

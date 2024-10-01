@@ -1,5 +1,6 @@
 import { db } from "@/db/config";
 import { PostTypes } from "@/types";
+import { UserModel } from "./UserModel";
 
 export class PostModel {
   static collection() {
@@ -26,6 +27,25 @@ export class PostModel {
   }
 
   static async findAllByUsername(username: string) {
+    const user = await UserModel.findOne({ username });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
     return await this.collection().find({ username }).sort({ createdAt: -1 }).toArray();
+  }
+
+  static async findOneByUsernameAndSlug(username: string, slug: string) {
+    const user = await UserModel.findOne({ username });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    return await this.collection().findOne({
+      username: username,
+      slug: slug,
+    });
   }
 }
