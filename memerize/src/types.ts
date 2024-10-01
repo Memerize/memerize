@@ -29,3 +29,11 @@ export const PostSchema = z.object({
 });
 
 export type PostTypes = z.infer<typeof PostSchema>;
+
+export interface SaveTypes {
+  _id?: ObjectId;
+  username: string;
+  slug: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
