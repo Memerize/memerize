@@ -35,8 +35,13 @@ export class UserModel {
     });
 
     if (existingUser) {
-      throw new Error("Username or email already exists");
+    if (existingUser.username === newUser.username) {
+      throw new Error("Username already exists");
     }
+    if (existingUser.email === newUser.email) {
+      throw new Error("Email already exists");
+    }
+  }
 
     if (!newUser.image) {
       newUser.image =
@@ -48,7 +53,8 @@ export class UserModel {
     const result = await this.collection().insertOne(newUser);
 
     const { password, ...userWithoutPassword } = newUser;
-
+    console.log(password);
+    
     return {
       ...userWithoutPassword,
       _id: result.insertedId,
