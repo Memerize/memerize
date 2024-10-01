@@ -24,4 +24,8 @@ export class PostModel {
   static async create(postData: PostTypes) {
     return this.collection().insertOne(postData);
   }
+
+  static async findAllByUsername(username: string) {
+    return await this.collection().find({ username }).sort({ createdAt: -1 }).toArray();
+  }
 }

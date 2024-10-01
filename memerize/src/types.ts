@@ -17,8 +17,8 @@ export type UserTypes = z.infer<typeof UserSchema>;
 
 export const PostSchema = z.object({
   _id: z.instanceof(ObjectId).optional(),
-  userId: z.instanceof(ObjectId),
-  title: z.string(),  
+  username: z.string(),
+  title: z.string(),
   slug: z.string().optional(),
   image: z.string(),
   likes: z.array(z.any()).optional(),
