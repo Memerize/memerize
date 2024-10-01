@@ -4,6 +4,14 @@ import Konva from "konva";
 import React, { useEffect, useState, useRef } from "react";
 import { Stage, Layer, Text, Image, Transformer } from "react-konva";
 
+const fontOptions = [
+    { label: "Impact", value: "Impact" },
+    { label: "Arial", value: "Arial, sans-serif" },
+    { label: "Georgia", value: "Georgia, serif" },
+    { label: "Courier New", value: "'Courier New', monospace" },
+    { label: "Times New Roman", value: "'Times New Roman', serif" },
+];
+
 const CreateMeme: React.FC = () => {
     const [backgroundImageUrl, setBackgroundImageUrl] = useState<string>("https://api.memegen.link/images/awesome.png");
     const [texts, setTexts] = useState<{ id: number; text: string; x: number; y: number; fontSize: number; fill: string; stroke: string; strokeWidth: number; fontFamily: string }[]>([]);
@@ -19,6 +27,11 @@ const CreateMeme: React.FC = () => {
     const imgRef = useRef(null);
     const compRef = useRef<HTMLDivElement>(null);
     const [isTransformerActive, setIsTransformerActive] = useState<boolean>(false);
+    const [openDropdown, setOpenDropdown] = useState(null);
+
+    const toggleDropdown = (id) => {
+        setOpenDropdown(openDropdown === id ? null : id);
+    };
 
     // Image loading
     useEffect(() => {
@@ -31,24 +44,24 @@ const CreateMeme: React.FC = () => {
                 {
                     id: 1,
                     text: "Top Text",
-                    x: img.width / 2 - 70,
+                    x: 23,
                     y: 20,
                     fontSize: 40,
-                    fill: textColor,
-                    stroke: "black",
+                    fill: "#ffffff",
+                    stroke: "#000000",
                     strokeWidth: 2,
-                    fontFamily: fontFamily,
+                    fontFamily: "Impact",
                 },
                 {
                     id: 2,
                     text: "Bottom Text",
-                    x: img.width / 2 - 100,
+                    x: 23,
                     y: img.height - 60,
                     fontSize: 40,
-                    fill: textColor,
-                    stroke: "black",
+                    fill: "#ffffff",
+                    stroke: "#000000",
                     strokeWidth: 2,
-                    fontFamily: fontFamily,
+                    fontFamily: "Impact",
                 },
             ]);
         };
@@ -112,12 +125,6 @@ const CreateMeme: React.FC = () => {
     const handleDragEnd = (e: Konva.DragEvent, id: number) => {
         const text = e.target;
 
-        // Coordinates before dragging
-        const oldX = text.getAttr('x');
-        const oldY = text.getAttr('y');
-        console.log(`Before drag - X: ${oldX}, Y: ${oldY}`);
-
-        // Coordinates after dragging
         const newX = text.x();
         const newY = text.y();
         console.log(`After drag - X: ${newX}, Y: ${newY}`);
@@ -125,25 +132,19 @@ const CreateMeme: React.FC = () => {
         const textWidth = text.width();
         const textHeight = text.height();
 
-        // Ensure the text does not go out of bounds
         const newPosition = preventTextOutOfBounds(newX, newY, textWidth, textHeight);
 
-        // Coordinates after applying preventTextOutOfBounds
         console.log(`After filtering (preventTextOutOfBounds) - X: ${newPosition.x}, Y: ${newPosition.y}`);
 
-        // Set the position explicitly to ensure the text stays within bounds
         text.position({
             x: newPosition.x,
             y: newPosition.y,
         });
 
-        // Update the text state with the clamped position
         setTexts((prevTexts) =>
             prevTexts.map((t) => (t.id === id ? { ...t, x: newPosition.x, y: newPosition.y } : t))
         );
     };
-
-
 
     const addText = () => {
         const newTextId = texts.length > 0 ? Math.max(...texts.map((t) => t.id)) + 1 : 1;
@@ -168,7 +169,34 @@ const CreateMeme: React.FC = () => {
         setTexts((prevTexts) =>
             prevTexts.map((t) => (t.id === id ? { ...t, text: updatedText } : t))
         );
+
+        adjustFontSizeToFit(id);
     };
+
+    const adjustFontSizeToFit = (textId: number) => {
+        const node = textRefs.current[textId];
+        const boxWidth = node.width();
+        let fontSize = node.fontSize();
+
+        if (node.textWidth > (boxWidth - 20) && fontSize > 26) {
+            fontSize -= 2;
+            node.fontSize(fontSize);
+            node.getLayer().batchDraw();
+        } else if (node.textWidth < (boxWidth - 40) && fontSize < 40) {
+            fontSize += 2;
+            node.fontSize(fontSize);
+            node.getLayer().batchDraw();
+        }
+
+        setTexts((prevTexts) =>
+            prevTexts.map((t) =>
+                t.id === textId
+                    ? { ...t, fontSize: fontSize }
+                    : t
+            )
+        );
+    };
+
 
     // New function to remove text
     const removeText = (id: number) => {
@@ -180,6 +208,28 @@ const CreateMeme: React.FC = () => {
             transformerRef.current.nodes([]);
             transformerRef.current.getLayer().batchDraw();
         }
+    };
+
+    const handleTextTransform = (textId: number) => {
+        const node = textRefs.current[textId];
+
+        node.setAttrs({
+            width: node.width() * node.scaleX(),
+            height: node.height() * node.scaleY(),
+            scaleX: 1,
+            scaleY: 1,
+        });
+
+        setTexts((prevTexts) =>
+            prevTexts.map((t) =>
+                t.id === textId
+                    ? {
+                        ...t,
+                        width: node.width(),
+                    }
+                    : t
+            )
+        );
     };
 
     return (
@@ -215,6 +265,10 @@ const CreateMeme: React.FC = () => {
                                         text={text.text}
                                         x={text.x}
                                         y={text.y}
+                                        width={imageDimensions.width - 50}
+                                        height={40}
+                                        align="center"
+                                        wrap="char"
                                         fontSize={text.fontSize}
                                         draggable
                                         fill={text.fill}
@@ -223,10 +277,16 @@ const CreateMeme: React.FC = () => {
                                         fontFamily={text.fontFamily}
                                         onClick={() => handleTextClick(text.id)}
                                         onDragEnd={(e) => handleDragEnd(e, text.id)}
+                                        onTransform={() => handleTextTransform(text.id)}
                                     />
+
                                 </React.Fragment>
                             ))}
-                            <Transformer ref={transformerRef} visible={isTransformerActive} />
+                            <Transformer
+                                ref={transformerRef}
+                                visible={isTransformerActive}
+
+                            />
                         </Layer>
                     </Stage>
                 </div>
@@ -245,19 +305,6 @@ const CreateMeme: React.FC = () => {
                         onChange={(e) => setBackgroundImageUrl(e.target.value)}
                         placeholder="Enter background image URL"
                         className="input input-bordered w-full"
-                    />
-                </div>
-
-                {/* Text Color Picker */}
-                <div className="form-control w-full">
-                    <label className="label">
-                        <span className="label-text">Text Color</span>
-                    </label>
-                    <input
-                        type="color"
-                        value={textColor}
-                        onChange={(e) => setTextColor(e.target.value)}
-                        className="input w-full p-0 h-10 cursor-pointer"
                     />
                 </div>
 
@@ -286,22 +333,120 @@ const CreateMeme: React.FC = () => {
 
                 {/* Editable Text Inputs for each Text Element */}
                 {texts.map((text) => (
-                    <div key={text.id} className="form-control w-full flex items-center space-x-2">
+                    <div key={text.id} className="form-control w-full flex flex-col space-y-2">
                         <label className="label w-full">
                             <span className="label-text">Text {text.id}</span>
                         </label>
+
                         <input
                             type="text"
                             value={text.text}
                             onChange={(e) => handleInputChange(e, text.id)}
                             className="input input-bordered w-full"
                         />
-                        {/* Remove Button */}
-                        <button className="btn btn-error mt-2" onClick={() => removeText(text.id)}>
-                            Remove
+
+                        {/* Trigger button for dropdown popup */}
+                        <button
+                            className="btn btn-secondary w-full"
+                            onClick={() => toggleDropdown(text.id)}
+                        >
+                            Edit Text Options
                         </button>
+
+                        {/* Dropdown for text options */}
+                        {openDropdown === text.id && (
+                            <div className="dropdown-content p-4 mt-2 rounded-md bg-base-200 shadow-lg">
+                                {/* Font Size */}
+                                <div className="flex items-center space-x-2 mb-2">
+                                    <label className="label-text">Font Size</label>
+                                    <input
+                                        type="number"
+                                        value={text.fontSize}
+                                        min={5}
+                                        max={100}
+                                        onChange={(e) => {
+                                            const newFontSize = parseInt(e.target.value);
+                                            setTexts((prevTexts) =>
+                                                prevTexts.map((t) =>
+                                                    t.id === text.id ? { ...t, fontSize: newFontSize } : t
+                                                )
+                                            );
+                                        }}
+                                        className="input input-bordered w-20"
+                                    />
+                                </div>
+
+                                {/* Font Color */}
+                                <div className="flex items-center space-x-2 mb-2">
+                                    <label className="label-text">Font Color</label>
+                                    <input
+                                        type="color"
+                                        value={text.fill}
+                                        onChange={(e) => {
+                                            const newColor = e.target.value;
+                                            setTexts((prevTexts) =>
+                                                prevTexts.map((t) =>
+                                                    t.id === text.id ? { ...t, fill: newColor } : t
+                                                )
+                                            );
+                                        }}
+                                        className="input w-10 h-10 p-0 cursor-pointer"
+                                    />
+                                </div>
+
+                                {/* Stroke Color */}
+                                <div className="flex items-center space-x-2 mb-2">
+                                    <label className="label-text">Stroke Color</label>
+                                    <input
+                                        type="color"
+                                        value={text.stroke}
+                                        onChange={(e) => {
+                                            const newStrokeColor = e.target.value;
+                                            setTexts((prevTexts) =>
+                                                prevTexts.map((t) =>
+                                                    t.id === text.id ? { ...t, stroke: newStrokeColor } : t
+                                                )
+                                            );
+                                        }}
+                                        className="input w-10 h-10 p-0 cursor-pointer"
+                                    />
+                                </div>
+
+                                {/* Font Selection */}
+                                <div className="flex items-center space-x-2 mb-2">
+                                    <label className="label-text">Font Family</label>
+                                    <select
+                                        className="select select-bordered w-full"
+                                        value={text.fontFamily}
+                                        onChange={(e) => {
+                                            const newFontFamily = e.target.value;
+                                            setTexts((prevTexts) =>
+                                                prevTexts.map((t) =>
+                                                    t.id === text.id ? { ...t, fontFamily: newFontFamily } : t
+                                                )
+                                            );
+                                        }}
+                                    >
+                                        {fontOptions.map((font) => (
+                                            <option key={font.value} value={font.value}>
+                                                {font.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Remove Text Button */}
+                                <button
+                                    className="btn btn-error mt-2 w-full"
+                                    onClick={() => removeText(text.id)}
+                                >
+                                    Remove
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ))}
+
             </div>
         </div>
     );
