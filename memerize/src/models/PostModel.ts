@@ -28,4 +28,11 @@ export class PostModel {
   static async findAllByUsername(username: string) {
     return await this.collection().find({ username }).sort({ createdAt: -1 }).toArray();
   }
+
+  static async findOneByUsernameAndSlug(username: string, slug: string) {
+    return await this.collection().findOne({
+      username: username,
+      slug: slug,
+    });
+  }
 }
