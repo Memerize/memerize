@@ -2,7 +2,6 @@ import { createSlug } from "@/action";
 import { handleError } from "@/helpers/handleError";
 import { PostModel } from "@/models/PostModel";
 import { PostSchema } from "@/types";
-import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -23,18 +22,19 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json(); // title, image, tags
-    const userId = new ObjectId(body.userId); // userId masih hardcode
+    const username = body.username // username masih hardcode, didapat dari form
     
     const parsedData = PostSchema.parse({
       ...body,
-      userId,
+      username,
     });
 
     const slug = await createSlug(parsedData.title); 
+    const uniqueSlug = `${slug}-${Date.now()}`;
 
     const postData = {
       ...parsedData,
-      slug,
+      slug: uniqueSlug,
       comments: [],
       likes: [],
       createdAt: new Date(),

@@ -29,7 +29,8 @@ export async function POST(request: Request) {
     }
 
     const { password, ...safeUser } = user;
-
+    console.log(password);
+    
     const access_token = signToken(safeUser);
 
     return Response.json({
