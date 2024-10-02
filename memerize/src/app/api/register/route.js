@@ -1,14 +1,20 @@
 import { handleError } from "@/helpers/handleError";
 import { UserModel } from "@/models/UserModel";
+import { UserSchema } from "@/types";
 
 export async function POST(request) {
   try {
     const body = await request.json();
-    body.username = body.username.trim();
+    const parsedBody = UserSchema.parse(body);
 
-    await UserModel.createUser(body);
+    parsedBody.username = parsedBody.username.trim();
 
-    return Response.json({ message: "Register success" });
+    await UserModel.createUser(parsedBody);
+
+    return new Response(JSON.stringify({ message: "Register success" }), {
+      status: 201,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
     return handleError(error);
   }

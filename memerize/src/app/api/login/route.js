@@ -1,11 +1,12 @@
 import { handleError } from "@/helpers/handleError";
 import { comparePasswords, signToken } from "@/helpers/jwt-bcrypt";
 import { UserModel } from "@/models/UserModel";
-import { UserSchema } from "@/types";
+import { z } from "zod";
+import { NextResponse } from "next/server";
 
-const LoginSchema = UserSchema.pick({
-  email: true,
-  password: true,
+const LoginSchema = z.object({
+  emailOrUsername: z.string().nonempty("Email or Username is required"),
+  password: z.string().min(5, "Password must be at least 5 characters long"),
 });
 
 export async function POST(request) {
@@ -14,29 +15,46 @@ export async function POST(request) {
     const body = LoginSchema.parse(rawBody);
 
     const user = await UserModel.findOne({
-      email: body.email,
+      $or: [{ email: body.emailOrUsername }, { username: body.emailOrUsername }],
     });
+
     if (!user) {
-      throw new Error("Invalid Email/Password");
+      throw new Error("Invalid Email/Username or Password");
     }
 
-    const isValidPassword = await comparePasswords(
-      body.password,
-      user.password
-    );
+    const isValidPassword = await comparePasswords(body.password, user.password);
     if (!isValidPassword) {
-      throw new Error("Invalid Email/Password");
+      throw new Error("Invalid Email/Username or Password");
     }
 
     const { password, ...safeUser } = user;
-    console.log(password);
-
     const access_token = signToken(safeUser);
 
-    return Response.json({
+    const response = NextResponse.json({
+      success: true,
+      message: 'Login successful',
       access_token,
       user: safeUser,
     });
+
+    response.cookies.set("Authorization", `Bearer ${access_token}`, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 60 * 60 * 24,
+    });
+
+    response.cookies.set("User", JSON.stringify(safeUser), {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 60 * 60 * 24,
+    });
+
+    return response;
+
   } catch (error) {
     return handleError(error);
   }
