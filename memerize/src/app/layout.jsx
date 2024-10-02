@@ -1,8 +1,10 @@
+// src/app/layout.jsx
+
 import localFont from "next/font/local";
 import "./globals.css";
 import Toast from "@/components/Toast";
-import Sidebar from "@/components/Sidebar";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/Navbar"; // Import the updated Navbar
+import Sidebar from "../components/Sidebar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -27,14 +29,13 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Toast />
-        <Navbar />
+        <Navbar /> {/* Render Navbar, which now includes Sidebar */}
         <div className="flex">
-          <aside
-            className="sticky top-16"
-            style={{ height: "calc(100vh - 4rem)" }}
-          >
+          {/* Sidebar for larger screens */}
+          <aside className="hidden md:block sticky top-16 h-[calc(100vh-4rem)]">
             <Sidebar />
           </aside>
+
           <main className="w-full m-8">{children}</main>
         </div>
       </body>
