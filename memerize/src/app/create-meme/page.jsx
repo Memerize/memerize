@@ -1,7 +1,10 @@
+//memerize/src/app/create-meme/page.jsx
+
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { Stage, Layer, Text, Image, Transformer } from "react-konva";
+import MemeCanvas from "../../components/create-meme/MemeCanvas";
+import ControlsPanel from "../../components/create-meme/ControlsPanel";
 
 const fontOptions = [
   { label: "Impact", value: "Impact" },
@@ -32,7 +35,6 @@ const CreateMeme = () => {
   const transformerRef = useRef(null);
   const textRefs = useRef({});
   const stageRef = useRef(null);
-  const imgRef = useRef(null);
   const compRef = useRef(null);
 
   // Toggle dropdown for text options
@@ -169,8 +171,8 @@ const CreateMeme = () => {
       {
         id: newTextId,
         text: `Text ${newTextId}`,
-        x: 100,
-        y: 100,
+        x: 23,
+        y: imageDimensions.height / 2 - 25,
         fontSize: 40,
         fill: "#ffffff",
         stroke: "#000000",
@@ -263,215 +265,36 @@ const CreateMeme = () => {
     >
       {/* Left panel for Canvas */}
       <div className="flex-1">
-        <div className="relative justify-center items-center text-center mx-auto bg-base-100 shadow-md rounded-lg p-4">
-          <Stage
-            ref={stageRef}
-            width={imageDimensions.width}
-            height={imageDimensions.height}
-            className="justify-center items-center text-center mx-auto flex overflow-auto"
-          >
-            <Layer>
-              {image && (
-                <Image
-                  ref={imgRef}
-                  image={image}
-                  x={0}
-                  y={0}
-                  width={imageDimensions.width}
-                  height={imageDimensions.height}
-                  alt="Meme"
-                />
-              )}
-              {texts.map((text) => (
-                <React.Fragment key={text.id}>
-                  <Text
-                    ref={(el) => (textRefs.current[text.id] = el)}
-                    text={text.text}
-                    x={text.x}
-                    y={text.y}
-                    width={imageDimensions.width - 50}
-                    height={40}
-                    align="center"
-                    wrap="char"
-                    fontSize={text.fontSize}
-                    draggable
-                    fill={text.fill}
-                    stroke={text.stroke}
-                    strokeWidth={text.strokeWidth}
-                    fontFamily={text.fontFamily}
-                    onClick={() => handleTextClick(text.id)}
-                    onDragEnd={(e) => handleDragEnd(e, text.id)}
-                    onTransform={() => handleTextTransform(text.id)}
-                  />
-                </React.Fragment>
-              ))}
-              <Transformer ref={transformerRef} visible={isTransformerActive} />
-            </Layer>
-          </Stage>
-        </div>
+        <MemeCanvas
+          image={image}
+          imageDimensions={imageDimensions}
+          texts={texts}
+          handleTextClick={handleTextClick}
+          handleDragEnd={handleDragEnd}
+          handleTextTransform={handleTextTransform}
+          isTransformerActive={isTransformerActive}
+          transformerRef={transformerRef}
+          textRefs={textRefs}
+          stageRef={stageRef}
+        />
       </div>
 
       {/* Right panel for Controls */}
-      <div className="flex flex-col items-start space-y-4 p-4 bg-base-100 shadow-lg rounded-lg w-full lg:w-80">
-        {/* Image URL Input */}
-        <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text">Background Image URL</span>
-          </label>
-          <input
-            type="text"
-            value={backgroundImageUrl}
-            onChange={(e) => setBackgroundImageUrl(e.target.value)}
-            placeholder="Enter background image URL"
-            className="input input-bordered w-full"
-          />
-        </div>
-
-        {/* Font Family Selector */}
-        <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text">Font Family</span>
-          </label>
-          <select
-            value={fontFamily}
-            onChange={(e) => setFontFamily(e.target.value)}
-            className="select select-bordered w-full"
-          >
-            {fontOptions.map((font) => (
-              <option key={font.value} value={font.value}>
-                {font.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Button to add Text */}
-        <button className="btn btn-primary w-full" onClick={addText}>
-          Add Text
-        </button>
-
-        {/* Editable Text Inputs for each Text Element */}
-        {texts.map((text) => (
-          <div
-            key={text.id}
-            className="form-control w-full flex flex-col space-y-2"
-          >
-            <label className="label w-full">
-              <span className="label-text">Text {text.id}</span>
-            </label>
-
-            <input
-              type="text"
-              value={text.text}
-              onChange={(e) => handleInputChange(e, text.id)}
-              className="input input-bordered w-full"
-            />
-
-            {/* Trigger button for dropdown popup */}
-            <button
-              className="btn btn-secondary w-full"
-              onClick={() => toggleDropdown(text.id)}
-            >
-              Edit Text Options
-            </button>
-
-            {/* Dropdown for text options */}
-            {openDropdown === text.id && (
-              <div className="dropdown-content p-4 mt-2 rounded-md bg-base-200 shadow-lg">
-                {/* Font Size */}
-                <div className="flex items-center space-x-2 mb-2">
-                  <label className="label-text">Font Size</label>
-                  <input
-                    type="number"
-                    value={text.fontSize}
-                    min={20}
-                    max={100}
-                    onChange={(e) => {
-                      const newFontSize = parseInt(e.target.value);
-                      setTexts((prevTexts) =>
-                        prevTexts.map((t) =>
-                          t.id === text.id ? { ...t, fontSize: newFontSize } : t
-                        )
-                      );
-                    }}
-                    className="input input-bordered w-20"
-                  />
-                </div>
-
-                {/* Font Color */}
-                <div className="flex items-center space-x-2 mb-2">
-                  <label className="label-text">Font Color</label>
-                  <input
-                    type="color"
-                    value={text.fill}
-                    onChange={(e) => {
-                      const newColor = e.target.value;
-                      setTexts((prevTexts) =>
-                        prevTexts.map((t) =>
-                          t.id === text.id ? { ...t, fill: newColor } : t
-                        )
-                      );
-                    }}
-                    className="input w-10 h-10 p-0 cursor-pointer"
-                  />
-                </div>
-
-                {/* Stroke Color */}
-                <div className="flex items-center space-x-2 mb-2">
-                  <label className="label-text">Stroke Color</label>
-                  <input
-                    type="color"
-                    value={text.stroke}
-                    onChange={(e) => {
-                      const newStrokeColor = e.target.value;
-                      setTexts((prevTexts) =>
-                        prevTexts.map((t) =>
-                          t.id === text.id
-                            ? { ...t, stroke: newStrokeColor }
-                            : t
-                        )
-                      );
-                    }}
-                    className="input w-10 h-10 p-0 cursor-pointer"
-                  />
-                </div>
-
-                {/* Font Selection */}
-                <div className="flex items-center space-x-2 mb-2">
-                  <label className="label-text">Font Family</label>
-                  <select
-                    className="select select-bordered w-full"
-                    value={text.fontFamily}
-                    onChange={(e) => {
-                      const newFontFamily = e.target.value;
-                      setTexts((prevTexts) =>
-                        prevTexts.map((t) =>
-                          t.id === text.id
-                            ? { ...t, fontFamily: newFontFamily }
-                            : t
-                        )
-                      );
-                    }}
-                  >
-                    {fontOptions.map((font) => (
-                      <option key={font.value} value={font.value}>
-                        {font.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Remove Text Button */}
-                <button
-                  className="btn btn-error mt-2 w-full"
-                  onClick={() => removeText(text.id)}
-                >
-                  Remove
-                </button>
-              </div>
-            )}
-          </div>
-        ))}
+      <div className="flex-1">
+        <ControlsPanel
+          backgroundImageUrl={backgroundImageUrl}
+          setBackgroundImageUrl={setBackgroundImageUrl}
+          fontFamily={fontFamily}
+          setFontFamily={setFontFamily}
+          fontOptions={fontOptions}
+          addText={addText}
+          texts={texts}
+          handleInputChange={handleInputChange}
+          toggleDropdown={toggleDropdown}
+          openDropdown={openDropdown}
+          removeText={removeText}
+          setTexts={setTexts}
+        />
       </div>
     </div>
   );
