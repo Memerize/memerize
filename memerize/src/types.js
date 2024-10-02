@@ -13,8 +13,6 @@ export const UserSchema = z.object({
     ),
 });
 
-export type UserTypes = z.infer<typeof UserSchema>;
-
 export const PostSchema = z.object({
   _id: z.instanceof(ObjectId).optional(),
   username: z.string(),
@@ -27,13 +25,3 @@ export const PostSchema = z.object({
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
 });
-
-export type PostTypes = z.infer<typeof PostSchema>;
-
-export interface SaveTypes {
-  _id?: ObjectId;
-  username: string;
-  slug: string;
-  createdAt: Date;
-  updatedAt: Date;
-}

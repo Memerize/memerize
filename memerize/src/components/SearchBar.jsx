@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState } from "react";
 
-function SearchBar({ onSearch }: { onSearch: (query: string) => void }) {
-  const [query, setQuery] = useState('');
+function SearchBar({ onSearch }) {
+  const [query, setQuery] = useState("");
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e) => {
     setQuery(e.target.value);
   };
 
@@ -20,7 +20,7 @@ function SearchBar({ onSearch }: { onSearch: (query: string) => void }) {
         placeholder="Search"
         className="input input-bordered w-24 md:w-auto bg-white text-black"
         onKeyDown={(e) => {
-          if (e.key === 'Enter') handleSearch();
+          if (e.key === "Enter") handleSearch();
         }}
       />
     </div>

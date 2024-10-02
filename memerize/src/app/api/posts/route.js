@@ -4,7 +4,7 @@ import { PostModel } from "@/models/PostModel";
 import { PostSchema } from "@/types";
 import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
+export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const searchQuery = searchParams.get("search") || "";
@@ -19,17 +19,17 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request) {
   try {
     const body = await request.json(); // title, image, tags
-    const username = body.username // username masih hardcode, didapat dari form
-    
+    const username = body.username; // username masih hardcode, didapat dari form
+
     const parsedData = PostSchema.parse({
       ...body,
       username,
     });
 
-    const slug = await createSlug(parsedData.title); 
+    const slug = await createSlug(parsedData.title);
     const uniqueSlug = `${slug}-${Date.now()}`;
 
     const postData = {
@@ -44,9 +44,9 @@ export async function POST(request: Request) {
     const newPost = await PostModel.create(postData);
 
     return new NextResponse(JSON.stringify(newPost), {
-      headers: { 
-        "Content-Type": "application/json" 
-      }
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   } catch (error) {
     return handleError(error);

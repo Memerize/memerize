@@ -8,7 +8,7 @@ const LoginSchema = UserSchema.pick({
   password: true,
 });
 
-export async function POST(request: Request) {
+export async function POST(request) {
   try {
     const rawBody = await request.json();
     const body = LoginSchema.parse(rawBody);
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
 
     const { password, ...safeUser } = user;
     console.log(password);
-    
+
     const access_token = signToken(safeUser);
 
     return Response.json({

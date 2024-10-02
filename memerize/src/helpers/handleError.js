@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
 export class CustomError extends Error {
-  status: number;
-  constructor(message: string, status: number) {
+  status;
+  constructor(message, status) {
     super(message);
     this.status = status;
   }
 }
 
-export function handleError(error: unknown) {
+export function handleError(error) {
   if (error instanceof CustomError) {
     return NextResponse.json(
       { error: error.message },
