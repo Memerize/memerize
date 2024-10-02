@@ -1,11 +1,11 @@
 import { db } from "@/db/config";
 import { hashPassword } from "@/helpers/jwt-bcrypt";
-import { UserSchema, UserTypes } from "@/types";
-import { Filter, ObjectId } from "mongodb";
+import { UserSchema } from "@/types";
+import { ObjectId } from "mongodb";
 
 export class UserModel {
   static collection() {
-    return db.collection<UserTypes>("users");
+    return db.collection("users");
   }
 
   // menampilkan semua data user yang tersimpan di database
@@ -15,19 +15,19 @@ export class UserModel {
   }
 
   // menampilkan data user sesuai id yang dicari
-  static async findUserById(id: string) {
+  static async findUserById(id) {
     const result = await this.collection().findOne({ _id: new ObjectId(id) });
     return result;
   }
 
   // menampilkan data user sesuai filter yang dicari
-  static async findOne(filter: Filter<UserTypes>) {
+  static async findOne(filter) {
     const result = await this.collection().findOne(filter);
     return result;
   }
 
   // membuat data user atau untuk register
-  static async createUser(newUser: UserTypes) {
+  static async createUser(newUser) {
     UserSchema.parse(newUser);
 
     const existingUser = await this.collection().findOne({

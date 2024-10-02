@@ -2,7 +2,7 @@
 import SearchBar from '@/components/SearchBar'; // Import komponen SearchBar
 
 export default function Navbar() {
-  const handleSearch = (query: string) => {
+  const handleSearch = (query) => {
     console.log('Search query:', query); // Di sini bisa tambahkan logika pencarian
   };
 

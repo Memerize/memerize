@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export default function ProfileUser() {
   return (
@@ -9,9 +9,13 @@ export default function ProfileUser() {
         <main className="w-full p-4">
           {/* Filter Bar */}
           <div className="flex justify-center space-x-4 mb-4">
-            <button className="bg-gray-300 p-2 rounded text-black">Trending</button>
+            <button className="bg-gray-300 p-2 rounded text-black">
+              Trending
+            </button>
             <button className="bg-gray-300 p-2 rounded text-black">Top</button>
-            <button className="bg-gray-300 p-2 rounded text-black">Fresh</button>
+            <button className="bg-gray-300 p-2 rounded text-black">
+              Fresh
+            </button>
           </div>
 
           {/* Meme Post */}
@@ -25,12 +29,12 @@ export default function ProfileUser() {
             </div>
             <div className="flex justify-between items-center mt-4">
               <div className="space-x-4">
-                <button className="text-blue-600 text-black">Vote</button>
-                <button className="text-blue-600 text-black">Comments</button>
+                <button className="text-blue-600">Vote</button>
+                <button className="text-blue-600">Comments</button>
               </div>
               <div className="space-x-4">
-                <button className="text-blue-600 text-black">Save</button>
-                <button className="text-blue-600 text-black">Share</button>
+                <button className="text-blue-600">Save</button>
+                <button className="text-blue-600">Share</button>
               </div>
             </div>
           </div>
@@ -39,5 +43,3 @@ export default function ProfileUser() {
     </div>
   );
 }
-
-;

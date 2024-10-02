@@ -1,6 +1,4 @@
-import React from 'react';
-
-const MemePostForm = () => {
+export default function MemePostForm() {
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-200">
       <div className="bg-gray-400 p-6 rounded-md w-96">
@@ -11,6 +9,7 @@ const MemePostForm = () => {
               Title
             </label>
             <input
+              name="title"
               type="text"
               id="title"
               className="w-full p-2 border border-gray-300 rounded"
@@ -50,6 +49,4 @@ const MemePostForm = () => {
       </div>
     </div>
   );
-};
-
-export default MemePostForm;
+}

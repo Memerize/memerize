@@ -1,21 +1,15 @@
 "use client"; // Tambahkan ini di paling atas jika diperlukan
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 
-interface InfiniteScrollProps {
-  loadMore: () => Promise<void>;
-  hasMore: boolean;
-  children: React.ReactNode;
-}
-
-const InfiniteScroll: React.FC<InfiniteScrollProps> = ({ loadMore, hasMore, children }) => {
-  const observer = useRef<IntersectionObserver | null>(null);
-  const lastElementRef = useRef<HTMLDivElement | null>(null);
+const InfiniteScroll = ({ loadMore, hasMore, children }) => {
+  const observer = useRef(null);
+  const lastElementRef = useRef(null);
 
   useEffect(() => {
     if (observer.current) observer.current.disconnect();
 
-    const callback = (entries: IntersectionObserverEntry[]) => {
+    const callback = (entries) => {
       if (entries[0].isIntersecting && hasMore) {
         loadMore();
       }
@@ -34,13 +28,12 @@ const InfiniteScroll: React.FC<InfiniteScrollProps> = ({ loadMore, hasMore, chil
   return (
     <div>
       {children}
-      <div ref={lastElementRef} style={{ height: '20px' }} />
+      <div ref={lastElementRef} style={{ height: "20px" }} />
     </div>
   );
 };
 
 export default InfiniteScroll;
-
 
 /*
 CATATAN

@@ -1,11 +1,9 @@
 import { jwtVerify } from "jose";
-import { WithId } from "mongodb";
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-import { UserTypes } from "./types";
+import { NextResponse } from "next/server";
 import { CustomError, handleError } from "./helpers/handleError";
 
-async function auth(request: NextRequest) {
+async function auth(request) {
   const authCookie = cookies().get("Authorization");
 
   if (!authCookie) throw new CustomError("Invalid token", 401);
@@ -15,7 +13,7 @@ async function auth(request: NextRequest) {
 
   const jwtSecret = new TextEncoder().encode(process.env.JWT_SECRET);
 
-  const { payload } = await jwtVerify<WithId<UserTypes>>(token, jwtSecret);
+  const { payload } = await jwtVerify(token, jwtSecret);
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-user-id", payload._id.toString());
@@ -26,7 +24,7 @@ async function auth(request: NextRequest) {
   return requestHeaders;
 }
 
-export async function middleware(request: NextRequest) {
+export async function middleware(request) {
   try {
     const requestHeaders = await auth(request);
 
