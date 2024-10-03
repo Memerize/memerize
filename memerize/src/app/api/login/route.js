@@ -15,46 +15,50 @@ export async function POST(request) {
     const body = LoginSchema.parse(rawBody);
 
     const user = await UserModel.findOne({
-      $or: [{ email: body.emailOrUsername }, { username: body.emailOrUsername }],
+      $or: [
+        { email: body.emailOrUsername },
+        { username: body.emailOrUsername },
+      ],
     });
 
     if (!user) {
       throw new Error("Invalid Email/Username or Password");
     }
 
-    const isValidPassword = await comparePasswords(body.password, user.password);
+    const isValidPassword = await comparePasswords(
+      body.password,
+      user.password
+    );
     if (!isValidPassword) {
       throw new Error("Invalid Email/Username or Password");
     }
-
-    const { password, ...safeUser } = user;
-    const access_token = signToken(safeUser);
+    delete user.password;
+    const access_token = signToken(user);
 
     const response = NextResponse.json({
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       access_token,
-      user: safeUser,
+      user,
     });
 
     response.cookies.set("Authorization", `Bearer ${access_token}`, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
       maxAge: 60 * 60 * 24,
     });
 
-    response.cookies.set("User", JSON.stringify(safeUser), {
+    response.cookies.set("User", JSON.stringify(user), {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
       maxAge: 60 * 60 * 24,
     });
 
     return response;
-
   } catch (error) {
     return handleError(error);
   }

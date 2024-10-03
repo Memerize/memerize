@@ -22,7 +22,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json(); // title, image, tags
-    const username = body.username; // username masih hardcode, didapat dari form
+    const username = request.headers.get("x-user-username");
 
     const parsedData = PostSchema.parse({
       ...body,
