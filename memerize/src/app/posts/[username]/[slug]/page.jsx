@@ -17,16 +17,17 @@ export default async function PostDetail({ params }) {
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
       <div className="flex items-center space-x-4 mb-6">
-        <img
-          src={post.user?.image || "https://via.placeholder.com/50"}
-          alt={post.user?.username}
-          className="w-12 h-12 rounded-full object-cover"
-        />
+        <Link href={`/posts/${post.user.username}`}>
+          <img
+            src={post.user?.image || "https://via.placeholder.com/50"}
+            alt={post.user?.username}
+            className="w-12 h-12 rounded-full object-cover"
+          />
+        </Link>
         <div>
           <h2 className="text-lg font-bold text-gray-800">
             {post.user?.username}
           </h2>
-          <p className="text-sm text-gray-600">{post.user?.email}</p>
         </div>
       </div>
 
