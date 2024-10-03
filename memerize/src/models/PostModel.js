@@ -1,5 +1,4 @@
 import { db } from "@/db/config";
-import { UserModel } from "./UserModel";
 
 export class PostModel {
   static collection() {
@@ -160,28 +159,88 @@ export class PostModel {
   }
 
   static async findAllByUsername(username) {
-    const user = await UserModel.findOne({ username });
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
     return await this.collection()
-      .find({ username })
-      .sort({ createdAt: -1 })
+      .aggregate([
+        {
+          $match: {
+            username: username,
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "username",
+            foreignField: "username",
+            as: "user",
+          },
+        },
+        {
+          $unwind: "$user",
+        },
+        {
+          $sort: {
+            createdAt: -1,
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            image: 1,
+            tags: 1,
+            slug: 1,
+            comments: 1,
+            likes: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            "user.name": 1,
+            "user.username": 1,
+            "user.email": 1,
+            "user.image": 1,
+          },
+        },
+      ])
       .toArray();
   }
 
   static async findOneByUsernameAndSlug(username, slug) {
-    const user = await UserModel.findOne({ username });
-
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    return await this.collection().findOne({
-      username: username,
-      slug: slug,
-    });
+    return await this.collection()
+      .aggregate([
+        {
+          $match: {
+            username: username,
+            slug: slug,
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "username",
+            foreignField: "username",
+            as: "user",
+          },
+        },
+        {
+          $unwind: "$user",
+        },
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            image: 1,
+            tags: 1,
+            slug: 1,
+            comments: 1,
+            likes: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            "user.name": 1,
+            "user.username": 1,
+            "user.email": 1,
+            "user.image": 1,
+          },
+        },
+      ])
+      .next();
   }
 }

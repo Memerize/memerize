@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { FaComment, FaArrowUp, FaRegBookmark, FaShare } from "react-icons/fa";
 
 export default function PostCard({ post }) {
@@ -11,6 +12,7 @@ export default function PostCard({ post }) {
               alt={`${post.user.username}'s profile`}
               className="w-10 h-10 rounded-full object-cover"
             />
+
             <h2 className="text-md font-medium text-gray-800">
               {post.user.username}
             </h2>
@@ -19,13 +21,15 @@ export default function PostCard({ post }) {
         </div>
       </div>
 
-      <div className="bg-gray-200">
-        <img
-          src={post.image}
-          alt={post.title}
-          className="object-contain w-full h-96"
-        />
-      </div>
+      <Link href={`/posts/${post.user.username}/${post.slug}`}>
+        <div className="bg-gray-200">
+          <img
+            src={post.image}
+            alt={post.title}
+            className="object-contain w-full h-96"
+          />
+        </div>
+      </Link>
 
       <div className="px-6 py-4 flex justify-between items-center">
         <div className="space-x-4 flex items-center">
