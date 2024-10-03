@@ -66,12 +66,22 @@ export class PostModel {
           },
         },
         {
+          $lookup: {
+            from: "users",
+            localField: "username",
+            foreignField: "username",
+            as: "user",
+          },
+        },
+        {
+          $unwind: "$user",
+        },
+        {
           $sort: { totalInteraction: -1 },
         },
         {
           $project: {
             _id: 1,
-            username: 1,
             title: 1,
             image: 1,
             tags: 1,
@@ -80,6 +90,10 @@ export class PostModel {
             comments: 1,
             likes: 1,
             totalInteraction: 1,
+            "user.name": 1,
+            "user.username": 1,
+            "user.email": 1,
+            "user.image": 1,
           },
         },
       ])
@@ -104,12 +118,22 @@ export class PostModel {
           },
         },
         {
+          $lookup: {
+            from: "users",
+            localField: "username",
+            foreignField: "username",
+            as: "user",
+          },
+        },
+        {
+          $unwind: "$user",
+        },
+        {
           $sort: { totalInteraction: -1 },
         },
         {
           $project: {
             _id: 1,
-            username: 1,
             title: 1,
             image: 1,
             tags: 1,
@@ -118,6 +142,10 @@ export class PostModel {
             comments: 1,
             likes: 1,
             totalInteraction: 1,
+            "user.name": 1,
+            "user.username": 1,
+            "user.email": 1,
+            "user.image": 1,
           },
         },
       ])
