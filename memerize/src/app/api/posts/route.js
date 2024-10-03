@@ -23,10 +23,11 @@ export async function POST(request) {
   try {
     const body = await request.json(); // title, image, tags
     const username = request.headers.get("x-user-username");
-
+    const profileImage = request.headers.get("x-user-image");
     const parsedData = PostSchema.parse({
       ...body,
       username,
+      profileImage,
     });
 
     const slug = await createSlug(parsedData.title);
