@@ -51,7 +51,6 @@ export class PostModel {
       }
     );
 
-    // Execute the aggregation pipeline
     return await this.collection().aggregate(pipeline).toArray();
   }
 
