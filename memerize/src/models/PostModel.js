@@ -7,14 +7,52 @@ export class PostModel {
   }
 
   static async findAllPost(searchQuery) {
+    const pipeline = [];
+
     if (searchQuery) {
-      return await this.collection()
-        .find({
+      pipeline.push({
+        $match: {
           title: { $regex: searchQuery, $options: "i" },
-        })
-        .toArray();
+        },
+      });
     }
-    return await this.collection().find().sort({ createdAt: -1 }).toArray();
+
+    pipeline.push(
+      {
+        $lookup: {
+          from: "users",
+          localField: "username",
+          foreignField: "username",
+          as: "user",
+        },
+      },
+      {
+        $unwind: "$user",
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          image: 1,
+          tags: 1,
+          slug: 1,
+          comments: 1,
+          likes: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          "user.name": 1,
+          "user.username": 1,
+          "user.email": 1,
+          "user.image": 1,
+        },
+      }
+    );
+
+    // Execute the aggregation pipeline
+    return await this.collection().aggregate(pipeline).toArray();
   }
 
   static async findTopPost() {

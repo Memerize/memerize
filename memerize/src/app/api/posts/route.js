@@ -23,7 +23,6 @@ export async function POST(request) {
   try {
     const body = await request.json(); // title, image, tags
     const username = request.headers.get("x-user-username");
-
     const parsedData = PostSchema.parse({
       ...body,
       username,

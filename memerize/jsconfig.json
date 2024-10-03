@@ -1,26 +1,7 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "tailwind.config.js", "src/types.js", "src/middleware.js", "src/action.js", "src/models/UserModel.js", "src/models/SaveModel.js", "src/models/PostModel.js", "src/helpers/jwt-bcrypt.js", "src/helpers/handleError.js", "src/db/config.js", "src/components/Toast.jsx", "src/components/Sidebar.jsx", "src/components/SearchBar.jsx", "src/components/Navbar.jsx", "src/components/InfiniteScroll.jsx", "src/app/page.jsx", "src/app/layout.jsx", "src/app/register/page.jsx", "src/app/profile-user/page.jsx", "src/app/login/page.jsx", "src/app/create-post/page.jsx", "src/app/api/login/route.js", "src/app/api/posts/[username]/[slug]/route.js", "src/app/api/posts/[username]/route.js", "src/app/api/posts/route.js", "src/app/api/register/route.js", "src/app/api/saves/route.js"],
-  "exclude": ["node_modules"]
 }
