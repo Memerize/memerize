@@ -6,12 +6,12 @@ export default function PostCard({ post }) {
           <div className="flex flex-col justify-start mb-2">
             <div className="flex items-center space-x-4">
               <img
-                src={post.profileImage}
-                alt={`${post.username}'s profile`}
+                src={post.user.image}
+                alt={`${post.user.username}'s profile`}
                 className="w-10 h-10 rounded-full object-cover"
               />
               <h2 className="text-md font-medium text-gray-800">
-                {post.username}
+                {post.user.username}
               </h2>
             </div>
             <h3 className="text-lg font-bold text-gray-800">{post.title}</h3>
