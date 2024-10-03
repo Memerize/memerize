@@ -7,12 +7,13 @@ export default function PostCard({ post }) {
       <div className="px-6 py-4">
         <div className="flex flex-col justify-start mb-2">
           <div className="flex items-center space-x-4">
-            <img
-              src={post.user.image}
-              alt={`${post.user.username}'s profile`}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-
+            <Link href={`/posts/${post.user.username}`}>
+              <img
+                src={post.user.image}
+                alt={`${post.user.username}'s profile`}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            </Link>
             <h2 className="text-md font-medium text-gray-800">
               {post.user.username}
             </h2>
