@@ -21,8 +21,8 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const body = await request.json(); // title, image, tags
-    const username = body.username; // username masih hardcode, didapat dari form
+    const body = await request.json();
+    const username = body.username; // username dari form
 
     const parsedData = PostSchema.parse({
       ...body,
@@ -35,7 +35,7 @@ export async function POST(request) {
     const postData = {
       ...parsedData,
       slug: uniqueSlug,
-      comments: [],
+      comments: [], // Inisialisasi komentar sebagai array kosong
       likes: [],
       createdAt: new Date(),
       updatedAt: new Date(),

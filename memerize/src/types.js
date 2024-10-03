@@ -25,3 +25,10 @@ export const PostSchema = z.object({
   createdAt: z.date().optional(),
   updatedAt: z.date().optional(),
 });
+
+export const CommentSchema = z.object({
+  postId: z.string(), // ID dari post yang dikomentari
+  username: z.string(),
+  content: z.string().min(1, "Content is required"),
+  createdAt: z.date().default(() => new Date()),
+});

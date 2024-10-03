@@ -1,5 +1,6 @@
 import React from "react";
 
+
 export default function ProfileUser() {
   return (
     <div className="bg-gray-100 min-h-screen">
