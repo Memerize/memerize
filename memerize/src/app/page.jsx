@@ -2,12 +2,15 @@
 
 import React, { useEffect, useState } from "react";
 import PostCard from "../components/post/PostCard";
+import Loading from "@/app/loading";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
   const [currentFilter, setCurrentFilter] = useState("fresh");
+  const [loading, setLoading] = useState(false);
 
   const fetchPosts = async (url) => {
+    setLoading(true);
     try {
       const response = await fetch(url);
       if (!response.ok) {
@@ -17,15 +20,15 @@ export default function Home() {
       setPosts(json);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Fetch default posts when the component mounts
     fetchPosts("/api/posts");
   }, []);
 
-  // Handlers for each filter
   const handleTrendingClick = () => {
     setCurrentFilter("trending");
     fetchPosts("/api/trending");
@@ -43,12 +46,19 @@ export default function Home() {
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      {/* Main Content */}
       <div className="flex justify-center">
-        {/* Main Section */}
         <main className="w-full max-w-5xl p-6">
-          {/* Filter Bar */}
           <div className="flex justify-center space-x-4 mb-6">
+            <button
+              className={`px-6 py-2 rounded-full transition-colors duration-300 ${
+                currentFilter === "fresh"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-300 text-black hover:bg-gray-400"
+              }`}
+              onClick={handleFreshClick}
+            >
+              Fresh
+            </button>
             <button
               className={`px-6 py-2 rounded-full transition-colors duration-300 ${
                 currentFilter === "trending"
@@ -69,20 +79,11 @@ export default function Home() {
             >
               Top
             </button>
-            <button
-              className={`px-6 py-2 rounded-full transition-colors duration-300 ${
-                currentFilter === "fresh"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-300 text-black hover:bg-gray-400"
-              }`}
-              onClick={handleFreshClick}
-            >
-              Fresh
-            </button>
           </div>
 
-          {/* Meme Post */}
-          {posts.length > 0 ? (
+          {loading ? (
+            <Loading />
+          ) : posts.length > 0 ? (
             <div className="grid grid-cols-1 gap-6">
               {posts.map((post) => (
                 <div

@@ -35,13 +35,13 @@ export class UserModel {
     });
 
     if (existingUser) {
-    if (existingUser.username === newUser.username) {
-      throw new Error("Username already exists");
+      if (existingUser.username === newUser.username) {
+        throw new Error("Username already exists");
+      }
+      if (existingUser.email === newUser.email) {
+        throw new Error("Email already exists");
+      }
     }
-    if (existingUser.email === newUser.email) {
-      throw new Error("Email already exists");
-    }
-  }
 
     if (!newUser.image) {
       newUser.image =
@@ -54,10 +54,37 @@ export class UserModel {
 
     const { password, ...userWithoutPassword } = newUser;
     console.log(password);
-    
+
     return {
       ...userWithoutPassword,
       _id: result.insertedId,
     };
+  }
+
+  static async editImageProfile(username, newImage) {
+    if (!newImage) {
+      throw new Error("Image URL is required");
+    }
+
+    const user = await this.findOne({ username });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const result = await this.collection().updateOne(
+      { username },
+      {
+        $set: {
+          image: newImage,
+        },
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      throw new Error("Failed to update profile image");
+    }
+
+    return { message: "Profile image updated successfully", image: newImage };
   }
 }

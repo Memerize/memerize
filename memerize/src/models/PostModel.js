@@ -1,4 +1,5 @@
 import { db } from "@/db/config";
+import { ObjectId } from "mongodb";
 
 export class PostModel {
   static collection() {
@@ -150,8 +151,8 @@ export class PostModel {
       .toArray();
   }
 
-  static async findByTitle(title) {
-    return await this.collection().findOne({ title: title });
+  static async findOneBySlug(slug) {
+    return await this.collection().findOne({ slug: slug });
   }
 
   static async create(postData) {
@@ -224,16 +225,115 @@ export class PostModel {
           $unwind: "$user",
         },
         {
+          $lookup: {
+            from: "users",
+            localField: "comments.username",
+            foreignField: "username",
+            as: "commentUserDetails",
+          },
+        },
+        {
+          $addFields: {
+            comments: {
+              $map: {
+                input: "$comments",
+                as: "comment",
+                in: {
+                  $mergeObjects: [
+                    {
+                      commentId: "$$comment.commentId",
+                    },
+                    "$$comment",
+                    {
+                      userImage: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$commentUserDetails",
+                              as: "userDetail",
+                              cond: {
+                                $eq: [
+                                  "$$userDetail.username",
+                                  "$$comment.username",
+                                ],
+                              },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                      replies: {
+                        $map: {
+                          input: "$$comment.replies",
+                          as: "reply",
+                          in: {
+                            $mergeObjects: [
+                              "$$reply",
+                              {
+                                userImage: {
+                                  $arrayElemAt: [
+                                    {
+                                      $filter: {
+                                        input: "$commentUserDetails",
+                                        as: "userDetail",
+                                        cond: {
+                                          $eq: [
+                                            "$$userDetail.username",
+                                            "$$reply.username",
+                                          ],
+                                        },
+                                      },
+                                    },
+                                    0,
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+        {
           $project: {
             _id: 1,
             title: 1,
             image: 1,
             tags: 1,
             slug: 1,
-            comments: 1,
+            comments: {
+              commentId: 1,
+              username: 1,
+              content: 1,
+              replies: {
+                username: 1,
+                content: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                "userImage._id": 1,
+                "userImage.email": 1,
+                "userImage.name": 1,
+                "userImage.username": 1,
+                "userImage.image": 1,
+              },
+              commentLikes: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              "userImage._id": 1,
+              "userImage.email": 1,
+              "userImage.name": 1,
+              "userImage.username": 1,
+              "userImage.image": 1,
+            },
             likes: 1,
             createdAt: 1,
             updatedAt: 1,
+            "user._id": 1,
             "user.name": 1,
             "user.username": 1,
             "user.email": 1,
@@ -242,5 +342,32 @@ export class PostModel {
         },
       ])
       .next();
+  }
+
+  static async addComment(slug, comment) {
+    comment.createdAt = new Date();
+    comment.updatedAt = new Date();
+    return await this.collection().findOneAndUpdate(
+      { slug },
+      {
+        $push: { comments: comment },
+        $set: { updatedAt: new Date() },
+      },
+      { returnDocument: "after" }
+    );
+  }
+
+  static async addReplyToComment(slug, commentId, reply) {
+    return await this.collection().findOneAndUpdate(
+      {
+        slug: slug,
+        "comments.commentId": new ObjectId(String(commentId)),
+      },
+      {
+        $push: { "comments.$.replies": reply },
+        $set: { updatedAt: new Date() },
+      },
+      { returnDocument: "after" }
+    );
   }
 }

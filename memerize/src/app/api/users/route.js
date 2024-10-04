@@ -1,12 +1,12 @@
-import { PostModel } from "@/models/PostModel";
 import { handleError } from "@/helpers/handleError";
 import { NextResponse } from "next/server";
+import { UserModel } from "@/models/UserModel";
 
 export async function GET() {
   try {
-    const posts = await PostModel.findTopPost();
+    const users = await UserModel.findAll();
 
-    return new NextResponse(JSON.stringify(posts), {
+    return new NextResponse(JSON.stringify(users), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {

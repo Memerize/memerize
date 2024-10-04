@@ -1,9 +1,18 @@
 import PostCard from "@/components/post/PostCard";
 
-export default async function ProfilePage({ params }) {
+export default async function UserPage({ params }) {
   const { username } = params;
 
+  const getUser = await fetch(`http://localhost:3000/api/users/${username}`, {
+    cache: "no-store",
+    next: {
+      tags: ["user"],
+    },
+  });
+  const user = await getUser.json();
+
   const getPosts = await fetch(`http://localhost:3000/api/posts/${username}`, {
+    cache: "no-store",
     next: {
       tags: ["profile"],
     },
@@ -12,8 +21,24 @@ export default async function ProfilePage({ params }) {
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
-      <div className="flex items-center space-x-4 mb-6">
-        <h1 className="text-3xl font-bold">Profile: {username}</h1>
+      <div className="flex flex-col items-center text-center space-y-4 mb-8">
+        <img
+          src={user.image || "https://via.placeholder.com/50"}
+          alt={user.username}
+          className="w-20 h-20 rounded-full object-cover border-2 border-gray-300"
+        />
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">{user.username}</h1>
+          <p className="text-lg text-gray-500">
+            <span className="font-medium">{user.name}</span>
+          </p>
+          <p className="text-sm text-gray-500">
+            <span className="font-medium">{user.email}</span>
+          </p>
+          <p className="text-sm text-gray-500">
+            Posts: <span className="font-medium">{posts.length}</span>
+          </p>
+        </div>
       </div>
 
       <div className="space-y-8">
