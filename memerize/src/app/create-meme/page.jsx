@@ -264,7 +264,7 @@ const CreateMeme = () => {
       ref={compRef}
     >
       {/* Left panel for Canvas */}
-      <div className="flex-1">
+      <div className="flex-1 w-full relative justify-center items-center text-center mx-auto bg-base-100 shadow-md rounded-lg p-4">
         <MemeCanvas
           image={image}
           imageDimensions={imageDimensions}
@@ -280,7 +280,7 @@ const CreateMeme = () => {
       </div>
 
       {/* Right panel for Controls */}
-      <div className="flex-1">
+      <div className="flex-1 flex flex-col items-center space-y-4 p-4 bg-base-100 shadow-lg rounded-lg w-full">
         <ControlsPanel
           backgroundImageUrl={backgroundImageUrl}
           setBackgroundImageUrl={setBackgroundImageUrl}

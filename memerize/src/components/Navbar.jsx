@@ -2,9 +2,12 @@
 "use client"; // Marks this as a Client Component
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from 'next/navigation';
-import SearchBar from "@/components/SearchBar"; // Import komponen SearchBar
-import Sidebar from "@/components/Sidebar"; // Import Sidebar component
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import memerizeTypeLogo from '../assets/img/memerizeTypeLogo.png'
+import SearchBar from "./SearchBar";
+import Sidebar from "./Sidebar";
 
 export default function Navbar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -16,15 +19,15 @@ export default function Navbar() {
 
   const handleLogout = () => {
     // Clear authentication cookies
-    document.cookie = 'Authorization=; Max-Age=0; path=/;';
-    document.cookie = 'User=; Max-Age=0; path=/;';
-    
+    document.cookie = "Authorization=; Max-Age=0; path=/;";
+    document.cookie = "User=; Max-Age=0; path=/;";
+
     // Redirect to the login page
-    router.push('/login');
+    router.push("/login");
   };
 
   const handleSearch = (query) => {
-    console.log('Search query:', query);
+    console.log("Search query:", query);
     // Implement your search logic here
   };
 
@@ -67,10 +70,22 @@ export default function Navbar() {
           </button>
 
           {/* Brand Link */}
-          <a className="btn hover:bg-color6 btn-ghost text-xl text-black">Memerize</a>
+          <Link
+            href={"/"}
+            className="btn hover:bg-color6 btn-ghost text-xl text-black"
+          >
+            <Image
+              src={memerizeTypeLogo}
+              alt="Memerize Logo"
+              width={150}
+              height={50}
+              className="w-[150px] h-[50px] object-cover invert"               objectFit="contain"
+            />
+          </Link>
         </div>
         <div className="flex-none gap-2 flex items-center">
-          <SearchBar onSearch={handleSearch} /> {/* Implementasikan SearchBar */}
+          <SearchBar onSearch={handleSearch} />{" "}
+          {/* Implementasikan SearchBar */}
           <div className="dropdown dropdown-end">
             <button
               tabIndex={0}
@@ -92,7 +107,9 @@ export default function Navbar() {
                 <a className="justify-between text-color1">Profile</a>
               </li>
               <li>
-                <a className="text-color1" onClick={handleLogout}>Logout</a>
+                <a className="text-color1" onClick={handleLogout}>
+                  Logout
+                </a>
               </li>
             </ul>
           </div>
@@ -113,7 +130,8 @@ export default function Navbar() {
             role="navigation"
             aria-label="Sidebar Navigation"
           >
-            <Sidebar closeSidebar={toggleSidebar} /> {/* Pass closeSidebar to allow closing from Sidebar */}
+            <Sidebar closeSidebar={toggleSidebar} />{" "}
+            {/* Pass closeSidebar to allow closing from Sidebar */}
           </aside>
         </div>
       )}

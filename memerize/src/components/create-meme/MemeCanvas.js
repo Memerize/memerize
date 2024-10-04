@@ -16,7 +16,7 @@ const MemeCanvas = ({
   stageRef,
 }) => {
   return (
-    <div className="relative justify-center items-center text-center mx-auto bg-base-100 shadow-md rounded-lg p-4">
+    <div className="">
       <Stage
         ref={stageRef}
         width={imageDimensions.width}
