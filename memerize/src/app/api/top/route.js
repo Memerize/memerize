@@ -2,7 +2,7 @@ import { PostModel } from "@/models/PostModel";
 import { handleError } from "@/helpers/handleError";
 import { NextResponse } from "next/server";
 
-export async function GET(request) {
+export async function GET() {
   try {
     const posts = await PostModel.findTopPost();
 
