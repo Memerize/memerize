@@ -16,24 +16,24 @@ export default function PostDetail({ params }) {
   const [loading, setLoading] = useState(false);
   const [loadingPost, setLoadingPost] = useState(true);
 
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const response = await fetch(`/api/posts/${username}/${slug}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch post data.");
-        }
-        const postData = await response.json();
-        setPost(postData);
-        setComments(postData.comments || []);
-      } catch (error) {
-        console.error("Error fetching post:", error);
-        setError("Error loading post.");
-      } finally {
-        setLoadingPost(false);
+  const fetchPost = async () => {
+    try {
+      const response = await fetch(`/api/posts/${username}/${slug}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch post data.");
       }
-    };
+      const postData = await response.json();
+      setPost(postData);
+      setComments(postData.comments || []);
+    } catch (error) {
+      console.error("Error fetching post:", error);
+      setError("Error loading post.");
+    } finally {
+      setLoadingPost(false);
+    }
+  };
 
+  useEffect(() => {
     fetchPost();
   }, [username, slug]);
 
@@ -64,6 +64,8 @@ export default function PostDetail({ params }) {
       const addedComment = await response.json();
       setComments([...comments, addedComment]);
       setNewComment("");
+
+      fetchPost();
     } catch (error) {
       setError("Error submitting the comment");
       console.error("Error submitting comment:", error);
@@ -145,7 +147,12 @@ export default function PostDetail({ params }) {
         <div className="space-y-4">
           {comments.length > 0 ? (
             comments.map((comment) => (
-              <CommentCard key={comment._id} comment={comment} slug={slug} />
+              <CommentCard
+                key={comment._id}
+                comment={comment}
+                slug={slug}
+                onReplyAdded={fetchPost}
+              />
             ))
           ) : (
             <p className="text-gray-500">No comments yet.</p>
