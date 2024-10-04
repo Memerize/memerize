@@ -18,7 +18,7 @@ const ControlsPanel = ({
   setTexts,
 }) => {
   return (
-    <div className="flex flex-col items-start space-y-4 p-4 bg-base-100 shadow-lg rounded-lg w-full lg:w-80">
+    <div className="w-full">
       {/* Image URL Input */}
       <div className="form-control w-full">
         <label className="label">
@@ -34,9 +34,9 @@ const ControlsPanel = ({
       </div>
 
       {/* Font Family Selector */}
-      <div className="form-control w-full">
-        <label className="label">
-          <span className="label-text">Font Family</span>
+      <div className="form-control w-full flex flex-row">
+        <label className="label mr-2">
+          <span className="label-text">Font</span>
         </label>
         <select
           value={fontFamily}
@@ -51,43 +51,40 @@ const ControlsPanel = ({
         </select>
       </div>
 
-      {/* Button to add Text */}
-      <button className="btn btn-outline btn-accent w-full" onClick={addText}>
-        Add Text
-      </button>
-
       {/* Editable Text Inputs for each Text Element */}
       {texts.map((text) => (
         <div
           key={text.id}
           className="relative form-control w-full flex flex-col space-y-2"
         >
-          <label className="label w-full">
-            <span className="label-text">Text {text.id}</span>
-          </label>
+          <div className="flex flex-col">
+            <div className="flex flex-row">
+              <label className="label">
+                <span className="label-text">Text {text.id}</span>
+              </label>
+              {/* Trigger button for dropdown popup with gear icon */}
+              <button
+                className="btn btn-outline btn-info"
+                onClick={() => toggleDropdown(text.id)}
+              >
+                 {/* Font Awesome gear icon */}
+              </button>
+              {/* Remove Text Button with trash icon */}
+              <button
+                className="btn btn-error"
+                onClick={() => removeText(text.id)}
+              >
+                 {/* Font Awesome trash icon */}
+              </button>
+            </div>
 
-          <input
-            type="text"
-            value={text.text}
-            onChange={(e) => handleInputChange(e, text.id)}
-            className="input input-bordered w-full"
-          />
-
-          {/* Trigger button for dropdown popup */}
-          <button
-            className="btn btn-outline btn-info w-full"
-            onClick={() => toggleDropdown(text.id)}
-          >
-            Edit Text Options
-          </button>
-          {/* Remove Text Button */}
-          <button
-            className="btn btn-error mt-2 w-full"
-            onClick={() => removeText(text.id)}
-          >
-            Remove
-          </button>
-
+            <input
+              type="text"
+              value={text.text}
+              onChange={(e) => handleInputChange(e, text.id)}
+              className="input input-bordered w-full"
+            />
+          </div>
           {/* Dropdown for text options */}
           {openDropdown === text.id && (
             <TextOptions
@@ -99,6 +96,13 @@ const ControlsPanel = ({
           )}
         </div>
       ))}
+      {/* Button to add Text */}
+      <button
+        className="btn btn-outline btn-accent w-full mt-2"
+        onClick={addText}
+      >
+        Add Text
+      </button>
     </div>
   );
 };

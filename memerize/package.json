@@ -20,8 +20,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-infinite-scroll-component": "^6.1.0",
-    "react-toastify": "^10.0.5",
     "react-konva": "^18.2.10",
+    "react-toastify": "^10.0.5",
     "sonner": "^1.5.0",
     "zod": "^3.23.8"
   },
