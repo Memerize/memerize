@@ -31,6 +31,8 @@ const CreateMeme = () => {
   const [isTransformerActive, setIsTransformerActive] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [addedImages, setAddedImages] = useState([]);
+  const [imageURL, setImageURL] = useState("");
+  const [addImageUrlError, setAddImageUrlError] = useState("");
 
   // Refs
   const transformerRef = useRef(null);
@@ -42,6 +44,22 @@ const CreateMeme = () => {
   // Toggle dropdown for text options
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
+  };
+
+  const handleAddImageURL = () => {
+    if (imageURL) {
+      if (imageURL.startsWith("https://") || imageURL.startsWith("http://")) {
+        addImageToCanvas(imageURL);
+        setImageURL("");
+        setAddImageUrlError("");
+      } else {
+        setAddImageUrlError(
+          "Invalid URL format."
+        );
+      }
+    } else {
+      setAddImageUrlError("Please enter an image URL.");
+    }
   };
 
   // Function to add image to canvas
@@ -64,7 +82,9 @@ const CreateMeme = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        addImageToCanvas(reader.result); // Send image to canvas handler
+        // setTimeout(() => {
+          addImageToCanvas(reader.result); // Send image to canvas handler
+        // }, 500);
       };
       reader.readAsDataURL(file); // Convert the image to a base64 string
     }
@@ -137,7 +157,12 @@ const CreateMeme = () => {
         selectedImageId !== null ? imageRefs.current[selectedImageId] : null;
 
       // Case 1: Click inside canvas but no element clicked, and transformer is active
-      if (isClickInsideCanvas && !clickedOnText && !clickedOnImage && isTransformerActive) {
+      if (
+        isClickInsideCanvas &&
+        !clickedOnText &&
+        !clickedOnImage &&
+        isTransformerActive
+      ) {
         setIsTransformerActive(false);
         setSelectedTextId(null);
         setSelectedImageId(null);
@@ -296,9 +321,7 @@ const CreateMeme = () => {
     }
 
     setTexts((prevTexts) =>
-      prevTexts.map((t) =>
-        t.id === textId ? { ...t, fontSize: fontSize } : t
-      )
+      prevTexts.map((t) => (t.id === textId ? { ...t, fontSize: fontSize } : t))
     );
   };
 
@@ -357,15 +380,13 @@ const CreateMeme = () => {
           stageRef={stageRef}
           addedImages={addedImages}
           handleImageDragEnd={handleImageDragEnd}
-          handleImageClick={handleImageClick} // Pass handleImageClick
-          selectedImageId={selectedImageId} // Pass selectedImageId
-          imageRefs={imageRefs} // Pass imageRefs
-          selectedTextId={selectedTextId}
+          handleImageClick={handleImageClick}
+          imageRefs={imageRefs}
         />
       </div>
 
       {/* Right panel for Controls */}
-      <div className="flex-1 flex flex-col items-center space-y-4 p-4 bg-base-100 shadow-lg rounded-lg w-1/2">
+      <div className="flex-1 flex flex-col items-center space-y-4 p-4 bg-base-100 shadow-lg rounded-lg md:w-full sm:w-full w-full">
         <ControlsPanel
           backgroundImageUrl={backgroundImageUrl}
           setBackgroundImageUrl={setBackgroundImageUrl}
@@ -379,9 +400,13 @@ const CreateMeme = () => {
           openDropdown={openDropdown}
           removeText={removeText}
           setTexts={setTexts}
-          handleImageUpload={handleImageUpload} // Pass handleImageUpload
+          handleImageUpload={handleImageUpload}
           addedImages={addedImages}
           removeImage={removeImage}
+          handleAddImageURL={handleAddImageURL}
+          addImageUrlError={addImageUrlError}
+          imageURL={imageURL}
+          setImageURL={setImageURL}
         />
       </div>
     </div>

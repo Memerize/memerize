@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Stage,
   Layer,
@@ -21,51 +21,8 @@ const MemeCanvas = ({
   addedImages,
   handleImageDragEnd,
   handleImageClick,
-  selectedImageId,
   imageRefs,
-  selectedTextId,
 }) => {
-  // Preload images
-  useEffect(() => {
-    addedImages.forEach((img) => {
-      if (!imageRefs.current[img.id]) {
-        const imgObj = new window.Image();
-        imgObj.src = img.src;
-        imgObj.onload = () => {
-          imageRefs.current[img.id] = imgObj;
-        };
-      }
-    });
-  }, [addedImages, imageRefs]);
-
-  // Attach transformer to selected element
-  useEffect(() => {
-    if (isTransformerActive) {
-      if (selectedImageId) {
-        const selectedNode = imageRefs.current[selectedImageId];
-        if (selectedNode) {
-          transformerRef.current.nodes([selectedNode]);
-          transformerRef.current.getLayer()?.batchDraw();
-        }
-      } else if (selectedTextId) {
-        const selectedNode = textRefs.current[selectedTextId];
-        if (selectedNode) {
-          transformerRef.current.nodes([selectedNode]);
-          transformerRef.current.getLayer()?.batchDraw();
-        }
-      }
-    } else {
-      transformerRef.current.nodes([]);
-      transformerRef.current.getLayer()?.batchDraw();
-    }
-  }, [
-    isTransformerActive,
-    selectedImageId,
-    textRefs,
-    imageRefs,
-    transformerRef,
-    selectedTextId,
-  ]);
   return (
     <div className="">
       <Stage
@@ -75,7 +32,6 @@ const MemeCanvas = ({
         className="justify-center items-center text-center mx-auto flex overflow-auto"
         onMouseDown={(e) => {
           if (e.target === e.target.getStage()) {
-            // Deselect handled in parent via click outside
           }
         }}
       >
@@ -95,6 +51,13 @@ const MemeCanvas = ({
           {addedImages.map((img) => {
             const image = new window.Image();
             image.src = img.src;
+            let scale = 1;
+            if (
+              image.width / imageDimensions.width > 1 ||
+              image.height / imageDimensions.height > 1
+            ) {
+              scale = 4;
+            }
             return (
               <KonvaImage
                 key={img.id}
@@ -104,6 +67,8 @@ const MemeCanvas = ({
                 scaleX={img.scaleX}
                 scaleY={img.scaleY}
                 rotation={img.rotation}
+                width={image.width / scale}
+                height={image.height / scale}
                 draggable
                 onClick={() => handleImageClick(img.id)}
                 onDragEnd={(e) => handleImageDragEnd(e, img.id)}
@@ -136,7 +101,7 @@ const MemeCanvas = ({
                 fontFamily={text.fontFamily}
                 onClick={() => handleTextClick(text.id)}
                 onDragEnd={(e) => handleDragEnd(e, text.id)}
-                onTransformEnd={() => handleTextTransform(text.id)}
+                onTransform={() => handleTextTransform(text.id)}
               />
             </React.Fragment>
           ))}
