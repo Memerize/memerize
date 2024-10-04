@@ -1,5 +1,3 @@
-//memerize/src/app/create-meme/page.jsx
-
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
@@ -22,24 +20,74 @@ const CreateMeme = () => {
   const [texts, setTexts] = useState([]);
   const [image, setImage] = useState(null);
   const [clickedOnText, setClickedOnText] = useState(false);
+  const [clickedOnImage, setClickedOnImage] = useState(false); // New state
   const [imageDimensions, setImageDimensions] = useState({
     width: 600,
     height: 400,
   });
   const [fontFamily, setFontFamily] = useState("Impact");
   const [selectedTextId, setSelectedTextId] = useState(null);
+  const [selectedImageId, setSelectedImageId] = useState(null); // New state
   const [isTransformerActive, setIsTransformerActive] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [addedImages, setAddedImages] = useState([]);
 
   // Refs
   const transformerRef = useRef(null);
   const textRefs = useRef({});
+  const imageRefs = useRef({}); // To keep image refs
   const stageRef = useRef(null);
   const compRef = useRef(null);
 
   // Toggle dropdown for text options
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
+  };
+
+  // Function to add image to canvas
+  const addImageToCanvas = (src) => {
+    const newImage = {
+      id: Date.now(), // Unique ID for each image
+      src: src,
+      x: imageDimensions.width / 2 - 50, // Centered horizontally
+      y: imageDimensions.height / 2 - 50, // Centered vertically
+      scaleX: 1,
+      scaleY: 1,
+      rotation: 0,
+    };
+    setAddedImages((prevImages) => [...prevImages, newImage]);
+  };
+
+  // Handle image upload
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        addImageToCanvas(reader.result); // Send image to canvas handler
+      };
+      reader.readAsDataURL(file); // Convert the image to a base64 string
+    }
+  };
+
+  // Function to handle image transformations (drag, scale, rotate)
+  const handleImageDragEnd = (e, id) => {
+    const { x, y } = e.target.position();
+    setAddedImages((prevImages) =>
+      prevImages.map((img) => (img.id === id ? { ...img, x, y } : img))
+    );
+  };
+
+  // Function to remove an added image
+  const removeImage = (id) => {
+    setAddedImages((prevImages) => prevImages.filter((img) => img.id !== id));
+    // If the removed image is selected, reset transformer
+    if (selectedImageId === id) {
+      setSelectedImageId(null);
+      setIsTransformerActive(false);
+      transformerRef.current?.nodes([]);
+      transformerRef.current?.getLayer()?.batchDraw();
+    }
   };
 
   // Image loading
@@ -76,7 +124,7 @@ const CreateMeme = () => {
     };
   }, [backgroundImageUrl]);
 
-  // Handle click outside for deselect text
+  // Handle click outside for deselect text or image
   useEffect(() => {
     const handleClickOutside = (e) => {
       const isClickInsideCanvas = stageRef.current
@@ -85,11 +133,14 @@ const CreateMeme = () => {
         .contains(e.target);
       const selectedText =
         selectedTextId !== null ? textRefs.current[selectedTextId] : null;
+      const selectedImage =
+        selectedImageId !== null ? imageRefs.current[selectedImageId] : null;
 
-      // Case 1: Click inside canvas but no text clicked, and transformer is active
-      if (isClickInsideCanvas && !clickedOnText && isTransformerActive) {
+      // Case 1: Click inside canvas but no element clicked, and transformer is active
+      if (isClickInsideCanvas && !clickedOnText && !clickedOnImage && isTransformerActive) {
         setIsTransformerActive(false);
         setSelectedTextId(null);
+        setSelectedImageId(null);
         transformerRef.current?.nodes([]);
         transformerRef.current?.getLayer()?.batchDraw();
         return;
@@ -99,9 +150,11 @@ const CreateMeme = () => {
       if (!isClickInsideCanvas) {
         setIsTransformerActive(false);
         setSelectedTextId(null);
+        setSelectedImageId(null);
         transformerRef.current?.nodes([]);
         transformerRef.current?.getLayer()?.batchDraw();
         setClickedOnText(false);
+        setClickedOnImage(false);
         return;
       }
 
@@ -112,6 +165,14 @@ const CreateMeme = () => {
         setClickedOnText(false);
         return;
       }
+
+      // Case 4: If an image was clicked and we want to activate the transformer
+      if (transformerRef.current && clickedOnImage && selectedImage) {
+        transformerRef.current.nodes([selectedImage]);
+        transformerRef.current.getLayer()?.batchDraw();
+        setClickedOnImage(false);
+        return;
+      }
     };
 
     window.addEventListener("click", handleClickOutside);
@@ -119,7 +180,15 @@ const CreateMeme = () => {
     return () => {
       window.removeEventListener("click", handleClickOutside);
     };
-  }, [isTransformerActive, selectedTextId, texts, clickedOnText]);
+  }, [
+    isTransformerActive,
+    selectedTextId,
+    selectedImageId,
+    texts,
+    addedImages,
+    clickedOnText,
+    clickedOnImage,
+  ]);
 
   // Prevent text dragging outside the image
   const preventTextOutOfBounds = (newX, newY, textWidth, textHeight) => {
@@ -186,8 +255,16 @@ const CreateMeme = () => {
 
   const handleTextClick = (id) => {
     setSelectedTextId(id);
+    setSelectedImageId(null);
     setIsTransformerActive(true);
     setClickedOnText(true);
+  };
+
+  const handleImageClick = (id) => {
+    setSelectedImageId(id);
+    setSelectedTextId(null);
+    setIsTransformerActive(true);
+    setClickedOnImage(true);
   };
 
   const handleInputChange = (e, id) => {
@@ -219,7 +296,9 @@ const CreateMeme = () => {
     }
 
     setTexts((prevTexts) =>
-      prevTexts.map((t) => (t.id === textId ? { ...t, fontSize: fontSize } : t))
+      prevTexts.map((t) =>
+        t.id === textId ? { ...t, fontSize: fontSize } : t
+      )
     );
   };
 
@@ -276,11 +355,17 @@ const CreateMeme = () => {
           transformerRef={transformerRef}
           textRefs={textRefs}
           stageRef={stageRef}
+          addedImages={addedImages}
+          handleImageDragEnd={handleImageDragEnd}
+          handleImageClick={handleImageClick} // Pass handleImageClick
+          selectedImageId={selectedImageId} // Pass selectedImageId
+          imageRefs={imageRefs} // Pass imageRefs
+          selectedTextId={selectedTextId}
         />
       </div>
 
       {/* Right panel for Controls */}
-      <div className="flex-1 flex flex-col items-center space-y-4 p-4 bg-base-100 shadow-lg rounded-lg w-full">
+      <div className="flex-1 flex flex-col items-center space-y-4 p-4 bg-base-100 shadow-lg rounded-lg w-1/2">
         <ControlsPanel
           backgroundImageUrl={backgroundImageUrl}
           setBackgroundImageUrl={setBackgroundImageUrl}
@@ -294,6 +379,9 @@ const CreateMeme = () => {
           openDropdown={openDropdown}
           removeText={removeText}
           setTexts={setTexts}
+          handleImageUpload={handleImageUpload} // Pass handleImageUpload
+          addedImages={addedImages}
+          removeImage={removeImage}
         />
       </div>
     </div>
