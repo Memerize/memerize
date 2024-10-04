@@ -1,109 +1,103 @@
-import React from "react";
-
-export default function Home() {
-  return (
-    <div className="bg-gray-100 min-h-screen">
-      {/* Main Content */}
-      <div className="flex">
-        {/* Main Section */}
-        <main className="w-full p-4">
-          {/* Filter Bar */}
-          <div className="flex justify-center space-x-4 mb-4">
-            <button className="bg-gray-300 p-2 rounded text-black">Trending</button>
-            <button className="bg-gray-300 p-2 rounded text-black">Top</button>
-            <button className="bg-gray-300 p-2 rounded text-black">Fresh</button>
-          </div>
-
-          {/* Meme Post */}
-          <div className="bg-white shadow p-4 rounded">
-            <div className="flex space-x-4">
-              <span className="font-bold text-black">User</span> 
-              <span className="font-bold text-black">Title</span>
-            </div>
-            <div className="bg-gray-300 text-center text-4xl py-16 mt-4 text-black">
-              MEME
-            </div>
-            <div className="flex justify-between items-center mt-4">
-              <div className="space-x-4">
-                <button className="text-blue-600">Vote</button>
-                <button className="text-blue-600">Comments</button>
-              </div>
-              <div className="space-x-4">
-                <button className="text-blue-600">Save</button>
-                <button className="text-blue-600">Share</button>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-    </div>
-  );
-};
-
-
-/*
-CATATAN => ini contoh penerapan infinity scroll
-
 "use client";
 
+import PostCard from "@/components/post/PostCard";
 import React, { useEffect, useState } from "react";
-import InfiniteScroll from "@/components/InfiniteScroll";
 
 export default function Home() {
-  const [items, setItems] = useState<string[]>([]);
-  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [posts, setPosts] = useState([]);
+  const [currentFilter, setCurrentFilter] = useState("fresh");
+
+  const fetchPosts = async (url) => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Failed to fetch posts");
+      }
+      const json = await response.json();
+      setPosts(json);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
-    const newItems = Array.from({ length: 50 }, (_, i) => `Meme ${i + 1}`);
-    setItems(newItems);
+    // Fetch default posts when the component mounts
+    fetchPosts("/api/posts");
   }, []);
 
-  const loadMore = async () => {
-    const newItems = Array.from({ length: 100 }, (_, i) => `Meme ${items.length + i + 1}`);
-    setItems([...items, ...newItems]);
-    if (newItems.length < 5) {
-      setHasMore(false);
-    }
+  // Handlers for each filter
+  const handleTrendingClick = () => {
+    setCurrentFilter("trending");
+    fetchPosts("/api/trending");
+  };
+
+  const handleTopClick = () => {
+    setCurrentFilter("top");
+    fetchPosts("/api/top");
+  };
+
+  const handleFreshClick = () => {
+    setCurrentFilter("fresh");
+    fetchPosts("/api/posts");
   };
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      <div className="flex">
-        <main className="w-full p-4">
-          <div className="flex justify-center space-x-4 mb-4">
-            <button className="bg-gray-300 p-2 rounded text-black">Trending</button>
-            <button className="bg-gray-300 p-2 rounded text-black">Top</button>
-            <button className="bg-gray-300 p-2 rounded text-black">Fresh</button>
+      {/* Main Content */}
+      <div className="flex justify-center">
+        {/* Main Section */}
+        <main className="w-full max-w-5xl p-6">
+          {/* Filter Bar */}
+          <div className="flex justify-center space-x-4 mb-6">
+            <button
+              className={`px-6 py-2 rounded-full transition-colors duration-300 ${
+                currentFilter === "trending"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-300 text-black hover:bg-gray-400"
+              }`}
+              onClick={handleTrendingClick}
+            >
+              Trending
+            </button>
+            <button
+              className={`px-6 py-2 rounded-full transition-colors duration-300 ${
+                currentFilter === "top"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-300 text-black hover:bg-gray-400"
+              }`}
+              onClick={handleTopClick}
+            >
+              Top
+            </button>
+            <button
+              className={`px-6 py-2 rounded-full transition-colors duration-300 ${
+                currentFilter === "fresh"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-300 text-black hover:bg-gray-400"
+              }`}
+              onClick={handleFreshClick}
+            >
+              Fresh
+            </button>
           </div>
 
-          <InfiniteScroll loadMore={loadMore} hasMore={hasMore}>
-            {items.map((item, index) => (
-              <div key={index} className="bg-white shadow p-4 rounded mb-4">
-                <div className="flex space-x-4">
-                  <span className="font-bold text-black">User</span>
-                  <span className="font-bold text-black">{item}</span>
+          {/* Meme Post */}
+          {posts.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6">
+              {posts.map((post) => (
+                <div
+                  key={post._id}
+                  className="bg-white shadow-lg rounded-lg overflow-hidden p-6"
+                >
+                  <PostCard post={post} />
                 </div>
-                <div className="bg-gray-300 text-center text-4xl py-16 mt-4 text-black">
-                  MEME
-                </div>
-                <div className="flex justify-between items-center mt-4">
-                  <div className="space-x-4">
-                    <button className="text-blue-600">Vote</button>
-                    <button className="text-blue-600">Comments</button>
-                  </div>
-                  <div className="space-x-4">
-                    <button className="text-blue-600">Save</button>
-                    <button className="text-blue-600">Share</button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </InfiniteScroll>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500">No posts available</p>
+          )}
         </main>
       </div>
     </div>
   );
 }
-
-
- */

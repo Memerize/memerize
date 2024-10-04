@@ -25,19 +25,35 @@ async function auth(request) {
 }
 
 export async function middleware(request) {
-  try {
-    const requestHeaders = await auth(request);
+  const { pathname } = new URL(request.url);
 
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
+  try {
+    if (pathname.startsWith("/api/posts")) {
+      if (request.method === "POST") {
+        const requestHeaders = await auth(request);
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
+      }
+    } else if (pathname.startsWith("/api/saves")) {
+      if (["GET", "POST"].includes(request.method)) {
+        const requestHeaders = await auth(request);
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
+      }
+    }
+
+    return NextResponse.next();
   } catch (error) {
     return handleError(error);
   }
 }
 
 export const config = {
-  matcher: [],
+  matcher: ["/api/posts", "/api/saves/:path*"],
 };

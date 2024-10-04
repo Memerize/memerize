@@ -16,6 +16,7 @@ export const UserSchema = z.object({
 export const PostSchema = z.object({
   _id: z.instanceof(ObjectId).optional(),
   username: z.string(),
+  profileImage: z.string().optional(),
   title: z.string(),
   slug: z.string().optional(),
   image: z.string(),
