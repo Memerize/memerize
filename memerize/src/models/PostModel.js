@@ -1,4 +1,5 @@
 import { db } from "@/db/config";
+import { ObjectId } from "mongodb";
 
 export class PostModel {
   static collection() {
@@ -239,6 +240,9 @@ export class PostModel {
                 as: "comment",
                 in: {
                   $mergeObjects: [
+                    {
+                      commentId: "$$comment.commentId",
+                    },
                     "$$comment",
                     {
                       userImage: {
@@ -258,6 +262,36 @@ export class PostModel {
                           0,
                         ],
                       },
+                      replies: {
+                        $map: {
+                          input: "$$comment.replies",
+                          as: "reply",
+                          in: {
+                            $mergeObjects: [
+                              "$$reply",
+                              {
+                                userImage: {
+                                  $arrayElemAt: [
+                                    {
+                                      $filter: {
+                                        input: "$commentUserDetails",
+                                        as: "userDetail",
+                                        cond: {
+                                          $eq: [
+                                            "$$userDetail.username",
+                                            "$$reply.username",
+                                          ],
+                                        },
+                                      },
+                                    },
+                                    0,
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
                     },
                   ],
                 },
@@ -272,10 +306,34 @@ export class PostModel {
             image: 1,
             tags: 1,
             slug: 1,
-            comments: 1,
+            comments: {
+              commentId: 1,
+              username: 1,
+              content: 1,
+              replies: {
+                username: 1,
+                content: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                "userImage._id": 1,
+                "userImage.email": 1,
+                "userImage.name": 1,
+                "userImage.username": 1,
+                "userImage.image": 1,
+              },
+              commentLikes: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              "userImage._id": 1,
+              "userImage.email": 1,
+              "userImage.name": 1,
+              "userImage.username": 1,
+              "userImage.image": 1,
+            },
             likes: 1,
             createdAt: 1,
             updatedAt: 1,
+            "user._id": 1,
             "user.name": 1,
             "user.username": 1,
             "user.email": 1,
@@ -293,6 +351,20 @@ export class PostModel {
       { slug },
       {
         $push: { comments: comment },
+        $set: { updatedAt: new Date() },
+      },
+      { returnDocument: "after" }
+    );
+  }
+
+  static async addReplyToComment(slug, commentId, reply) {
+    return await this.collection().findOneAndUpdate(
+      {
+        slug: slug,
+        "comments.commentId": new ObjectId(String(commentId)),
+      },
+      {
+        $push: { "comments.$.replies": reply },
         $set: { updatedAt: new Date() },
       },
       { returnDocument: "after" }

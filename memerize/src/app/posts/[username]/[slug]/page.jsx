@@ -144,8 +144,8 @@ export default function PostDetail({ params }) {
         <h3 className="text-xl font-semibold mb-4">Comments</h3>
         <div className="space-y-4">
           {comments.length > 0 ? (
-            comments.map((comment, index) => (
-              <CommentCard key={index} comment={comment} />
+            comments.map((comment) => (
+              <CommentCard key={comment._id} comment={comment} slug={slug} />
             ))
           ) : (
             <p className="text-gray-500">No comments yet.</p>

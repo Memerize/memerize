@@ -8,7 +8,6 @@ export async function POST(request, { params }) {
   const { slug } = params;
   const { content } = await request.json();
   const username = request.headers.get("x-user-username");
-  console.log(username);
 
   try {
     const post = await PostModel.findOneBySlug(slug);
