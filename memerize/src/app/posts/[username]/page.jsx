@@ -1,9 +1,10 @@
 import PostCard from "@/components/post/PostCard";
 
-export default async function ProfilePage({ params }) {
+export default async function UserPage({ params }) {
   const { username } = params;
 
   const getUser = await fetch(`http://localhost:3000/api/users/${username}`, {
+    cache: "no-store",
     next: {
       tags: ["user"],
     },
@@ -11,6 +12,7 @@ export default async function ProfilePage({ params }) {
   const user = await getUser.json();
 
   const getPosts = await fetch(`http://localhost:3000/api/posts/${username}`, {
+    cache: "no-store",
     next: {
       tags: ["profile"],
     },
