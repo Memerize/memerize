@@ -150,8 +150,8 @@ export class PostModel {
       .toArray();
   }
 
-  static async findByTitle(title) {
-    return await this.collection().findOne({ title: title });
+  static async findOneBySlug(slug) {
+    return await this.collection().findOne({ slug: slug });
   }
 
   static async create(postData) {
@@ -224,6 +224,48 @@ export class PostModel {
           $unwind: "$user",
         },
         {
+          $lookup: {
+            from: "users",
+            localField: "comments.username",
+            foreignField: "username",
+            as: "commentUserDetails",
+          },
+        },
+        {
+          $addFields: {
+            comments: {
+              $map: {
+                input: "$comments",
+                as: "comment",
+                in: {
+                  $mergeObjects: [
+                    "$$comment",
+                    {
+                      userImage: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$commentUserDetails",
+                              as: "userDetail",
+                              cond: {
+                                $eq: [
+                                  "$$userDetail.username",
+                                  "$$comment.username",
+                                ],
+                              },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+        {
           $project: {
             _id: 1,
             title: 1,
@@ -242,5 +284,18 @@ export class PostModel {
         },
       ])
       .next();
+  }
+
+  static async addComment(slug, comment) {
+    comment.createdAt = new Date();
+    comment.updatedAt = new Date();
+    return await this.collection().findOneAndUpdate(
+      { slug },
+      {
+        $push: { comments: comment },
+        $set: { updatedAt: new Date() },
+      },
+      { returnDocument: "after" }
+    );
   }
 }

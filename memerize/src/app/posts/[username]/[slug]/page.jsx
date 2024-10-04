@@ -1,18 +1,84 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { FaArrowUp, FaComment, FaRegBookmark, FaShare } from "react-icons/fa";
+import Loading from "@/app/loading";
+import CommentCard from "@/components/post/CommentCard";
 
-export default async function PostDetail({ params }) {
+export default function PostDetail({ params }) {
   const { username, slug } = params;
 
-  const getPost = await fetch(
-    `http://localhost:3000/api/posts/${username}/${slug}`,
-    {
-      next: {
-        tags: ["post"],
-      },
+  const [post, setPost] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingPost, setLoadingPost] = useState(true);
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await fetch(`/api/posts/${username}/${slug}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch post data.");
+        }
+        const postData = await response.json();
+        setPost(postData);
+        setComments(postData.comments || []);
+      } catch (error) {
+        console.error("Error fetching post:", error);
+        setError("Error loading post.");
+      } finally {
+        setLoadingPost(false);
+      }
+    };
+
+    fetchPost();
+  }, [username, slug]);
+
+  const handleAddComment = async () => {
+    if (!newComment.trim()) {
+      setError("Comment cannot be empty");
+      return;
     }
-  );
-  const post = await getPost.json();
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/comments/${slug}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: newComment,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add comment");
+      }
+
+      const addedComment = await response.json();
+      setComments([...comments, addedComment]);
+      setNewComment("");
+    } catch (error) {
+      setError("Error submitting the comment");
+      console.error("Error submitting comment:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loadingPost) {
+    return <Loading />;
+  }
+
+  if (!post) {
+    return <div>Error loading post.</div>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
@@ -60,7 +126,7 @@ export default async function PostDetail({ params }) {
 
         <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
           <FaComment />
-          <span>{post.comments.length} Comments</span>
+          <span>{comments.length} Comments</span>
         </button>
 
         <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
@@ -74,17 +140,12 @@ export default async function PostDetail({ params }) {
         </button>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-8 h-96 overflow-y-auto pr-2">
         <h3 className="text-xl font-semibold mb-4">Comments</h3>
         <div className="space-y-4">
-          {post.comments.length > 0 ? (
-            post.comments.map((comment, index) => (
-              <div key={index} className="bg-gray-100 p-4 rounded-md shadow">
-                <p className="text-gray-700">{comment.content}</p>
-                <span className="text-sm text-gray-500">
-                  {new Date(comment.createdAt).toLocaleString()}
-                </span>
-              </div>
+          {comments.length > 0 ? (
+            comments.map((comment, index) => (
+              <CommentCard key={index} comment={comment} />
             ))
           ) : (
             <p className="text-gray-500">No comments yet.</p>
@@ -92,10 +153,23 @@ export default async function PostDetail({ params }) {
         </div>
       </div>
 
-      <div className="flex justify-end mt-6">
-        <Link href="/">
-          <button className="btn btn-neutral">Back</button>
-        </Link>
+      <div className="sticky bottom-0 bg-white p-4 border-t">
+        <textarea
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          className="w-full p-2 border rounded-md"
+          placeholder="Write a comment..."
+        ></textarea>
+
+        {error && <p className="text-red-500 mt-2">{error}</p>}
+
+        <button
+          onClick={handleAddComment}
+          className="mt-2 bg-blue-500 text-white py-1 px-3 rounded"
+          disabled={loading}
+        >
+          {loading ? "Adding comment..." : "Add Comment"}
+        </button>
       </div>
     </div>
   );
