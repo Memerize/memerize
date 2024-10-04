@@ -1,7 +1,11 @@
-// memerize/src/components/create-meme/MemeCanvas.js
-
 import React from "react";
-import { Stage, Layer, Text, Image, Transformer } from "react-konva";
+import {
+  Stage,
+  Layer,
+  Text,
+  Image as KonvaImage,
+  Transformer,
+} from "react-konva";
 
 const MemeCanvas = ({
   image,
@@ -14,6 +18,10 @@ const MemeCanvas = ({
   transformerRef,
   textRefs,
   stageRef,
+  addedImages,
+  handleImageDragEnd,
+  handleImageClick,
+  imageRefs,
 }) => {
   return (
     <div className="">
@@ -22,10 +30,14 @@ const MemeCanvas = ({
         width={imageDimensions.width}
         height={imageDimensions.height}
         className="justify-center items-center text-center mx-auto flex overflow-auto"
+        onMouseDown={(e) => {
+          if (e.target === e.target.getStage()) {
+          }
+        }}
       >
         <Layer>
           {image && (
-            <Image
+            <KonvaImage
               image={image}
               x={0}
               y={0}
@@ -34,6 +46,42 @@ const MemeCanvas = ({
               alt="Meme"
             />
           )}
+
+          {/* Render Added Images */}
+          {addedImages.map((img) => {
+            const image = new window.Image();
+            image.src = img.src;
+            let scale = 1;
+            if (
+              image.width / imageDimensions.width > 1 ||
+              image.height / imageDimensions.height > 1
+            ) {
+              scale = 4;
+            }
+            return (
+              <KonvaImage
+                key={img.id}
+                image={image}
+                x={img.x}
+                y={img.y}
+                scaleX={img.scaleX}
+                scaleY={img.scaleY}
+                rotation={img.rotation}
+                width={image.width / scale}
+                height={image.height / scale}
+                draggable
+                onClick={() => handleImageClick(img.id)}
+                onDragEnd={(e) => handleImageDragEnd(e, img.id)}
+                ref={(node) => {
+                  if (node) {
+                    imageRefs.current[img.id] = node;
+                  }
+                }}
+              />
+            );
+          })}
+
+          {/* Render Texts */}
           {texts.map((text) => (
             <React.Fragment key={text.id}>
               <Text
@@ -57,7 +105,14 @@ const MemeCanvas = ({
               />
             </React.Fragment>
           ))}
-          <Transformer ref={transformerRef} visible={isTransformerActive} />
+
+          <Transformer
+            ref={transformerRef}
+            visible={isTransformerActive}
+            anchorStroke="#000000"
+            borderStroke="#000000"
+            anchorFill="#000000"
+          />
         </Layer>
       </Stage>
     </div>

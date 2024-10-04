@@ -1,7 +1,7 @@
 "use client";
 
-import PostCard from "@/components/post/PostCard";
 import React, { useEffect, useState } from "react";
+import PostCard from "../components/post/PostCard";
 import Loading from "@/app/loading";
 
 export default function Home() {
