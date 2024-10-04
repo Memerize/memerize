@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { PostModel } from "@/models/PostModel";
 import { UserModel } from "@/models/UserModel";
 import { handleError } from "@/helpers/handleError";
+import { ObjectId } from "mongodb";
 
 export async function POST(request, { params }) {
   const { slug } = params;
   const { content } = await request.json();
   const username = request.headers.get("x-user-username");
   console.log(username);
-  
+
   try {
     const post = await PostModel.findOneBySlug(slug);
     if (!post) {
@@ -21,6 +22,7 @@ export async function POST(request, { params }) {
     }
 
     const newComment = {
+      commentId: new ObjectId(),
       username: user.username,
       content,
       replies: [],
