@@ -14,3 +14,15 @@ export async function GET(request, { params }) {
     return handleError(error);
   }
 }
+
+export async function POST(request, { params }) {
+  const { username } = params;
+  const { image } = await request.json();
+
+  try {
+    const result = await UserModel.editImageProfile(username, image);
+    return NextResponse.json(result);
+  } catch (error) {
+    return handleError(error);
+  }
+}

@@ -51,6 +51,16 @@ export default function Home() {
           <div className="flex justify-center space-x-4 mb-6">
             <button
               className={`px-6 py-2 rounded-full transition-colors duration-300 ${
+                currentFilter === "fresh"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-300 text-black hover:bg-gray-400"
+              }`}
+              onClick={handleFreshClick}
+            >
+              Fresh
+            </button>
+            <button
+              className={`px-6 py-2 rounded-full transition-colors duration-300 ${
                 currentFilter === "trending"
                   ? "bg-blue-500 text-white"
                   : "bg-gray-300 text-black hover:bg-gray-400"
@@ -68,16 +78,6 @@ export default function Home() {
               onClick={handleTopClick}
             >
               Top
-            </button>
-            <button
-              className={`px-6 py-2 rounded-full transition-colors duration-300 ${
-                currentFilter === "fresh"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-300 text-black hover:bg-gray-400"
-              }`}
-              onClick={handleFreshClick}
-            >
-              Fresh
             </button>
           </div>
 

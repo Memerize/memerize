@@ -55,6 +55,15 @@ export async function middleware(request) {
           },
         });
       }
+    } else if (pathname.startsWith("/api/users")) {
+      if (["POST", "PUT", "PATCH"].includes(request.method)) {
+        const requestHeaders = await auth(request);
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
+      }
     }
 
     return NextResponse.next();
@@ -64,5 +73,10 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/api/posts", "/api/saves/:path*", "/api/comments/:path*"],
+  matcher: [
+    "/api/posts",
+    "/api/saves/:path*",
+    "/api/comments/:path*",
+    "/api/users/:path*",
+  ],
 };
