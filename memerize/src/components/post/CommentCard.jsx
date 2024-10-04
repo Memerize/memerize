@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ReplyCard from "./ReplyCard";
 
-export default function CommentCard({ comment, slug }) {
+export default function CommentCard({ comment, slug, onReplyAdded }) {
   const [showReplyBox, setShowReplyBox] = useState(false);
   const [newReply, setNewReply] = useState("");
   const [error, setError] = useState(null);
@@ -44,6 +44,10 @@ export default function CommentCard({ comment, slug }) {
       comment.replies.push(addedReply);
       setNewReply("");
       setShowReplyBox(false);
+
+      if (onReplyAdded) {
+        onReplyAdded();
+      }
     } catch (error) {
       console.error("Error submitting reply:", error);
       setError("Error submitting reply");
