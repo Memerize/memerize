@@ -1,3 +1,5 @@
+// memerize\src\app\create-meme\page.jsx
+
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
@@ -37,13 +39,24 @@ const CreateMeme = () => {
   // Refs
   const transformerRef = useRef(null);
   const textRefs = useRef({});
-  const imageRefs = useRef({}); // To keep image refs
+  const imageRefs = useRef({});
   const stageRef = useRef(null);
   const compRef = useRef(null);
 
   // Toggle dropdown for text options
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
+  };
+
+  const handleBackgroundImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setBackgroundImageUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleAddImageURL = () => {
@@ -53,9 +66,7 @@ const CreateMeme = () => {
         setImageURL("");
         setAddImageUrlError("");
       } else {
-        setAddImageUrlError(
-          "Invalid URL format."
-        );
+        setAddImageUrlError("Invalid URL format.");
       }
     } else {
       setAddImageUrlError("Please enter an image URL.");
@@ -74,6 +85,10 @@ const CreateMeme = () => {
       rotation: 0,
     };
     setAddedImages((prevImages) => [...prevImages, newImage]);
+    setTimeout(() => {
+      handleImageClick(newImage.id);
+      stageRef.current.batchDraw();
+    }, 1000);
   };
 
   // Handle image upload
@@ -83,7 +98,7 @@ const CreateMeme = () => {
       const reader = new FileReader();
       reader.onload = () => {
         // setTimeout(() => {
-          addImageToCanvas(reader.result); // Send image to canvas handler
+        addImageToCanvas(reader.result); // Send image to canvas handler
         // }, 500);
       };
       reader.readAsDataURL(file); // Convert the image to a base64 string
@@ -105,7 +120,6 @@ const CreateMeme = () => {
     if (selectedImageId === id) {
       setSelectedImageId(null);
       setIsTransformerActive(false);
-      transformerRef.current?.nodes([]);
       transformerRef.current?.getLayer()?.batchDraw();
     }
   };
@@ -199,7 +213,6 @@ const CreateMeme = () => {
         return;
       }
     };
-
     window.addEventListener("click", handleClickOutside);
 
     return () => {
@@ -407,6 +420,7 @@ const CreateMeme = () => {
           addImageUrlError={addImageUrlError}
           imageURL={imageURL}
           setImageURL={setImageURL}
+          handleBackgroundImageUpload={handleBackgroundImageUpload}
         />
       </div>
     </div>

@@ -115,7 +115,6 @@ export default function Navbar() {
               width={150}
               height={50}
               className="w-[150px] h-[50px] object-cover invert"
-              objectFit="contain"
             />
           </Link>
         </div>
