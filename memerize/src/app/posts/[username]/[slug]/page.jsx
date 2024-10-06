@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { MentionsInput, Mention } from "react-mentions";
 import { FaArrowUp, FaComment, FaRegBookmark, FaShare } from "react-icons/fa";
 import Loading from "@/app/loading";
 import CommentCard from "@/components/post/CommentCard";
+import mentionStyle from "@/components/post/MentionStyle";
 
 export default function PostDetail({ params }) {
   const { username, slug } = params;
@@ -15,6 +17,7 @@ export default function PostDetail({ params }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingPost, setLoadingPost] = useState(true);
+  const [users, setUsers] = useState([]); // State to store fetched users
 
   const fetchPost = async () => {
     try {
@@ -36,6 +39,23 @@ export default function PostDetail({ params }) {
   useEffect(() => {
     fetchPost();
   }, [username, slug]);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(`/api/users`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch users");
+      }
+      const usersData = await response.json();
+      setUsers(usersData.slice(0, 5));
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) {
@@ -73,6 +93,11 @@ export default function PostDetail({ params }) {
       setLoading(false);
     }
   };
+
+  const userSuggestions = users.map((user) => ({
+    id: user.username,
+    display: `@${user.username}`,
+  }));
 
   if (loadingPost) {
     return <Loading />;
@@ -161,12 +186,20 @@ export default function PostDetail({ params }) {
       </div>
 
       <div className="sticky bottom-0 bg-white p-4 border-t">
-        <textarea
+        <MentionsInput
           value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          className="w-full p-2 border rounded-md"
+          onChange={(e, newValue) => setNewComment(newValue)}
           placeholder="Write a comment..."
-        ></textarea>
+          className="w-full p-2 border rounded-md"
+          style={mentionStyle}
+          allowSuggestionsAboveCursor={true}
+        >
+          <Mention
+            trigger="@"
+            data={userSuggestions}
+            displayTransform={(id, display) => `${display}`} // No extra classes here
+          />
+        </MentionsInput>
 
         {error && <p className="text-red-500 mt-2">{error}</p>}
 

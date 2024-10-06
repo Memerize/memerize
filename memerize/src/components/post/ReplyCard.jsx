@@ -1,4 +1,35 @@
+import Link from "next/link";
 import React from "react";
+
+const parseMentions = (text) => {
+  const regex = /@\[(.*?)\]\((.*?)\)/g;
+  const parts = [];
+  let lastIndex = 0;
+
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index));
+    }
+
+    const display = match[1];
+    const username = match[2];
+
+    parts.push(
+      <Link key={match.index} href={`/posts/${username}`}>
+        <span className="mention">{display}</span>
+      </Link>
+    );
+
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+
+  return parts;
+};
 
 export default function ReplyCard({ reply }) {
   return (
@@ -11,7 +42,7 @@ export default function ReplyCard({ reply }) {
         />
         <p className="font-semibold">{reply.username}</p>
       </div>
-      <p>{reply.content}</p>
+      <p className="text-gray-700">{parseMentions(reply.content)}</p>
       <span className="text-xs text-gray-500">
         {new Date(reply.createdAt).toLocaleString()}
       </span>

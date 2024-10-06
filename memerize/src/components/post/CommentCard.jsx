@@ -1,15 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ReplyCard from "./ReplyCard";
+import { MentionsInput, Mention } from "react-mentions";
+import mentionStyle from "@/components/post/MentionStyle";
+import Link from "next/link";
 
 export default function CommentCard({ comment, slug, onReplyAdded }) {
   const [showReplyBox, setShowReplyBox] = useState(false);
   const [newReply, setNewReply] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState([]); // To store users for mentions
 
   const toggleReplyBox = () => {
     setShowReplyBox((prev) => !prev);
   };
+
+  // Fetch users when reply box is opened
+  useEffect(() => {
+    if (showReplyBox) {
+      const fetchUsers = async () => {
+        try {
+          const response = await fetch(`/api/users`);
+          if (!response.ok) {
+            throw new Error("Failed to fetch users");
+          }
+          const usersData = await response.json();
+          setUsers(usersData.slice(0, 5)); // Limit to 5 users for suggestions
+        } catch (error) {
+          console.error("Error fetching users:", error);
+        }
+      };
+      fetchUsers();
+    }
+  }, [showReplyBox]);
 
   const handleReplySubmit = async (e) => {
     e.preventDefault();
@@ -56,6 +79,41 @@ export default function CommentCard({ comment, slug, onReplyAdded }) {
     }
   };
 
+  const userSuggestions = users.map((user) => ({
+    id: user.username,
+    display: `@${user.username}`,
+  }));
+
+  const parseMentions = (text) => {
+    const regex = /@\[(.*?)\]\((.*?)\)/g;
+    const parts = [];
+    let lastIndex = 0;
+
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index));
+      }
+
+      const display = match[1];
+      const username = match[2];
+
+      parts.push(
+        <Link key={match.index} href={`/posts/${username}`}>
+          <span className="mention">{display}</span>
+        </Link>
+      );
+
+      lastIndex = regex.lastIndex;
+    }
+
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+
+    return parts;
+  };
+
   return (
     <div className="bg-gray-100 p-4 rounded-md shadow">
       <div className="flex items-center space-x-4 mb-2">
@@ -71,7 +129,7 @@ export default function CommentCard({ comment, slug, onReplyAdded }) {
           </span>
         </div>
       </div>
-      <p className="text-gray-700">{comment.content}</p>
+      <p className="text-gray-700">{parseMentions(comment.content)}</p>
 
       <div className="ml-4 mt-4">
         {comment.replies?.length > 0 && (
@@ -92,12 +150,20 @@ export default function CommentCard({ comment, slug, onReplyAdded }) {
 
       {showReplyBox && (
         <form onSubmit={handleReplySubmit} className="mt-2">
-          <textarea
+          <MentionsInput
             value={newReply}
-            onChange={(e) => setNewReply(e.target.value)}
-            className="w-full p-2 border rounded-md"
+            onChange={(e, newValue) => setNewReply(newValue)}
             placeholder="Write a reply..."
-          ></textarea>
+            className="w-full p-2 border rounded-md"
+            style={mentionStyle}
+            allowSuggestionsAboveCursor={true}
+          >
+            <Mention
+              trigger="@"
+              data={userSuggestions}
+              displayTransform={(id, display) => `${display}`}
+            />
+          </MentionsInput>
           {error && <p className="text-red-500">{error}</p>}
           <button
             type="submit"
