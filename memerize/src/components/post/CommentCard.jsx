@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
 import ReplyCard from "./ReplyCard";
 import { MentionsInput, Mention } from "react-mentions";
-import mentionStyle from "@/components/post/MentionStyle";
+import { mentionStyle } from "@/components/post/MentionStyle";
 import Link from "next/link";
 
-export default function CommentCard({ comment, slug, onReplyAdded }) {
+export default function CommentCard({
+  comment,
+  slug,
+  postUsername,
+  onReplyAdded,
+}) {
   const [showReplyBox, setShowReplyBox] = useState(false);
   const [newReply, setNewReply] = useState("");
   const [error, setError] = useState(null);
@@ -46,6 +51,14 @@ export default function CommentCard({ comment, slug, onReplyAdded }) {
     setError(null);
 
     try {
+      // Extract mentioned users from the reply content
+      const mentionedUsers = [...newReply.matchAll(/@\[(.*?)\]\((.*?)\)/g)].map(
+        (match) => match[2] // This will get the usernames
+      );
+
+      console.log("Mentioned users:", mentionedUsers); // Check if mentioned users are being detected
+
+      // Post the reply
       const response = await fetch(
         `/api/comments/${slug}/${comment.commentId}`,
         {
@@ -68,12 +81,33 @@ export default function CommentCard({ comment, slug, onReplyAdded }) {
       setNewReply("");
       setShowReplyBox(false);
 
+      // Send a notification for each mentioned user
+      for (const mentionedUser of mentionedUsers) {
+        console.log("Sending notification to:", mentionedUser);
+        const notificationResponse = await fetch(
+          `/api/notifications/${mentionedUser}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              type: "mention",
+              slug: slug, // Pass the slug of the post
+              postUsername: postUsername, // Pass the post creator's username
+            }),
+          }
+        );
+
+        console.log("Notification response:", notificationResponse);
+      }
+
       if (onReplyAdded) {
         onReplyAdded();
       }
     } catch (error) {
-      console.error("Error submitting reply:", error);
-      setError("Error submitting reply");
+      console.error("Error submitting reply or sending notification:", error);
+      setError("Error submitting reply or sending notification");
     } finally {
       setLoading(false);
     }

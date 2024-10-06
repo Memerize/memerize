@@ -6,7 +6,7 @@ import { MentionsInput, Mention } from "react-mentions";
 import { FaArrowUp, FaComment, FaRegBookmark, FaShare } from "react-icons/fa";
 import Loading from "@/app/loading";
 import CommentCard from "@/components/post/CommentCard";
-import mentionStyle from "@/components/post/MentionStyle";
+import { mentionStyle } from "@/components/post/MentionStyle";
 
 export default function PostDetail({ params }) {
   const { username, slug } = params;
@@ -67,6 +67,14 @@ export default function PostDetail({ params }) {
     setError(null);
 
     try {
+      // Extract mentioned users from the comment content
+      const mentionedUsers = [
+        ...newComment.matchAll(/@\[(.*?)\]\((.*?)\)/g),
+      ].map(
+        (match) => match[2] // This gets the usernames from the mentions
+      );
+
+      // Post the comment
       const response = await fetch(`/api/comments/${slug}`, {
         method: "POST",
         headers: {
@@ -83,8 +91,25 @@ export default function PostDetail({ params }) {
 
       const addedComment = await response.json();
       setComments([...comments, addedComment]);
-      setNewComment("");
+      setNewComment(""); // Clear the comment input
 
+      // Send a notification for each mentioned user
+      for (const mentionedUser of mentionedUsers) {
+        await fetch(`/api/notifications/${mentionedUser}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "mention",
+            message: `${username} mentioned you in a comment.`,
+            slug: slug, // Post slug where the mention happened
+            postUsername: post.user?.username, // The owner of the post
+          }),
+        });
+      }
+
+      // Refresh post to reflect the new comment
       fetchPost();
     } catch (error) {
       setError("Error submitting the comment");
@@ -176,6 +201,7 @@ export default function PostDetail({ params }) {
                 key={comment._id}
                 comment={comment}
                 slug={slug}
+                postUsername={post.user?.username}
                 onReplyAdded={fetchPost}
               />
             ))

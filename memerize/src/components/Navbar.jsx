@@ -173,7 +173,9 @@ export default function Navbar() {
                   {notifications.length > 0 ? (
                     notifications.map((notif, index) => (
                       <li key={index} className="flex flex-col">
-                        <Link href={`/posts/${notif.slug}`}>
+                        <Link
+                          href={`/posts/${notif.postUsername}/${notif.slug}`}
+                        >
                           <p
                             className={`text-sm ${
                               !notif.isSeen ? "font-bold" : ""

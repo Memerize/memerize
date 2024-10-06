@@ -2,28 +2,36 @@ import { NextResponse } from "next/server";
 import { NotificationModel } from "@/models/NotificationModel";
 
 export async function POST(request, { params }) {
-  const { username } = params;
-  const { type, slug } = await request.json();
+  const { username: mentionedUsername } = params;
+  const { type, slug, postUsername } = await request.json();
   const mentionUsername = request.headers.get("x-user-username");
 
-  if (!username || !type || !slug || !mentionUsername) {
+  if (
+    !mentionedUsername ||
+    !type ||
+    !slug ||
+    !mentionUsername ||
+    !postUsername
+  ) {
     return NextResponse.json(
       {
-        error: "Username, type, mentionUsername, and slug are required",
+        error:
+          "mentionedUsername, type, mentionUsername, postUsername, and slug are required",
       },
       { status: 400 }
     );
   }
 
-  const message = `${mentionUsername} is tagging you.`;
+  const message = `${mentionUsername} tagged you in a comment on a post by ${postUsername}.`;
 
   try {
     const insertedId = await NotificationModel.createNotification(
-      username,
-      type,
+      postUsername, // Post creator
+      "mention", // Notification type
       message,
       slug,
-      mentionUsername
+      mentionUsername, // User who mentioned
+      mentionedUsername // User who got mentioned
     );
     return NextResponse.json({ insertedId });
   } catch (error) {

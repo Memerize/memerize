@@ -12,25 +12,27 @@ export class NotificationModel {
 
   static async findByUsername(username) {
     return await this.collection()
-      .find({ username })
+      .find({ postUsername: username })
       .sort({ createdAt: -1 })
       .toArray();
   }
 
   static async createNotification(
-    username,
+    postUsername,
     type,
     message,
     slug,
-    mentionUsername
+    mentionUsername,
+    mentionedUsername
   ) {
     if (!Object.values(NotificationType).includes(type)) {
       throw new Error("Invalid notification type");
     }
 
     const newNotification = {
-      username,
-      mentionUsername,
+      postUsername, // Post creator
+      mentionUsername, // The user who is tagging someone
+      mentionedUsername, // The user who got tagged
       type,
       message,
       slug,
