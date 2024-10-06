@@ -64,6 +64,15 @@ export async function middleware(request) {
           },
         });
       }
+    } else if (pathname.startsWith("/api/notifications")) {
+      if (["GET", "POST"].includes(request.method))   {
+        const requestHeaders = await auth(request);
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
+      }
     }
 
     return NextResponse.next();
@@ -78,5 +87,6 @@ export const config = {
     "/api/saves/:path*",
     "/api/comments/:path*",
     "/api/users/:path*",
+    "/api/notifications/:path*",
   ],
 };

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { FaBell } from "react-icons/fa";
 import memerizeTypeLogo from "../assets/img/memerizeTypeLogo.png";
 import SearchBar from "./SearchBar";
 import Sidebar from "./Sidebar";
@@ -19,6 +20,9 @@ export default function Navbar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unseenCount, setUnseenCount] = useState(0);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const router = useRouter();
 
   const fetchUserProfile = async (username) => {
@@ -34,6 +38,25 @@ export default function Navbar() {
     }
   };
 
+  const fetchNotifications = async (username) => {
+    try {
+      const response = await fetch(`/api/notifications`, {
+        headers: {
+          "x-user-username": username,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch notifications.");
+      }
+      const notificationsData = await response.json();
+      setNotifications(notificationsData);
+      const unseen = notificationsData.filter((notif) => !notif.isSeen).length;
+      setUnseenCount(unseen);
+    } catch (error) {
+      console.error("Error fetching notifications", error);
+    }
+  };
+
   useEffect(() => {
     const authCookie = getCookie("Authorization");
     const userCookie = getCookie("User");
@@ -44,6 +67,7 @@ export default function Navbar() {
         try {
           const user = JSON.parse(userCookie);
           fetchUserProfile(user.username);
+          fetchNotifications(user.username);
         } catch (error) {
           console.error("Error parsing user cookie", error);
         }
@@ -55,6 +79,10 @@ export default function Navbar() {
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
+  };
+
+  const toggleNotifications = () => {
+    setIsNotificationsOpen((prev) => !prev);
   };
 
   const handleLogout = () => {
@@ -121,6 +149,52 @@ export default function Navbar() {
         </div>
         <div className="flex-none gap-2 flex items-center">
           <SearchBar onSearch={handleSearch} />
+
+          {/* Notification Icon */}
+          {isLogin && (
+            <div className="relative">
+              <button
+                onClick={toggleNotifications}
+                className="btn btn-ghost btn-circle text-black"
+                aria-label="Notifications"
+              >
+                <div className="indicator">
+                  <FaBell className="w-6 h-6 text-white" />
+                  {unseenCount > 0 && (
+                    <span className="badge badge-sm indicator-item">
+                      {unseenCount}
+                    </span>
+                  )}
+                </div>
+              </button>
+
+              {isNotificationsOpen && (
+                <ul className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-50 p-2 text-black">
+                  {notifications.length > 0 ? (
+                    notifications.map((notif, index) => (
+                      <li key={index} className="flex flex-col">
+                        <Link
+                          href={`/posts/${notif.postUsername}/${notif.slug}`}
+                        >
+                          <p
+                            className={`text-sm ${
+                              !notif.isSeen ? "font-bold" : ""
+                            }`}
+                          >
+                            {notif.message}
+                          </p>
+                        </Link>
+                      </li>
+                    ))
+                  ) : (
+                    <li>
+                      <p className="text-gray-500">No notifications</p>
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
+          )}
 
           {isLogin ? (
             <div className="dropdown dropdown-end">
