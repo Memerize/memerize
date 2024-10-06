@@ -17,13 +17,20 @@ export class NotificationModel {
       .toArray();
   }
 
-  static async createNotification(username, type, message, slug) {
+  static async createNotification(
+    username,
+    type,
+    message,
+    slug,
+    mentionUsername
+  ) {
     if (!Object.values(NotificationType).includes(type)) {
       throw new Error("Invalid notification type");
     }
 
     const newNotification = {
       username,
+      mentionUsername,
       type,
       message,
       slug,
@@ -32,7 +39,7 @@ export class NotificationModel {
       updatedAt: new Date(),
     };
 
-    const result = await this.collection.insertOne(newNotification);
+    const result = await this.collection().insertOne(newNotification);
     return result.insertedId;
   }
 }
