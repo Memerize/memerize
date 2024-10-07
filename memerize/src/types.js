@@ -19,7 +19,7 @@ export const PostSchema = z.object({
   title: z.string(),
   slug: z.string().optional(),
   image: z.string(),
-  likes: z.array(z.any()).optional(),
+  likes: z.array(z.string()).optional(), // Menambahkan likes sebagai array string
   tags: z.array(z.string()).optional(),
   comments: z.array(z.any()).optional(),
   createdAt: z.date().optional(),

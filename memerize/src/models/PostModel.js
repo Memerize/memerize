@@ -61,7 +61,10 @@ export class PostModel {
   }
 
   static async create(postData) {
-    return this.collection().insertOne(postData);
+    return this.collection().insertOne({
+      ...postData,
+      likes: [], // Inisialisasi likes sebagai array kosong
+    });
   }
 
   static async findOne(query) {
