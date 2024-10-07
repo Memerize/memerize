@@ -1,8 +1,47 @@
+// memerize/src/components/Sidebar.jsx
+
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function Sidebar({ closeSidebar }) {
+  const [tags, setTags] = useState([]); 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); 
+  const [isTagsOpen, setIsTagsOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchTopTags = async () => {
+      try {
+        const response = await fetch("/api/posts/tags");
+        if (!response.ok) {
+          throw new Error("Failed to fetch tags");
+        }
+        const data = await response.json();
+        setTags(data.slice(0, 5));
+      } catch (err) {
+        console.error("Error fetching tags:", err);
+        setError("Failed to load tags");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopTags();
+  }, []);
+
+  const toggleTagsDropdown = () => {
+    setIsTagsOpen((prev) => !prev);
+  };
+
+  const handleTagClick = () => {
+    setIsTagsOpen(false);
+  };
+
   return (
     <ul className="menu bg-color3 h-full p-4 w-16 md:w-24 lg:w-24 xl:w-64 space-y-2">
+      {/* Link Home */}
       <li>
         <Link
           className="block text-md text-color2 focus:text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
@@ -12,15 +51,45 @@ export default function Sidebar({ closeSidebar }) {
           Home
         </Link>
       </li>
+
+      {/* Dropdown Tags */}
       <li>
-        <Link
-          className="block text-md text-color2 focus:text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
-          href="/tags"
-          onClick={closeSidebar}
+        <button
+          onClick={toggleTagsDropdown}
+          className="w-full text-left block text-md text-color2 focus:text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
+          aria-haspopup="true"
+          aria-expanded={isTagsOpen}
         >
           Tags
-        </Link>
+        </button>
+        {isTagsOpen && (
+          <ul className="mt-2 space-y-1">
+            {loading ? (
+              <li className="px-3 py-2 text-sm text-gray-500">Loading...</li>
+            ) : error ? (
+              <li className="px-3 py-2 text-sm text-red-500">{error}</li>
+            ) : tags.length === 0 ? (
+              <li className="px-3 py-2 text-sm text-gray-500">
+                No tags available
+              </li>
+            ) : (
+              tags.map((tag) => (
+                <li key={tag.tag}>
+                  <Link
+                    href={`/posts/tags/${encodeURIComponent(tag.tag)}`}
+                    onClick={handleTagClick}
+                    className="block px-3 py-2 text-sm text-color2 hover:bg-color5 focus:bg-color5 rounded"
+                  >
+                    #{tag.tag} ({tag.count})
+                  </Link>
+                </li>
+              ))
+            )}
+          </ul>
+        )}
       </li>
+
+      {/* Link Create Meme */}
       <li>
         <Link
           className="block text-md text-color2 focus:text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
@@ -30,6 +99,8 @@ export default function Sidebar({ closeSidebar }) {
           Create Meme
         </Link>
       </li>
+
+      {/* Link Create Post */}
       <li>
         <Link
           className="block text-md text-color2 focus:text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"

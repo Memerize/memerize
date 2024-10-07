@@ -11,8 +11,7 @@ const TextOptions = ({ text, fontOptions, setTexts, closeDropdown }) => {
   };
 
   return (
-    <div className="absolute z-10 ml-2 p-4 rounded-md bg-base-200 shadow-lg w-64">
-      {/* Konten dropdown */}
+    <div className="absolute top-10 z-10 p-4 rounded-md bg-base-200 shadow-lg w-full">
       {/* Font Size */}
       <div className="flex items-center mb-2">
         <label className="label-text">Font Size</label>

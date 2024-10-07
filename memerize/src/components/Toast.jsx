@@ -19,9 +19,11 @@ export default function Toast() {
     if (success) {
       toast.success(success);
     }
-
+    if (error || success) {
+      router.replace(pathname);
+    }
     router.replace(pathname);
-  }, [error, success]);
+  }, [error, pathname, router, success]);
 
   return <Toaster position="top-right" richColors />;
 }

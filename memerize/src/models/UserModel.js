@@ -45,7 +45,7 @@ export class UserModel {
 
     if (!newUser.image) {
       newUser.image =
-        "https://www.pngarts.com/files/10/Default-Profile-Picture-Download-PNG-Image.png";
+        "https://res.cloudinary.com/dlj1xpqqa/image/upload/v1728276780/k48t01fbihbdgzoa8qer.png";
     }
 
     newUser.password = await hashPassword(newUser.password);
