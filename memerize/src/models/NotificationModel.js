@@ -1,4 +1,5 @@
 import { db } from "@/db/config";
+import { ObjectId } from "mongodb";
 
 const NotificationType = {
   LIKE: "like",
@@ -12,7 +13,7 @@ export class NotificationModel {
 
   static async findByUsername(username) {
     return await this.collection()
-      .find({ postUsername: username })
+      .find({ mentionedUsername: username })
       .sort({ createdAt: -1 })
       .toArray();
   }
@@ -43,5 +44,13 @@ export class NotificationModel {
 
     const result = await this.collection().insertOne(newNotification);
     return result.insertedId;
+  }
+
+  static async updateNotificationSeen(notificationId, isSeen) {
+    return await this.collection().findOneAndUpdate(
+      { _id: new ObjectId(notificationId) },
+      { $set: { isSeen, updatedAt: new Date() } },
+      { returnDocument: "after" }
+    );
   }
 }

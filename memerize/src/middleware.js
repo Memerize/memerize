@@ -55,7 +55,7 @@ export async function middleware(request) {
           },
         });
       }
-    } else if (pathname.startsWith("/api/users")) {
+    } else if (pathname.startsWith("/api/users")) { 
       if (["POST", "PUT", "PATCH"].includes(request.method)) {
         const requestHeaders = await auth(request);
         return NextResponse.next({
@@ -65,7 +65,7 @@ export async function middleware(request) {
         });
       }
     } else if (pathname.startsWith("/api/notifications")) {
-      if (["GET", "POST"].includes(request.method))   {
+      if (["GET", "POST", "PATCH"].includes(request.method))   {
         const requestHeaders = await auth(request);
         return NextResponse.next({
           request: {

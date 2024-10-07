@@ -57,6 +57,22 @@ export default function Navbar() {
     }
   };
 
+  const markNotificationAsSeen = async (notificationId) => {
+    try {
+      await fetch(`/api/notifications/${notificationId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          isSeen: true,
+        }),
+      });
+    } catch (error) {
+      console.error("Error marking notification as seen", error);
+    }
+  };
+
   useEffect(() => {
     const authCookie = getCookie("Authorization");
     const userCookie = getCookie("User");
@@ -175,10 +191,30 @@ export default function Navbar() {
                       <li key={index} className="flex flex-col">
                         <Link
                           href={`/posts/${notif.postUsername}/${notif.slug}`}
+                          onClick={async (e) => {
+                            e.preventDefault();
+
+                            // Mark the notification as seen
+                            await markNotificationAsSeen(notif._id);
+
+                            // Update the state to reflect the notification as seen
+                            setNotifications((prevNotifications) =>
+                              prevNotifications.map((n) =>
+                                n._id === notif._id ? { ...n, isSeen: true } : n
+                              )
+                            );
+
+                            // After marking the notification as seen, navigate to the post
+                            router.push(
+                              `/posts/${notif.postUsername}/${notif.slug}`
+                            );
+                          }}
                         >
                           <p
                             className={`text-sm ${
-                              !notif.isSeen ? "font-bold" : ""
+                              notif.isSeen
+                                ? "text-gray-500"
+                                : "text-black font-bold"
                             }`}
                           >
                             {notif.message}

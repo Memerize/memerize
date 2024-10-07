@@ -84,20 +84,18 @@ export default function CommentCard({
       // Send a notification for each mentioned user
       for (const mentionedUser of mentionedUsers) {
         console.log("Sending notification to:", mentionedUser);
-        const notificationResponse = await fetch(
-          `/api/notifications/${mentionedUser}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              type: "mention",
-              slug: slug, // Pass the slug of the post
-              postUsername: postUsername, // Pass the post creator's username
-            }),
-          }
-        );
+        const notificationResponse = await fetch(`/api/notifications`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "mention",
+            slug: slug, // Pass the slug of the post
+            postUsername: postUsername, // Pass the post creator's username
+            mentionedUsername: mentionedUser, // The user who was mentioned
+          }),
+        });
 
         console.log("Notification response:", notificationResponse);
       }
