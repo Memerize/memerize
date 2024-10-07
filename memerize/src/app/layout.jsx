@@ -5,6 +5,7 @@ import "./globals.css";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 import Toast from "../components/Toast";
+import { UserProvider } from "@/context/UserContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,15 +29,17 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Toast />
-        <Navbar />
-        <div className="flex">
-          <aside className="hidden md:block sticky top-16 h-[calc(100vh-4rem)]">
-            <Sidebar />
-          </aside>
+        <UserProvider>
+          <Toast />
+          <Navbar />
+          <div className="flex">
+            <aside className="hidden md:block sticky top-16 h-[calc(100vh-4rem)]">
+              <Sidebar />
+            </aside>
 
-          <main className="w-full m-8">{children}</main>
-        </div>
+            <main className="w-full m-8">{children}</main>
+          </div>
+        </UserProvider>
       </body>
     </html>
   );
