@@ -8,6 +8,7 @@ import { FaBell } from "react-icons/fa";
 import memerizeTypeLogo from "../assets/img/memerizeTypeLogo.png";
 import SearchBar from "./SearchBar";
 import Sidebar from "./Sidebar";
+import NotificationCard from "./NotificationCard";
 
 const getCookie = (name) => {
   const value = `; ${document.cookie}`;
@@ -135,7 +136,6 @@ export default function Navbar() {
     }
   }, [notifications]);
 
-
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
   };
@@ -218,32 +218,11 @@ export default function Navbar() {
                 <ul className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-50 p-2 text-black">
                   {notifications.length > 0 ? (
                     notifications.map((notif, index) => (
-                      <li key={index} className="flex flex-col">
-                        <Link
-                          href={`/posts/${notif.postUsername}/${notif.slug}`}
-                          onClick={async (e) => {
-                            e.preventDefault();
-
-                            // Mark notification as seen
-                            await markNotificationAsSeen(notif._id);
-
-                            // Navigate to the post
-                            router.push(
-                              `/posts/${notif.postUsername}/${notif.slug}`
-                            );
-                          }}
-                        >
-                          <p
-                            className={`text-sm ${
-                              notif.isSeen
-                                ? "text-gray-500"
-                                : "text-black font-bold"
-                            }`}
-                          >
-                            {notif.message}
-                          </p>
-                        </Link>
-                      </li>
+                      <NotificationCard
+                        key={index}
+                        notification={notif}
+                        markAsSeen={markNotificationAsSeen}
+                      />
                     ))
                   ) : (
                     <li>
