@@ -17,6 +17,7 @@ const fontOptions = [
 
 const CreateMeme = () => {
   // State variables
+  const [loading, setLoading] = useState(false);
   const [backgroundImageUrl, setBackgroundImageUrl] = useState(
     "https://api.memegen.link/images/awesome.png"
   );
@@ -128,6 +129,7 @@ const CreateMeme = () => {
   // Image loading
   useEffect(() => {
     const img = new window.Image();
+    img.crossOrigin = "anonymous";
     img.src = backgroundImageUrl;
     img.onload = () => {
       setImage(img);
@@ -390,7 +392,11 @@ const CreateMeme = () => {
     space-y-4 p-1"
       >
         <div className="bg-base-100 shadow-md rounded-lg w-full">
-          <MemeTemplateSelector setBackgroundImageUrl={setBackgroundImageUrl} />
+          <MemeTemplateSelector
+            loading={loading}
+            setLoading={setLoading}
+            setBackgroundImageUrl={setBackgroundImageUrl}
+          />
         </div>
       </div>
       <div
@@ -418,6 +424,9 @@ const CreateMeme = () => {
             handleImageDragEnd={handleImageDragEnd}
             handleImageClick={handleImageClick}
             imageRefs={imageRefs}
+            setIsTransformerActive={setIsTransformerActive}
+            loading={loading}
+            setLoading={setLoading}
           />
         </div>
 

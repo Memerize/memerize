@@ -101,7 +101,7 @@ export default function PostDetail({ params }) {
 
       <h1 className="text-2xl font-bold mb-4 text-black">{post.title}</h1>
 
-      <div className="bg-gray-200 w-full h-96 mb-6">
+      <div className="bg-gray-200 w-full mb-6">
         <img
           src={post.image}
           alt={post.title}
