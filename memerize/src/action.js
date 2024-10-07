@@ -6,6 +6,14 @@ export async function refreshCacheByTag(tag) {
   revalidateTag(tag);
 }
 
+export async function fetchUser(username) {
+  const response = await fetch(`/api/users/${username}`, {
+    next: { tags: ["user"] },
+  });
+  console.log(response);
+  return response;
+}
+
 export async function createSlug(title) {
   const result = title
     .toLowerCase()
