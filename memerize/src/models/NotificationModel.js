@@ -18,6 +18,13 @@ export class NotificationModel {
       .toArray();
   }
 
+  static async findUnseenByUsername(username) {
+    return await this.collection()
+      .find({ mentionedUsername: username, isSeen: false })
+      .sort({ createdAt: -1 })
+      .toArray();
+  }
+
   static async createNotification(
     postUsername,
     type,

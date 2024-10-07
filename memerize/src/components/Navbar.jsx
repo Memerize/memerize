@@ -38,25 +38,6 @@ export default function Navbar() {
     }
   };
 
-  const fetchNotifications = async (username) => {
-    try {
-      const response = await fetch(`/api/notifications`, {
-        headers: {
-          "x-user-username": username,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch notifications.");
-      }
-      const notificationsData = await response.json();
-      setNotifications(notificationsData);
-      const unseen = notificationsData.filter((notif) => !notif.isSeen).length;
-      setUnseenCount(unseen);
-    } catch (error) {
-      console.error("Error fetching notifications", error);
-    }
-  };
-
   const handleSearch = async (query) => {
     try {
       const response = await fetch(`/api/users/search?query=${query}`);
@@ -99,21 +80,61 @@ export default function Navbar() {
     const authCookie = getCookie("Authorization");
     const userCookie = getCookie("User");
 
-    if (authCookie) {
+    if (authCookie && userCookie) {
       setIsLogin(true);
-      if (userCookie) {
-        try {
-          const user = JSON.parse(userCookie);
-          fetchUserProfile(user.username);
-          fetchNotifications(user.username);
-        } catch (error) {
-          console.error("Error parsing user cookie", error);
+      const user = JSON.parse(userCookie);
+      fetchUserProfile(user.username);
+
+      // Start SSE connection with username as query parameter
+      const eventSource = new EventSource(
+        `/api/notifications/stream?username=${user.username}`
+      );
+
+      // Listen for events
+      eventSource.onmessage = (event) => {
+        const newNotifications = JSON.parse(event.data);
+
+        console.log("New notifications received:", newNotifications); // Debug log
+
+        // Ensure only notifications that have not been seen are processed
+        const unseenNotifications = newNotifications.filter(
+          (notif) => !notif.isSeen
+        );
+
+        // Filter out any notifications that already exist in the state
+        const newUniqueNotifications = unseenNotifications.filter(
+          (notif) =>
+            !notifications.find(
+              (existingNotif) => existingNotif._id === notif._id
+            )
+        );
+
+        // Only update state with unique, unseen notifications
+        if (newUniqueNotifications.length > 0) {
+          setNotifications((prevNotifications) => [
+            ...prevNotifications,
+            ...newUniqueNotifications,
+          ]);
+
+          // Update unseen count
+          setUnseenCount((prev) => prev + newUniqueNotifications.length);
         }
-      }
+      };
+
+      eventSource.onerror = (error) => {
+        console.error("SSE error:", error);
+        eventSource.close();
+      };
+
+      // Clean up the connection when the component unmounts
+      return () => {
+        eventSource.close();
+      };
     } else {
       setIsLogin(false);
     }
-  }, []);
+  }, [notifications]);
+
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
