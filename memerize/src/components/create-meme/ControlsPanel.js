@@ -32,8 +32,8 @@ const ControlsPanel = ({
   return (
     <div className="w-full">
       <div className="w-full max-w-md mx-auto mt-4">
-        <div className="flex">
-          <p className="label-text mx-auto">Background Image</p>
+        <div className="flex w-full">
+          <p className="label-text mx-auto">Meme Template</p>
         </div>
         <div className="tabs tabs-bordered">
           <button
@@ -53,7 +53,7 @@ const ControlsPanel = ({
         {activeBgTab === "upload" && (
           <div className="form-control w-full mt-4">
             <label className="label">
-              <span className="label-text">Upload Background Image</span>
+              <span className="label-text">Upload Meme Template</span>
             </label>
             <input
               type="file"
@@ -67,7 +67,7 @@ const ControlsPanel = ({
         {activeBgTab === "url" && (
           <div className="form-control w-full mt-4">
             <label className="label">
-              <span className="label-text">Background Image URL</span>
+              <span className="label-text">Meme Template URL</span>
             </label>
             <input
               type="text"
@@ -135,7 +135,7 @@ const ControlsPanel = ({
                   placeholder="Enter image URL"
                   value={imageURL}
                   onChange={(e) => setImageURL(e.target.value)}
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full min-w-56"
                 />
                 <button
                   onClick={handleAddImageURL}
@@ -177,7 +177,7 @@ const ControlsPanel = ({
       {texts.map((text) => (
         <div
           key={text.id}
-          className="relative form-control w-full flex flex-col space-y-2 mt-5"
+          className="relative form-control w-full flex flex-col space-y-2 mt-5 mx-auto"
         >
           <div className="flex flex-col">
             <div className="flex flex-row">

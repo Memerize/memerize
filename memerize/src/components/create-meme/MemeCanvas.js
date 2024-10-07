@@ -112,9 +112,9 @@ const MemeCanvas = ({
           <Transformer
             ref={transformerRef}
             visible={isTransformerActive}
-            anchorStroke="#000000"
-            borderStroke="#000000"
-            anchorFill="#000000"
+            anchorStroke="#888888"
+            borderStroke="#888888"
+            anchorFill="#FFFFFF"
           />
         </Layer>
       </Stage>
