@@ -275,7 +275,7 @@ const MemeCanvas = ({
 
             {/* Sharing Options */}
             <div className="flex flex-col space-y-4">
-              {/* Post on Memerize Button */}
+               {/* Post on Memerize Button */}
               <button className="btn btn-accent" onClick={handlePostOnMemerize}>
                 Post on Memerize
               </button>
@@ -345,6 +345,8 @@ const MemeCanvas = ({
                   {copySuccess ? copySuccess : "Copy Link"}
                 </button>
               </div>
+
+             
             </div>
           </div>
         </div>

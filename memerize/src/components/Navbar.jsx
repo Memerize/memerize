@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -8,6 +8,7 @@ import { FaBell } from "react-icons/fa";
 import memerizeTypeLogo from "../assets/img/memerizeTypeLogo.png";
 import SearchBar from "./SearchBar";
 import Sidebar from "./Sidebar";
+import { UserContext } from "@/context/UserContext";
 import NotificationCard from "./NotificationCard";
 
 const getCookie = (name) => {
@@ -26,18 +27,13 @@ export default function Navbar() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const router = useRouter();
 
-  const fetchUserProfile = async (username) => {
-    try {
-      const response = await fetch(`/api/users/${username}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch user data.");
-      }
-      const user = await response.json();
-      setUserProfile(user);
-    } catch (error) {
-      console.error("Error fetching user data", error);
-    }
-  };
+  const {
+    user,
+    loading: userLoading,
+    error: userError,
+    updateUser,
+    logout,
+  } = useContext(UserContext);
 
   const handleSearch = async (query) => {
     try {
@@ -78,17 +74,18 @@ export default function Navbar() {
   };
 
   useEffect(() => {
+    setUserProfile(user);
+  }, [user]);
+
+  useEffect(() => {
     const authCookie = getCookie("Authorization");
     const userCookie = getCookie("User");
-
     if (authCookie && userCookie) {
       setIsLogin(true);
-      const user = JSON.parse(userCookie);
-      fetchUserProfile(user.username);
-
+      const ParsedUserCookie = JSON.parse(userCookie);
       // Start SSE connection with username as query parameter
       const eventSource = new EventSource(
-        `/api/notifications/stream?username=${user.username}`
+        `/api/notifications/stream?username=${ParsedUserCookie?.username}`
       );
 
       // Listen for events
@@ -269,7 +266,10 @@ export default function Navbar() {
                   </Link>
                 </li>
                 <li>
-                  <a className="text-white btn btn-error" onClick={handleLogout}>
+                  <a
+                    className="text-white btn btn-error"
+                    onClick={handleLogout}
+                  >
                     Logout
                   </a>
                 </li>

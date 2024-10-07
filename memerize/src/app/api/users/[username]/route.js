@@ -15,7 +15,7 @@ export async function GET(request, { params }) {
   }
 }
 
-export async function POST(request, { params }) {
+export async function PATCH(request, { params }) {
   const { username } = params;
   const { image } = await request.json();
 
