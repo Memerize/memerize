@@ -1,11 +1,70 @@
-// memerize/src/components/PostCard.jsx
-
 "use client";
 
 import Link from "next/link";
-import { FaComment, FaArrowUp, FaRegBookmark, FaShare } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaComment, FaRegBookmark, FaShare } from "react-icons/fa";
+import { BsArrowUpCircle, BsArrowUpCircleFill } from "react-icons/bs";
+import { useRouter } from "next/navigation";
 
 export default function PostCard({ post }) {
+  const [liked, setLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(post.likes.length);
+  const [loadingLike, setLoadingLike] = useState(false);
+  const router = useRouter();
+
+  const currentUser = getCookie("User") ? JSON.parse(getCookie("User")) : null;
+
+  useEffect(() => {
+    if (currentUser) {
+      setLiked(post.likes.includes(currentUser.username));
+    }
+  }, []);
+
+  const refetchPost = async () => {
+    try {
+      const response = await fetch(
+        `/api/posts/${post.user.username}/${post.slug}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch post");
+      }
+      const updatedPost = await response.json();
+
+      setLikesCount(updatedPost.likes.length);
+
+      setLiked(updatedPost.likes.includes(currentUser.username));
+    } catch (error) {
+      console.error("Error refetching post:", error);
+    }
+  };
+
+  const handleLike = async () => {
+    if (!currentUser) {
+      alert("You need to log in to like this post.");
+      return router.push("/login");
+    }
+
+    if (loadingLike) return;
+
+    setLoadingLike(true);
+
+    try {
+      const response = await fetch(`/api/likes/${post.slug}`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to like/unlike the post");
+      }
+
+      await refetchPost();
+    } catch (error) {
+      console.error("Error liking post:", error);
+    } finally {
+      setLoadingLike(false);
+    }
+  };
+
   return (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-6 p-6 flex flex-col">
       {/* Header: User Info and Title */}
@@ -37,6 +96,7 @@ export default function PostCard({ post }) {
           />
         </div>
       </Link>
+
       {/* Tags Section */}
       {post.tags && post.tags.length > 0 && (
         <div className="mt-3 flex flex-wrap">
@@ -51,22 +111,29 @@ export default function PostCard({ post }) {
           ))}
         </div>
       )}
+
       {/* Action Buttons */}
       <div className="px-6 py-4 flex justify-between items-center mt-auto">
         {/* Left Side: Upvotes */}
         <div className="flex items-center space-x-4">
-          <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
-            <FaArrowUp />
-            <span>{post.likes.length} Upvotes</span>
+          <button
+            className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+            onClick={handleLike}
+            disabled={loadingLike}
+          >
+            {liked ? <BsArrowUpCircleFill /> : <BsArrowUpCircle />}
+            <span>{likesCount} Upvotes</span>
           </button>
         </div>
 
         {/* Middle: Comments */}
         <div className="flex items-center space-x-4">
-          <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
-            <FaComment />
-            <span>{post.comments.length} Comments</span>
-          </button>
+          <Link href={`/posts/${post.user.username}/${post.slug}`}>
+            <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
+              <FaComment />
+              <span>{post.comments.length} Comments</span>
+            </button>
+          </Link>
         </div>
 
         {/* Right Side: Save & Share */}
@@ -83,4 +150,11 @@ export default function PostCard({ post }) {
       </div>
     </div>
   );
+}
+
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+  return null;
 }
