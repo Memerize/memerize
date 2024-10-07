@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { MentionsInput, Mention } from "react-mentions";
 import { FaArrowUp, FaComment, FaRegBookmark, FaShare } from "react-icons/fa";
 import Loading from "@/app/loading";
 import CommentCard from "@/components/post/CommentCard";
+import { mentionStyle } from "@/components/post/MentionStyle";
 
 export default function PostDetail({ params }) {
   const { username, slug } = params;
@@ -15,6 +17,7 @@ export default function PostDetail({ params }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingPost, setLoadingPost] = useState(true);
+  const [users, setUsers] = useState([]);
 
   const fetchPost = async () => {
     try {
@@ -37,6 +40,19 @@ export default function PostDetail({ params }) {
     fetchPost();
   }, [username, slug]);
 
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch(`/api/users`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch users");
+      }
+      const usersData = await response.json();
+      setUsers(usersData);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
   const handleAddComment = async () => {
     if (!newComment.trim()) {
       setError("Comment cannot be empty");
@@ -47,6 +63,11 @@ export default function PostDetail({ params }) {
     setError(null);
 
     try {
+      const mentionedUsers = [
+        ...newComment.matchAll(/@\[(.*?)\]\((.*?)\)/g),
+      ].map((match) => match[2]);
+
+      // Post the comment
       const response = await fetch(`/api/comments/${slug}`, {
         method: "POST",
         headers: {
@@ -65,6 +86,22 @@ export default function PostDetail({ params }) {
       setComments([...comments, addedComment]);
       setNewComment("");
 
+      for (const mentionedUser of mentionedUsers) {
+        await fetch(`/api/notifications`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            type: "mention",
+            message: `${username} mentioned you in a comment.`,
+            slug: slug,
+            postUsername: post.user?.username,
+            mentionedUsername: mentionedUser,
+          }),
+        });
+      }
+
       fetchPost();
     } catch (error) {
       setError("Error submitting the comment");
@@ -72,6 +109,20 @@ export default function PostDetail({ params }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const filterUserSuggestions = (search) => {
+    if (!search) return [];
+
+    return users
+      .filter((user) =>
+        user.username.toLowerCase().includes(search.toLowerCase())
+      )
+      .slice(0, 5)
+      .map((user) => ({
+        id: user.username,
+        display: `@${user.username}`,
+      }));
   };
 
   if (loadingPost) {
@@ -151,6 +202,7 @@ export default function PostDetail({ params }) {
                 key={comment._id}
                 comment={comment}
                 slug={slug}
+                postUsername={post.user?.username}
                 onReplyAdded={fetchPost}
               />
             ))
@@ -161,12 +213,21 @@ export default function PostDetail({ params }) {
       </div>
 
       <div className="sticky bottom-0 bg-white p-4 border-t">
-        <textarea
+        <MentionsInput
           value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          className="w-full p-2 border rounded-md"
+          onFocus={fetchUsers}
+          onChange={(e, newValue) => setNewComment(newValue)}
           placeholder="Write a comment..."
-        ></textarea>
+          className="w-full p-2 border rounded-md"
+          style={mentionStyle}
+          allowSuggestionsAboveCursor={true}
+        >
+          <Mention
+            trigger="@"
+            data={filterUserSuggestions}
+            displayTransform={(id, display) => `${display}`}
+          />
+        </MentionsInput>
 
         {error && <p className="text-red-500 mt-2">{error}</p>}
 

@@ -55,8 +55,17 @@ export async function middleware(request) {
           },
         });
       }
-    } else if (pathname.startsWith("/api/users")) {
+    } else if (pathname.startsWith("/api/users")) { 
       if (["POST", "PUT", "PATCH"].includes(request.method)) {
+        const requestHeaders = await auth(request);
+        return NextResponse.next({
+          request: {
+            headers: requestHeaders,
+          },
+        });
+      }
+    } else if (pathname.startsWith("/api/notifications")) {
+      if (["GET", "POST", "PATCH"].includes(request.method))   {
         const requestHeaders = await auth(request);
         return NextResponse.next({
           request: {
@@ -78,5 +87,6 @@ export const config = {
     "/api/saves/:path*",
     "/api/comments/:path*",
     "/api/users/:path*",
+    "/api/notifications/:path*",
   ],
 };

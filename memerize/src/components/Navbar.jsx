@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { FaBell } from "react-icons/fa";
 import memerizeTypeLogo from "../assets/img/memerizeTypeLogo.png";
 import SearchBar from "./SearchBar";
 import Sidebar from "./Sidebar";
@@ -19,6 +20,9 @@ export default function Navbar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unseenCount, setUnseenCount] = useState(0);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const router = useRouter();
 
   const fetchUserProfile = async (username) => {
@@ -34,27 +38,110 @@ export default function Navbar() {
     }
   };
 
+  const handleSearch = async (query) => {
+    try {
+      const response = await fetch(`/api/users/search?query=${query}`);
+      if (response.ok) {
+        const users = await response.json();
+        return users;
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+      return [];
+    }
+  };
+
+  const markNotificationAsSeen = async (notificationId) => {
+    try {
+      await fetch(`/api/notifications/${notificationId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          isSeen: true,
+        }),
+      });
+
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notif) =>
+          notif._id === notificationId ? { ...notif, isSeen: true } : notif
+        )
+      );
+      setUnseenCount((prevCount) => prevCount - 1);
+    } catch (error) {
+      console.error("Error marking notification as seen", error);
+    }
+  };
+
   useEffect(() => {
     const authCookie = getCookie("Authorization");
     const userCookie = getCookie("User");
 
-    if (authCookie) {
+    if (authCookie && userCookie) {
       setIsLogin(true);
-      if (userCookie) {
-        try {
-          const user = JSON.parse(userCookie);
-          fetchUserProfile(user.username);
-        } catch (error) {
-          console.error("Error parsing user cookie", error);
+      const user = JSON.parse(userCookie);
+      fetchUserProfile(user.username);
+
+      // Start SSE connection with username as query parameter
+      const eventSource = new EventSource(
+        `/api/notifications/stream?username=${user.username}`
+      );
+
+      // Listen for events
+      eventSource.onmessage = (event) => {
+        const newNotifications = JSON.parse(event.data);
+
+        console.log("New notifications received:", newNotifications); // Debug log
+
+        // Ensure only notifications that have not been seen are processed
+        const unseenNotifications = newNotifications.filter(
+          (notif) => !notif.isSeen
+        );
+
+        // Filter out any notifications that already exist in the state
+        const newUniqueNotifications = unseenNotifications.filter(
+          (notif) =>
+            !notifications.find(
+              (existingNotif) => existingNotif._id === notif._id
+            )
+        );
+
+        // Only update state with unique, unseen notifications
+        if (newUniqueNotifications.length > 0) {
+          setNotifications((prevNotifications) => [
+            ...prevNotifications,
+            ...newUniqueNotifications,
+          ]);
+
+          // Update unseen count
+          setUnseenCount((prev) => prev + newUniqueNotifications.length);
         }
-      }
+      };
+
+      eventSource.onerror = (error) => {
+        console.error("SSE error:", error);
+        eventSource.close();
+      };
+
+      // Clean up the connection when the component unmounts
+      return () => {
+        eventSource.close();
+      };
     } else {
       setIsLogin(false);
     }
-  }, []);
+  }, [notifications]);
+
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
+  };
+
+  const toggleNotifications = () => {
+    setIsNotificationsOpen((prev) => !prev);
   };
 
   const handleLogout = () => {
@@ -65,20 +152,6 @@ export default function Navbar() {
     setUserProfile(null);
     router.push("/login");
   };
-
-  const handleSearch = (query) => {
-    console.log("Search query:", query);
-  };
-
-  useEffect(() => {
-    const handleEsc = (event) => {
-      if (event.key === "Escape" && isSidebarOpen) {
-        setIsSidebarOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [isSidebarOpen]);
 
   return (
     <>
@@ -119,8 +192,69 @@ export default function Navbar() {
           </Link>
         </div>
         <div className="flex-none gap-2 flex items-center">
+          {/* Search bar */}
           <SearchBar onSearch={handleSearch} />
 
+          {/* Notifications */}
+          {isLogin && (
+            <div className="relative">
+              <button
+                onClick={toggleNotifications}
+                className="btn btn-ghost btn-circle text-black"
+                aria-label="Notifications"
+              >
+                <div className="indicator">
+                  <FaBell className="w-6 h-6 text-white" />
+                  {unseenCount > 0 && (
+                    <span className="badge badge-sm indicator-item">
+                      {unseenCount}
+                    </span>
+                  )}
+                </div>
+              </button>
+
+              {isNotificationsOpen && (
+                <ul className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg z-50 p-2 text-black">
+                  {notifications.length > 0 ? (
+                    notifications.map((notif, index) => (
+                      <li key={index} className="flex flex-col">
+                        <Link
+                          href={`/posts/${notif.postUsername}/${notif.slug}`}
+                          onClick={async (e) => {
+                            e.preventDefault();
+
+                            // Mark notification as seen
+                            await markNotificationAsSeen(notif._id);
+
+                            // Navigate to the post
+                            router.push(
+                              `/posts/${notif.postUsername}/${notif.slug}`
+                            );
+                          }}
+                        >
+                          <p
+                            className={`text-sm ${
+                              notif.isSeen
+                                ? "text-gray-500"
+                                : "text-black font-bold"
+                            }`}
+                          >
+                            {notif.message}
+                          </p>
+                        </Link>
+                      </li>
+                    ))
+                  ) : (
+                    <li>
+                      <p className="text-gray-500">No notifications</p>
+                    </li>
+                  )}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {/* User Profile or Login */}
           {isLogin ? (
             <div className="dropdown dropdown-end">
               <button
@@ -170,6 +304,7 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Sidebar for mobile */}
       {isSidebarOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div

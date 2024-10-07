@@ -215,7 +215,7 @@ export class PostModel {
         },
         {
           $lookup: {
-            from: "users",
+            from: "users", // Assuming the users collection has user profile data
             localField: "username",
             foreignField: "username",
             as: "user",
@@ -226,10 +226,18 @@ export class PostModel {
         },
         {
           $lookup: {
-            from: "users",
+            from: "users", // Lookup for comment user details
             localField: "comments.username",
             foreignField: "username",
             as: "commentUserDetails",
+          },
+        },
+        {
+          $lookup: {
+            from: "users", // Lookup for reply user details
+            localField: "comments.replies.username",
+            foreignField: "username",
+            as: "replyUserDetails",
           },
         },
         {
@@ -240,9 +248,6 @@ export class PostModel {
                 as: "comment",
                 in: {
                   $mergeObjects: [
-                    {
-                      commentId: "$$comment.commentId",
-                    },
                     "$$comment",
                     {
                       userImage: {
@@ -274,7 +279,7 @@ export class PostModel {
                                   $arrayElemAt: [
                                     {
                                       $filter: {
-                                        input: "$commentUserDetails",
+                                        input: "$replyUserDetails",
                                         as: "userDetail",
                                         cond: {
                                           $eq: [
