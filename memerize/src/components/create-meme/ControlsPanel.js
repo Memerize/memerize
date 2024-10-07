@@ -1,3 +1,5 @@
+//memerize\src\components\create-meme\ControlsPanel.js
+
 import React, { useState } from "react";
 import TextOptions from "./TextOptions";
 import { IoSettings } from "react-icons/io5";
@@ -21,23 +23,61 @@ const ControlsPanel = ({
   handleAddImageURL,
   addImageUrlError,
   imageURL,
-  setImageURL
+  setImageURL,
+  handleBackgroundImageUpload,
 }) => {
   const [activeTab, setActiveTab] = useState("upload");
+  const [activeBgTab, setActiveBgTab] = useState("url");
 
   return (
     <div className="w-full">
-      <div className="form-control w-full">
-        <label className="label">
-          <span className="label-text">Background Image URL</span>
-        </label>
-        <input
-          type="text"
-          value={backgroundImageUrl}
-          onChange={(e) => setBackgroundImageUrl(e.target.value)}
-          placeholder="Enter background image URL"
-          className="input input-bordered w-full"
-        />
+      <div className="w-full max-w-md mx-auto mt-4">
+        <div className="flex w-full">
+          <p className="label-text mx-auto">Meme Template</p>
+        </div>
+        <div className="tabs tabs-bordered">
+          <button
+            className={`tab ${activeBgTab === "upload" ? "tab-active" : ""}`}
+            onClick={() => setActiveBgTab("upload")}
+          >
+            <FaUpload className="mr-2" />
+          </button>
+          <button
+            className={`tab ${activeBgTab === "url" ? "tab-active" : ""}`}
+            onClick={() => setActiveBgTab("url")}
+          >
+            <FaLink />
+          </button>
+        </div>
+
+        {activeBgTab === "upload" && (
+          <div className="form-control w-full mt-4">
+            <label className="label">
+              <span className="label-text">Upload Meme Template</span>
+            </label>
+            <input
+              type="file"
+              accept=".jpg,.jpeg,.png"
+              onChange={handleBackgroundImageUpload}
+              className="file-input file-input-bordered file-input-accent"
+            />
+          </div>
+        )}
+
+        {activeBgTab === "url" && (
+          <div className="form-control w-full mt-4">
+            <label className="label">
+              <span className="label-text">Meme Template URL</span>
+            </label>
+            <input
+              type="text"
+              value={backgroundImageUrl}
+              onChange={(e) => setBackgroundImageUrl(e.target.value)}
+              placeholder="Enter background image URL"
+              className="input input-bordered w-full"
+            />
+          </div>
+        )}
       </div>
       <div className="w-full max-w-md mx-auto mt-4">
         <div className="flex">
@@ -66,7 +106,7 @@ const ControlsPanel = ({
               </label>
               <input
                 type="file"
-                accept=".jpg,.jpeg,.png,.gif"
+                accept=".jpg,.jpeg,.png"
                 onChange={handleImageUpload}
                 className="file-input file-input-bordered file-input-accent"
               />
@@ -95,7 +135,7 @@ const ControlsPanel = ({
                   placeholder="Enter image URL"
                   value={imageURL}
                   onChange={(e) => setImageURL(e.target.value)}
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full min-w-56"
                 />
                 <button
                   onClick={handleAddImageURL}
@@ -137,7 +177,7 @@ const ControlsPanel = ({
       {texts.map((text) => (
         <div
           key={text.id}
-          className="relative form-control w-full flex flex-col space-y-2 mt-5"
+          className="relative form-control w-full flex flex-col space-y-2 mt-5 mx-auto"
         >
           <div className="flex flex-col">
             <div className="flex flex-row">

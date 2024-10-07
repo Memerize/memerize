@@ -1,8 +1,11 @@
+// memerize\src\app\create-meme\page.jsx
+
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
 import MemeCanvas from "../../components/create-meme/MemeCanvas";
 import ControlsPanel from "../../components/create-meme/ControlsPanel";
+import MemeTemplateSelector from "@/components/create-meme/MemeTemplateSelector";
 
 const fontOptions = [
   { label: "Impact", value: "Impact" },
@@ -14,6 +17,7 @@ const fontOptions = [
 
 const CreateMeme = () => {
   // State variables
+  const [loading, setLoading] = useState(false);
   const [backgroundImageUrl, setBackgroundImageUrl] = useState(
     "https://api.memegen.link/images/awesome.png"
   );
@@ -37,13 +41,24 @@ const CreateMeme = () => {
   // Refs
   const transformerRef = useRef(null);
   const textRefs = useRef({});
-  const imageRefs = useRef({}); // To keep image refs
+  const imageRefs = useRef({});
   const stageRef = useRef(null);
   const compRef = useRef(null);
 
   // Toggle dropdown for text options
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
+  };
+
+  const handleBackgroundImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setBackgroundImageUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleAddImageURL = () => {
@@ -53,9 +68,7 @@ const CreateMeme = () => {
         setImageURL("");
         setAddImageUrlError("");
       } else {
-        setAddImageUrlError(
-          "Invalid URL format."
-        );
+        setAddImageUrlError("Invalid URL format.");
       }
     } else {
       setAddImageUrlError("Please enter an image URL.");
@@ -74,6 +87,10 @@ const CreateMeme = () => {
       rotation: 0,
     };
     setAddedImages((prevImages) => [...prevImages, newImage]);
+    setTimeout(() => {
+      handleImageClick(newImage.id);
+      stageRef.current.batchDraw();
+    }, 1000);
   };
 
   // Handle image upload
@@ -83,7 +100,7 @@ const CreateMeme = () => {
       const reader = new FileReader();
       reader.onload = () => {
         // setTimeout(() => {
-          addImageToCanvas(reader.result); // Send image to canvas handler
+        addImageToCanvas(reader.result); // Send image to canvas handler
         // }, 500);
       };
       reader.readAsDataURL(file); // Convert the image to a base64 string
@@ -105,7 +122,6 @@ const CreateMeme = () => {
     if (selectedImageId === id) {
       setSelectedImageId(null);
       setIsTransformerActive(false);
-      transformerRef.current?.nodes([]);
       transformerRef.current?.getLayer()?.batchDraw();
     }
   };
@@ -113,10 +129,25 @@ const CreateMeme = () => {
   // Image loading
   useEffect(() => {
     const img = new window.Image();
+    img.crossOrigin = "anonymous";
     img.src = backgroundImageUrl;
     img.onload = () => {
       setImage(img);
-      setImageDimensions({ width: img.width, height: img.height });
+      let adjustedWidth;
+      let adjustedHeight;
+      let maxSize = 600;
+      if (img.width > maxSize) {
+        adjustedWidth = maxSize;
+        adjustedHeight = (adjustedWidth / img.width) * img.height;
+      } else if (img.height > maxSize) {
+        adjustedHeight = maxSize;
+        adjustedWidth = (adjustedHeight / img.height) * img.width;
+      } else {
+        adjustedWidth = img.width;
+        adjustedHeight = img.height;
+      }
+      // console.log(adjustedWidth, adjustedHeight);
+      setImageDimensions({ width: adjustedWidth, height: adjustedHeight });
       setTexts([
         {
           id: 1,
@@ -133,7 +164,7 @@ const CreateMeme = () => {
           id: 2,
           text: "Bottom Text",
           x: 23,
-          y: img.height - 60,
+          y: adjustedHeight - 60,
           fontSize: 40,
           fill: "#ffffff",
           stroke: "#000000",
@@ -199,7 +230,6 @@ const CreateMeme = () => {
         return;
       }
     };
-
     window.addEventListener("click", handleClickOutside);
 
     return () => {
@@ -356,58 +386,75 @@ const CreateMeme = () => {
   };
 
   return (
-    <div
-      className="
-        flex flex-col lg:flex-row lg:justify-center lg:items-start 
-        space-y-4 lg:space-y-0 lg:space-x-6 p-4 
-        w-full sm:w-11/12 md:w-10/12 lg:w-9/12 xl:w-8/12 
-        mx-auto
-      "
-      ref={compRef}
-    >
-      {/* Left panel for Canvas */}
-      <div className="flex-1 w-full relative justify-center items-center text-center mx-auto bg-base-100 shadow-md rounded-lg p-4">
-        <MemeCanvas
-          image={image}
-          imageDimensions={imageDimensions}
-          texts={texts}
-          handleTextClick={handleTextClick}
-          handleDragEnd={handleDragEnd}
-          handleTextTransform={handleTextTransform}
-          isTransformerActive={isTransformerActive}
-          transformerRef={transformerRef}
-          textRefs={textRefs}
-          stageRef={stageRef}
-          addedImages={addedImages}
-          handleImageDragEnd={handleImageDragEnd}
-          handleImageClick={handleImageClick}
-          imageRefs={imageRefs}
-        />
+    <div className="flex flex-col items-center w-full mx-auto">
+      <div
+        className="w-full sm:w-11/12 md:w-10/12 lg:w-9/12 xl:w-8/12 
+    space-y-4 p-1"
+      >
+        <div className="bg-base-100 shadow-md rounded-lg w-full">
+          <MemeTemplateSelector
+            loading={loading}
+            setLoading={setLoading}
+            setBackgroundImageUrl={setBackgroundImageUrl}
+          />
+        </div>
       </div>
+      <div
+        className="
+        flex flex-col lg:flex-row lg:justify-center lg:items-start 
+    space-y-4 lg:space-y-0 lg:space-x-2 p-1 
+    w-full sm:w-11/12 md:w-10/12 lg:w-9/12 xl:w-8/12
+      "
+        ref={compRef}
+      >
+        {/* Left panel for Canvas */}
+        <div className="flex-[2] w-full relative justify-center items-center text-center bg-base-100 shadow-md rounded-lg p-4">
+          <MemeCanvas
+            image={image}
+            imageDimensions={imageDimensions}
+            texts={texts}
+            handleTextClick={handleTextClick}
+            handleDragEnd={handleDragEnd}
+            handleTextTransform={handleTextTransform}
+            isTransformerActive={isTransformerActive}
+            transformerRef={transformerRef}
+            textRefs={textRefs}
+            stageRef={stageRef}
+            addedImages={addedImages}
+            handleImageDragEnd={handleImageDragEnd}
+            handleImageClick={handleImageClick}
+            imageRefs={imageRefs}
+            setIsTransformerActive={setIsTransformerActive}
+            loading={loading}
+            setLoading={setLoading}
+          />
+        </div>
 
-      {/* Right panel for Controls */}
-      <div className="flex-1 flex flex-col items-center space-y-4 p-4 bg-base-100 shadow-lg rounded-lg md:w-full sm:w-full w-full">
-        <ControlsPanel
-          backgroundImageUrl={backgroundImageUrl}
-          setBackgroundImageUrl={setBackgroundImageUrl}
-          fontFamily={fontFamily}
-          setFontFamily={setFontFamily}
-          fontOptions={fontOptions}
-          addText={addText}
-          texts={texts}
-          handleInputChange={handleInputChange}
-          toggleDropdown={toggleDropdown}
-          openDropdown={openDropdown}
-          removeText={removeText}
-          setTexts={setTexts}
-          handleImageUpload={handleImageUpload}
-          addedImages={addedImages}
-          removeImage={removeImage}
-          handleAddImageURL={handleAddImageURL}
-          addImageUrlError={addImageUrlError}
-          imageURL={imageURL}
-          setImageURL={setImageURL}
-        />
+        {/* Right panel for Controls */}
+        <div className="flex-[1] flex flex-col items-center space-y-4 p-4 bg-base-100 shadow-lg rounded-lg w-full">
+          <ControlsPanel
+            backgroundImageUrl={backgroundImageUrl}
+            setBackgroundImageUrl={setBackgroundImageUrl}
+            fontFamily={fontFamily}
+            setFontFamily={setFontFamily}
+            fontOptions={fontOptions}
+            addText={addText}
+            texts={texts}
+            handleInputChange={handleInputChange}
+            toggleDropdown={toggleDropdown}
+            openDropdown={openDropdown}
+            removeText={removeText}
+            setTexts={setTexts}
+            handleImageUpload={handleImageUpload}
+            addedImages={addedImages}
+            removeImage={removeImage}
+            handleAddImageURL={handleAddImageURL}
+            addImageUrlError={addImageUrlError}
+            imageURL={imageURL}
+            setImageURL={setImageURL}
+            handleBackgroundImageUpload={handleBackgroundImageUpload}
+          />
+        </div>
       </div>
     </div>
   );

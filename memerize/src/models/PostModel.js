@@ -375,4 +375,56 @@ export class PostModel {
       { returnDocument: "after" }
     );
   }
+
+  static async getTagStatistics() {
+    return await this.collection()
+      .aggregate([
+        { $unwind: "$tags" },
+        { $group: { _id: "$tags", count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ])
+      .toArray();
+  }
+
+  static async findPostsByTag(tag) {
+    try {
+      const posts = await this.collection()
+        .aggregate([
+          { $match: { tags: tag } }, // Filter posts that include the tag
+          {
+            $lookup: {
+              from: "users",
+              localField: "username",
+              foreignField: "username",
+              as: "user",
+            },
+          },
+          { $unwind: "$user" }, // Convert user array to object
+          { $sort: { createdAt: -1 } }, // Sort by newest first
+          {
+            $project: {
+              _id: 1,
+              title: 1,
+              image: 1,
+              tags: 1,
+              slug: 1,
+              comments: 1,
+              likes: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              "user.name": 1,
+              "user.username": 1,
+              "user.email": 1,
+              "user.image": 1,
+            },
+          },
+        ])
+        .toArray();
+
+      return posts;
+    } catch (error) {
+      console.error(`Error fetching posts with tag "${tag}":`, error);
+      throw new Error("Failed to fetch posts by tag.");
+    }
+  }
 }

@@ -188,7 +188,6 @@ export default function Navbar() {
               width={150}
               height={50}
               className="w-[150px] h-[50px] object-cover invert"
-              objectFit="contain"
             />
           </Link>
         </div>
@@ -276,14 +275,22 @@ export default function Navbar() {
               >
                 <li>
                   <Link
-                    href={`/profile`}
+                    href={`/posts/${userProfile?.username}`}
                     className="justify-between text-color1"
                   >
-                    Profile
+                    Your Posts
                   </Link>
                 </li>
                 <li>
-                  <a className="text-color1" onClick={handleLogout}>
+                  <Link
+                    href={`/profile`}
+                    className="justify-between text-color1"
+                  >
+                    Edit Profile
+                  </Link>
+                </li>
+                <li>
+                  <a className="text-white btn btn-error" onClick={handleLogout}>
                     Logout
                   </a>
                 </li>

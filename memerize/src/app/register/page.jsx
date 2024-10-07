@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -14,7 +14,7 @@ export default function RegisterPage() {
 
   const validateForm = () => {
     if (!email.includes("@")) {
-      toast.error('Email must email format', {
+      toast.error("Email must email format", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -27,7 +27,7 @@ export default function RegisterPage() {
     }
 
     if (password.length < 5) {
-      toast.error('Password must be at least 5 characters', {
+      toast.error("Password must be at least 5 characters", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -40,7 +40,7 @@ export default function RegisterPage() {
     }
 
     if (username.includes(" ")) {
-      toast.error('Username must not contain spaces', {
+      toast.error("Username must not contain spaces", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -76,7 +76,7 @@ export default function RegisterPage() {
         throw new Error(errorData.message || "Registration failed");
       }
 
-      toast.success('Registration successful!', {
+      toast.success("Registration successful!", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -89,10 +89,9 @@ export default function RegisterPage() {
       setTimeout(() => {
         router.push("/login");
       }, 3000);
-
     } catch (error) {
       setErrorMessage(error.message);
-      toast.error(error.message || 'Registration failed', {
+      toast.error(error.message || "Registration failed", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
@@ -183,9 +182,7 @@ export default function RegisterPage() {
           >
             Register
           </button>
-          {errorMessage && (
-            <p className="text-red-500 mt-2">{errorMessage}</p>
-          )}
+          {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
         </form>
         <div className="text-center mt-4">
           <p className="text-sm text-black">
