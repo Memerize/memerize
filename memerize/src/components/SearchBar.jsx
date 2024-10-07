@@ -45,6 +45,11 @@ export default function SearchBar() {
     setQuery(e.target.value);
   };
 
+  const handleClick = () => {
+    setQuery("");
+    setUsers([]);
+  };
+
   return (
     <div className="relative form-control">
       <input
@@ -62,6 +67,7 @@ export default function SearchBar() {
               <li
                 key={index}
                 className="p-2 hover:bg-gray-200 hover:rounded-md"
+                onClick={handleClick}
               >
                 <Link href={`/posts/${user.username}`}>{user.username}</Link>
               </li>
