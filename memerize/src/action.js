@@ -14,5 +14,3 @@ export async function createSlug(title) {
 
   return result;
 }
- 
-ex

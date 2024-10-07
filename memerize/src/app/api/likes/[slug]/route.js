@@ -3,9 +3,9 @@ import { PostModel } from "@/models/PostModel";
 import { NextResponse } from "next/server";
 
 export async function POST(request, { params }) {
-  const { slug } = params;
-  const username = "username test"; // Ganti dengan username dari request headers
-
+    const { slug } = params;
+    const username = request.headers.get("x-user-username"); // Mengambil username dari request headers
+  
   try {
     // Temukan post berdasarkan slug
     const post = await PostModel.findOne({ slug });
