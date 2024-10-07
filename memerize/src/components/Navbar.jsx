@@ -62,7 +62,7 @@ export default function Navbar() {
       const response = await fetch(`/api/users/search?query=${query}`);
       if (response.ok) {
         const users = await response.json();
-        return users; // Return the search results
+        return users;
       } else {
         return [];
       }
@@ -84,7 +84,6 @@ export default function Navbar() {
         }),
       });
 
-      // Update the state to reflect notification as seen
       setNotifications((prevNotifications) =>
         prevNotifications.map((notif) =>
           notif._id === notificationId ? { ...notif, isSeen: true } : notif

@@ -6,7 +6,7 @@ import Link from "next/link";
 export default function SearchBar() {
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState([]);
-  const debounceTimeoutRef = useRef(null); // UseRef for managing debounce timeout
+  const debounceTimeoutRef = useRef(null);
 
   const fetchUsers = async (searchQuery) => {
     try {
@@ -24,20 +24,20 @@ export default function SearchBar() {
 
   const handleSearch = (searchQuery) => {
     if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current); // Clear the previous timeout
+      clearTimeout(debounceTimeoutRef.current);
     }
 
     debounceTimeoutRef.current = setTimeout(async () => {
       const allUsers = await fetchUsers(searchQuery);
-      setUsers(allUsers.slice(0, 5)); // Limit to 5 users
-    }, 500); // 500ms debounce
+      setUsers(allUsers.slice(0, 5));
+    }, 500);
   };
 
   useEffect(() => {
     if (query.length > 0) {
       handleSearch(query);
     } else {
-      setUsers([]); // Clear users when input is empty
+      setUsers([]);
     }
   }, [query]);
 
@@ -59,7 +59,10 @@ export default function SearchBar() {
         <div className="absolute top-12 left-0 w-full bg-white shadow-lg rounded-md z-10">
           <ul className="p-2">
             {users.map((user, index) => (
-              <li key={index} className="p-2 hover:bg-gray-200">
+              <li
+                key={index}
+                className="p-2 hover:bg-gray-200 hover:rounded-md"
+              >
                 <Link href={`/posts/${user.username}`}>{user.username}</Link>
               </li>
             ))}
