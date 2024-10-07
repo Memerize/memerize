@@ -17,7 +17,7 @@ export default function PostDetail({ params }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingPost, setLoadingPost] = useState(true);
-  const [users, setUsers] = useState([]); // State to store fetched users
+  const [users, setUsers] = useState([]);
 
   const fetchPost = async () => {
     try {
@@ -47,15 +47,11 @@ export default function PostDetail({ params }) {
         throw new Error("Failed to fetch users");
       }
       const usersData = await response.json();
-      setUsers(usersData.slice(0, 5));
+      setUsers(usersData);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
   };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) {
@@ -67,12 +63,9 @@ export default function PostDetail({ params }) {
     setError(null);
 
     try {
-      // Extract mentioned users from the comment content
       const mentionedUsers = [
         ...newComment.matchAll(/@\[(.*?)\]\((.*?)\)/g),
-      ].map(
-        (match) => match[2] // This gets the usernames from the mentions
-      );
+      ].map((match) => match[2]);
 
       // Post the comment
       const response = await fetch(`/api/comments/${slug}`, {
@@ -91,9 +84,8 @@ export default function PostDetail({ params }) {
 
       const addedComment = await response.json();
       setComments([...comments, addedComment]);
-      setNewComment(""); // Clear the comment input
+      setNewComment("");
 
-      // Send a notification for each mentioned user
       for (const mentionedUser of mentionedUsers) {
         await fetch(`/api/notifications`, {
           method: "POST",
@@ -103,14 +95,13 @@ export default function PostDetail({ params }) {
           body: JSON.stringify({
             type: "mention",
             message: `${username} mentioned you in a comment.`,
-            slug: slug, // Post slug where the mention happened
-            postUsername: post.user?.username, // The owner of the post
-            mentionedUsername: mentionedUser, // The mentioned user
+            slug: slug,
+            postUsername: post.user?.username,
+            mentionedUsername: mentionedUser,
           }),
         });
       }
 
-      // Refresh post to reflect the new comment
       fetchPost();
     } catch (error) {
       setError("Error submitting the comment");
@@ -120,10 +111,19 @@ export default function PostDetail({ params }) {
     }
   };
 
-  const userSuggestions = users.map((user) => ({
-    id: user.username,
-    display: `@${user.username}`,
-  }));
+  const filterUserSuggestions = (search) => {
+    if (!search) return [];
+
+    return users
+      .filter((user) =>
+        user.username.toLowerCase().includes(search.toLowerCase())
+      )
+      .slice(0, 5)
+      .map((user) => ({
+        id: user.username,
+        display: `@${user.username}`,
+      }));
+  };
 
   if (loadingPost) {
     return <Loading />;
@@ -215,6 +215,7 @@ export default function PostDetail({ params }) {
       <div className="sticky bottom-0 bg-white p-4 border-t">
         <MentionsInput
           value={newComment}
+          onFocus={fetchUsers}
           onChange={(e, newValue) => setNewComment(newValue)}
           placeholder="Write a comment..."
           className="w-full p-2 border rounded-md"
@@ -223,8 +224,8 @@ export default function PostDetail({ params }) {
         >
           <Mention
             trigger="@"
-            data={userSuggestions}
-            displayTransform={(id, display) => `${display}`} // No extra classes here
+            data={filterUserSuggestions}
+            displayTransform={(id, display) => `${display}`}
           />
         </MentionsInput>
 

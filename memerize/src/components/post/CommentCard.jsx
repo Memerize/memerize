@@ -14,13 +14,12 @@ export default function CommentCard({
   const [newReply, setNewReply] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [users, setUsers] = useState([]); // To store users for mentions
+  const [users, setUsers] = useState([]);
 
   const toggleReplyBox = () => {
     setShowReplyBox((prev) => !prev);
   };
 
-  // Fetch users when reply box is opened
   useEffect(() => {
     if (showReplyBox) {
       const fetchUsers = async () => {
@@ -30,7 +29,7 @@ export default function CommentCard({
             throw new Error("Failed to fetch users");
           }
           const usersData = await response.json();
-          setUsers(usersData.slice(0, 5)); // Limit to 5 users for suggestions
+          setUsers(usersData);
         } catch (error) {
           console.error("Error fetching users:", error);
         }
@@ -51,12 +50,9 @@ export default function CommentCard({
     setError(null);
 
     try {
-      // Extract mentioned users from the reply content
       const mentionedUsers = [...newReply.matchAll(/@\[(.*?)\]\((.*?)\)/g)].map(
-        (match) => match[2] // This will get the usernames
+        (match) => match[2]
       );
-
-      console.log("Mentioned users:", mentionedUsers); // Check if mentioned users are being detected
 
       // Post the reply
       const response = await fetch(
@@ -81,23 +77,19 @@ export default function CommentCard({
       setNewReply("");
       setShowReplyBox(false);
 
-      // Send a notification for each mentioned user
       for (const mentionedUser of mentionedUsers) {
-        console.log("Sending notification to:", mentionedUser);
-        const notificationResponse = await fetch(`/api/notifications`, {
+        await fetch(`/api/notifications`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             type: "mention",
-            slug: slug, // Pass the slug of the post
-            postUsername: postUsername, // Pass the post creator's username
-            mentionedUsername: mentionedUser, // The user who was mentioned
+            slug: slug,
+            postUsername: postUsername,
+            mentionedUsername: mentionedUser,
           }),
         });
-
-        console.log("Notification response:", notificationResponse);
       }
 
       if (onReplyAdded) {
@@ -111,10 +103,19 @@ export default function CommentCard({
     }
   };
 
-  const userSuggestions = users.map((user) => ({
-    id: user.username,
-    display: `@${user.username}`,
-  }));
+  const filterUserSuggestions = (search) => {
+    if (!search) return [];
+
+    return users
+      .filter((user) =>
+        user.username.toLowerCase().includes(search.toLowerCase())
+      )
+      .slice(0, 5)
+      .map((user) => ({
+        id: user.username,
+        display: `@${user.username}`,
+      }));
+  };
 
   const parseMentions = (text) => {
     const regex = /@\[(.*?)\]\((.*?)\)/g;
@@ -194,7 +195,7 @@ export default function CommentCard({
           >
             <Mention
               trigger="@"
-              data={userSuggestions}
+              data={filterUserSuggestions}
               displayTransform={(id, display) => `${display}`}
             />
           </MentionsInput>
