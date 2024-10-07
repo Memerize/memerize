@@ -95,7 +95,7 @@ export default function PostDetail({ params }) {
 
       // Send a notification for each mentioned user
       for (const mentionedUser of mentionedUsers) {
-        await fetch(`/api/notifications/${mentionedUser}`, {
+        await fetch(`/api/notifications`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -105,6 +105,7 @@ export default function PostDetail({ params }) {
             message: `${username} mentioned you in a comment.`,
             slug: slug, // Post slug where the mention happened
             postUsername: post.user?.username, // The owner of the post
+            mentionedUsername: mentionedUser, // The mentioned user
           }),
         });
       }
