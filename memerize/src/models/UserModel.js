@@ -26,6 +26,11 @@ export class UserModel {
     return result;
   }
 
+  static async findByUsername(username) {
+    const result = await this.collection().find(username).toArray();
+    return result;
+  }
+
   // membuat data user atau untuk register
   static async createUser(newUser) {
     UserSchema.parse(newUser);

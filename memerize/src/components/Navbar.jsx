@@ -57,6 +57,21 @@ export default function Navbar() {
     }
   };
 
+  const handleSearch = async (query) => {
+    try {
+      const response = await fetch(`/api/users/search?query=${query}`);
+      if (response.ok) {
+        const users = await response.json();
+        return users;
+      } else {
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+      return [];
+    }
+  };
+
   const markNotificationAsSeen = async (notificationId) => {
     try {
       await fetch(`/api/notifications/${notificationId}`, {
@@ -68,6 +83,13 @@ export default function Navbar() {
           isSeen: true,
         }),
       });
+
+      setNotifications((prevNotifications) =>
+        prevNotifications.map((notif) =>
+          notif._id === notificationId ? { ...notif, isSeen: true } : notif
+        )
+      );
+      setUnseenCount((prevCount) => prevCount - 1);
     } catch (error) {
       console.error("Error marking notification as seen", error);
     }
@@ -110,20 +132,6 @@ export default function Navbar() {
     router.push("/login");
   };
 
-  const handleSearch = (query) => {
-    console.log("Search query:", query);
-  };
-
-  useEffect(() => {
-    const handleEsc = (event) => {
-      if (event.key === "Escape" && isSidebarOpen) {
-        setIsSidebarOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [isSidebarOpen]);
-
   return (
     <>
       <div className="navbar bg-color4 sticky top-0 z-10 h-16">
@@ -164,9 +172,10 @@ export default function Navbar() {
           </Link>
         </div>
         <div className="flex-none gap-2 flex items-center">
+          {/* Search bar */}
           <SearchBar onSearch={handleSearch} />
 
-          {/* Notification Icon */}
+          {/* Notifications */}
           {isLogin && (
             <div className="relative">
               <button
@@ -194,17 +203,10 @@ export default function Navbar() {
                           onClick={async (e) => {
                             e.preventDefault();
 
-                            // Mark the notification as seen
+                            // Mark notification as seen
                             await markNotificationAsSeen(notif._id);
 
-                            // Update the state to reflect the notification as seen
-                            setNotifications((prevNotifications) =>
-                              prevNotifications.map((n) =>
-                                n._id === notif._id ? { ...n, isSeen: true } : n
-                              )
-                            );
-
-                            // After marking the notification as seen, navigate to the post
+                            // Navigate to the post
                             router.push(
                               `/posts/${notif.postUsername}/${notif.slug}`
                             );
@@ -232,6 +234,7 @@ export default function Navbar() {
             </div>
           )}
 
+          {/* User Profile or Login */}
           {isLogin ? (
             <div className="dropdown dropdown-end">
               <button
@@ -273,6 +276,7 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Sidebar for mobile */}
       {isSidebarOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
