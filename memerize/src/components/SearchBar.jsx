@@ -1,30 +1,71 @@
-import { useState } from "react";
+"use client";
 
-function SearchBar({ onSearch }) {
+import { useEffect, useState, useRef } from "react";
+import Link from "next/link";
+
+export default function SearchBar() {
   const [query, setQuery] = useState("");
+  const [users, setUsers] = useState([]);
+  const debounceTimeoutRef = useRef(null); // UseRef for managing debounce timeout
+
+  const fetchUsers = async (searchQuery) => {
+    try {
+      const response = await fetch(`/api/search?query=${searchQuery}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch users");
+      }
+      const results = await response.json();
+      return results;
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+  };
+
+  const handleSearch = (searchQuery) => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current); // Clear the previous timeout
+    }
+
+    debounceTimeoutRef.current = setTimeout(async () => {
+      const allUsers = await fetchUsers(searchQuery);
+      setUsers(allUsers.slice(0, 5)); // Limit to 5 users
+    }, 500); // 500ms debounce
+  };
+
+  useEffect(() => {
+    if (query.length > 0) {
+      handleSearch(query);
+    } else {
+      setUsers([]); // Clear users when input is empty
+    }
+  }, [query]);
 
   const handleInputChange = (e) => {
     setQuery(e.target.value);
   };
 
-  const handleSearch = () => {
-    onSearch(query);
-  };
-
   return (
-    <div className="form-control">
+    <div className="relative form-control">
       <input
         type="text"
         value={query}
         onChange={handleInputChange}
-        placeholder="Search"
+        placeholder="Search users"
         className="input input-bordered w-24 md:w-auto bg-white text-black"
-        onKeyDown={(e) => {
-          if (e.key === "Enter") handleSearch();
-        }}
       />
+
+      {users.length > 0 && (
+        <div className="absolute top-12 left-0 w-full bg-white shadow-lg rounded-md z-10">
+          <ul className="p-2">
+            {users.map((user, index) => (
+              <li key={index} className="p-2 hover:bg-gray-200">
+                <Link href={`/posts/${user.username}`}>{user.username}</Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
-
-export default SearchBar;
