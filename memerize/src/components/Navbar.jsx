@@ -165,17 +165,20 @@ export default function Navbar() {
     setIsNotificationsOpen((prev) => !prev);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async (e) => {
+    e.preventDefault();
     document.cookie = "Authorization=; Max-Age=0; path=/;";
     document.cookie = "User=; Max-Age=0; path=/;";
     document.cookie = "next-auth.session-token=; Max-Age=0; path=/;";
-
-    setIsLogin(false);
-    setUserProfile(null);
-    if (session) {
-      signOut();
-    } else {
+    try {
+      setIsLogin(false);
+      setUserProfile(null);
+      if (session) {
+        await signOut({ redirect: false });
+      }
       router.push("/login");
+    } catch (error) {
+      console.log(error);
     }
   };
 
