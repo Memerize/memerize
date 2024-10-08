@@ -23,13 +23,7 @@ export default function Navbar() {
   const router = useRouter();
   const { data: session } = useSession();
 
-  const {
-    user,
-    loading: userLoading,
-    error: userError,
-    updateUser,
-    logout,
-  } = useContext(UserContext);
+  const { user } = useContext(UserContext);
 
   const handleSearch = async (query) => {
     try {
@@ -176,9 +170,8 @@ export default function Navbar() {
     setUserProfile(null);
     if (session) {
       signOut();
-    } else {
-      router.push("/login");
     }
+    router.push("/login");
   };
 
   return (

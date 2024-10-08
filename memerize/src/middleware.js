@@ -8,7 +8,6 @@ async function auth(request) {
   const authCookie = cookies().get("Authorization");
   const googleSessionToken = cookies().get("next-auth.session-token");
 
-
   if (!authCookie && !googleSessionToken) {
     throw new CustomError("Invalid token", 401);
   }
@@ -28,12 +27,18 @@ async function auth(request) {
     requestHeaders.set("x-user-image", payload.image);
 
     return requestHeaders;
-  } 
-  
+  }
+
   // Google session login via next-auth
   else if (googleSessionToken) {
     try {
-      const session = await getSession({ req: { headers: { cookie: `next-auth.session-token=${googleSessionToken.value}` } } });
+      const session = await getSession({
+        req: {
+          headers: {
+            cookie: `next-auth.session-token=${googleSessionToken.value}`,
+          },
+        },
+      });
 
       if (!session) {
         throw new CustomError("Invalid Google session", 401);
@@ -41,10 +46,10 @@ async function auth(request) {
 
       const requestHeaders = new Headers(request.headers);
       requestHeaders.set("x-user-email", session.user.email);
-      requestHeaders.set("x-user-username", session.user.email.split("@")[0]);
+      requestHeaders.set("x-user-username", session.user.username);
       requestHeaders.set("x-user-image", session.user.image);
 
-      console.log(requestHeaders, "Google User Session Headers");
+      // console.log(requestHeaders, "Google User Session Headers");
       return requestHeaders;
     } catch (error) {
       console.error("Failed to get session from next-auth", error);
@@ -66,7 +71,10 @@ export async function middleware(request) {
       });
     }
 
-    if (pathname.startsWith("/api/saves") && ["GET", "POST"].includes(request.method)) {
+    if (
+      pathname.startsWith("/api/saves") &&
+      ["GET", "POST"].includes(request.method)
+    ) {
       const requestHeaders = await auth(request);
       return NextResponse.next({
         request: {
@@ -84,7 +92,10 @@ export async function middleware(request) {
       });
     }
 
-    if (pathname.startsWith("/api/users") && ["POST", "PUT", "PATCH"].includes(request.method)) {
+    if (
+      pathname.startsWith("/api/users") &&
+      ["POST", "PUT", "PATCH"].includes(request.method)
+    ) {
       const requestHeaders = await auth(request);
       return NextResponse.next({
         request: {
@@ -93,7 +104,10 @@ export async function middleware(request) {
       });
     }
 
-    if (pathname.startsWith("/api/notifications") && ["GET", "POST", "PATCH"].includes(request.method)) {
+    if (
+      pathname.startsWith("/api/notifications") &&
+      ["GET", "POST", "PATCH"].includes(request.method)
+    ) {
       const requestHeaders = await auth(request);
       return NextResponse.next({
         request: {
