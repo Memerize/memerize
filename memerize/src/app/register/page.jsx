@@ -73,7 +73,8 @@ export default function RegisterPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Registration failed");
+        console.log(errorData)
+        throw new Error(errorData.message || "Registration failed from API");
       }
 
       toast.success("Registration successful!", {

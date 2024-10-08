@@ -23,13 +23,7 @@ export default function Navbar() {
   const router = useRouter();
   const { data: session } = useSession();
 
-  const {
-    user,
-    loading: userLoading,
-    error: userError,
-    updateUser,
-    logout,
-  } = useContext(UserContext);
+  const { user } = useContext(UserContext);
 
   const handleSearch = async (query) => {
     try {
@@ -170,6 +164,7 @@ export default function Navbar() {
     document.cookie = "Authorization=; Max-Age=0; path=/;";
     document.cookie = "User=; Max-Age=0; path=/;";
     document.cookie = "next-auth.session-token=; Max-Age=0; path=/;";
+
     try {
       setIsLogin(false);
       setUserProfile(null);
@@ -180,6 +175,7 @@ export default function Navbar() {
     } catch (error) {
       console.log(error);
     }
+    router.push("/login");
   };
 
   return (
