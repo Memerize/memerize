@@ -2,23 +2,41 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { FaComment, FaRegBookmark, FaShare } from "react-icons/fa";
+import { FaComment, FaShare, FaRegBookmark, FaBookmark } from "react-icons/fa";
 import { BsArrowUpCircle, BsArrowUpCircleFill } from "react-icons/bs";
 import { useRouter } from "next/navigation";
+import { useContext } from "react";
+import { UserContext } from "@/context/UserContext";
 
-export default function PostCard({ post }) {
+export default function PostCard({ post, savedPosts }) {
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes.length);
+  const [saved, setSaved] = useState(false); // Track save state
   const [loadingLike, setLoadingLike] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false); // Track save action loading state
   const router = useRouter();
 
-  const currentUser = getCookie("User") ? JSON.parse(getCookie("User")) : null;
+  const {
+    user: currentUser
+  } = useContext(UserContext)
 
   useEffect(() => {
     if (currentUser) {
       setLiked(post.likes.includes(currentUser.username));
+      checkIfSaved(); // Check if the post is saved when the component loads
     }
-  }, []);
+  }, [savedPosts]);
+
+  const checkIfSaved = () => {
+    if (Array.isArray(savedPosts)) {
+      const isPostSaved = savedPosts.some(
+        (savedPost) => savedPost.slug === post?.slug
+      );
+      setSaved(isPostSaved);
+    } else {
+      setSaved(false);
+    }
+  };
 
   const refetchPost = async () => {
     try {
@@ -31,7 +49,6 @@ export default function PostCard({ post }) {
       const updatedPost = await response.json();
 
       setLikesCount(updatedPost.likes.length);
-
       setLiked(updatedPost.likes.includes(currentUser.username));
     } catch (error) {
       console.error("Error refetching post:", error);
@@ -62,6 +79,46 @@ export default function PostCard({ post }) {
       console.error("Error liking post:", error);
     } finally {
       setLoadingLike(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!currentUser) {
+      alert("You need to log in to save this post.");
+      return router.push("/login");
+    }
+
+    if (loadingSave) return;
+
+    // Optimistically update the UI to reflect the save/unsave change
+    setSaved(!saved);
+    setLoadingSave(true);
+
+    try {
+      const response = await fetch(`/api/saves`, {
+        method: "POST",
+        body: JSON.stringify({ slug: post.slug }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save/unsave the post");
+      }
+
+      const data = await response.json();
+      if (data.message.includes("removed")) {
+        setSaved(false);
+      } else {
+        setSaved(true);
+      }
+    } catch (error) {
+      console.error("Error saving/unsaving post:", error);
+      // Revert the save state if there's an error
+      setSaved(!saved);
+    } finally {
+      setLoadingSave(false);
     }
   };
 
@@ -138,9 +195,13 @@ export default function PostCard({ post }) {
 
         {/* Right Side: Save & Share */}
         <div className="flex items-center space-x-4">
-          <button className="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
-            <FaRegBookmark />
-            <span>Save</span>
+          <button
+            className="flex items-center space-x-1 text-blue-600 hover:text-blue-800"
+            onClick={handleSave}
+            disabled={loadingSave}
+          >
+            {saved ? <FaBookmark /> : <FaRegBookmark />}
+            <span>{saved ? "Saved" : "Save"}</span>
           </button>
           <button className="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
             <FaShare />

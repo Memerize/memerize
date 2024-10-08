@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -64,6 +65,22 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    try {
+      // Menggunakan next-auth untuk sign in dengan Google
+      await signIn("google", {
+        callbackUrl: "/",
+      });
+    } catch (error) {
+      console.log(error);
+      setErrorMessage("Google login failed");
+      toast.error("Google login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center bg-[var(--background)] text-[var(--foreground)] mt-36">
       <div className="w-full max-w-md p-8 space-y-6 bg-gray-100 shadow-md rounded-lg">
@@ -108,7 +125,26 @@ export default function LoginPage() {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-        {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
+
+        {errorMessage && (
+          <p className="text-red-500 mt-2 text-center">{errorMessage}</p>
+        )}
+
+        <div className="flex items-center justify-center mt-6">
+          <div className="w-full border-t border-gray-300"></div>
+          <span className="px-4 text-gray-500">Or</span>
+          <div className="w-full border-t border-gray-300"></div>
+        </div>
+
+        <div className="flex flex-col items-center mt-4">
+          <button
+            onClick={handleGoogleLogin}
+            className="w-full py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            {loading ? "Logging in with Google..." : "Login with Google"}
+          </button>
+        </div>
+
         <div className="text-center mt-4">
           <p className="text-sm text-black">
             Do not have an account yet?{" "}

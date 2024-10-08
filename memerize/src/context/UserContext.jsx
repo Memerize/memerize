@@ -4,6 +4,7 @@
 
 import React, { createContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react"; // Import useSession dari next-auth
 import { toast } from "sonner";
 
 // Create the UserContext
@@ -19,30 +20,50 @@ const getCookie = (name) => {
 
 // UserProvider component
 export const UserProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // User data
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   // Function to fetch user data from API
   const fetchUser = async () => {
     try {
+      // Cek apakah user login dengan manual
       const userCookie = getCookie("User");
-      if (!userCookie) {
+      
+      if (userCookie) {
+        // Pengguna login manual
+        const userData = JSON.parse(userCookie);
+        const response = await fetch(`/api/users/${userData.username}`);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch user profile.");
+        }
+
+        const userProfile = await response.json();
+        setUser(userProfile);
+      } 
+      // Jika login dengan Google (via next-auth session)
+      else if (session && status === "authenticated") {
+        const googleUser = {
+          username: session.user.email.split("@")[0],
+          email: session.user.email,
+          image: session.user.image,
+        };
+
+        const response = await fetch(`/api/users/${googleUser.username}`);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch Google user profile.");
+        }
+
+        const userProfile = await response.json();
+        setUser(userProfile);
+      } 
+      else {
         setUser(null);
-        setLoading(false);
-        return;
       }
-
-      const userData = JSON.parse(userCookie);
-      const response = await fetch(`/api/users/${userData.username}`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch user profile.");
-      }
-
-      const userProfile = await response.json();
-      setUser(userProfile);
     } catch (err) {
       console.error("Error fetching user profile:", err);
       setError("Error loading profile.");
@@ -54,7 +75,7 @@ export const UserProvider = ({ children }) => {
   // Fetch user data on component mount
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [session, status]); // Tambahkan dependency session dan status
 
   // Function to update user data (e.g., updating profile image)
   const updateUser = async (updatedFields) => {
