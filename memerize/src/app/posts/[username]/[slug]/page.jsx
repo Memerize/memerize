@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MentionsInput, Mention } from "react-mentions";
-import { FaArrowUp, FaComment, FaRegBookmark, FaShare } from "react-icons/fa";
+import { FaComment, FaRegBookmark, FaShare } from "react-icons/fa";
+import { BsArrowUpCircle, BsArrowUpCircleFill } from "react-icons/bs";
 import Loading from "@/app/loading";
 import CommentCard from "@/components/post/CommentCard";
 import { mentionStyle } from "@/components/post/MentionStyle";
@@ -14,10 +15,15 @@ export default function PostDetail({ params }) {
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [liked, setLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // For comment submission
+  const [loadingLike, setLoadingLike] = useState(false); // For like button
   const [loadingPost, setLoadingPost] = useState(true);
   const [users, setUsers] = useState([]);
+
+  const currentUser = getCookie("User") ? JSON.parse(getCookie("User")) : null;
 
   const fetchPost = async () => {
     try {
@@ -28,6 +34,8 @@ export default function PostDetail({ params }) {
       const postData = await response.json();
       setPost(postData);
       setComments(postData.comments || []);
+      setLikesCount(postData.likes.length);
+      setLiked(postData.likes.includes(currentUser?.username));
     } catch (error) {
       console.error("Error fetching post:", error);
       setError("Error loading post.");
@@ -39,6 +47,32 @@ export default function PostDetail({ params }) {
   useEffect(() => {
     fetchPost();
   }, [username, slug]);
+
+  const handleLike = async () => {
+    if (!currentUser) {
+      alert("You need to log in to like this post.");
+      return router.push("/login");
+    }
+
+    setLoadingLike(true); // Set loading for the like button
+
+    try {
+      const response = await fetch(`/api/likes/${slug}`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to like/unlike the post");
+      }
+
+      setLiked((prev) => !prev);
+      setLikesCount((prev) => (liked ? prev - 1 : prev + 1));
+    } catch (error) {
+      console.error("Error liking post:", error);
+    } finally {
+      setLoadingLike(false); // Reset loading for the like button
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -59,7 +93,7 @@ export default function PostDetail({ params }) {
       return;
     }
 
-    setLoading(true);
+    setLoading(true); // Set loading for comment submission
     setError(null);
 
     try {
@@ -107,7 +141,7 @@ export default function PostDetail({ params }) {
       setError("Error submitting the comment");
       console.error("Error submitting comment:", error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Reset loading for comment submission
     }
   };
 
@@ -172,9 +206,13 @@ export default function PostDetail({ params }) {
       </div>
 
       <div className="flex items-center justify-between mb-6">
-        <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
-          <FaArrowUp />
-          <span>{post.likes.length} Upvotes</span>
+        <button
+          className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+          onClick={handleLike}
+          disabled={loadingLike} // Disable the like button while it's loading
+        >
+          {liked ? <BsArrowUpCircleFill /> : <BsArrowUpCircle />}
+          <span>{likesCount} Upvotes</span>
         </button>
 
         <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
@@ -234,11 +272,21 @@ export default function PostDetail({ params }) {
         <button
           onClick={handleAddComment}
           className="mt-2 bg-blue-500 text-white py-1 px-3 rounded"
-          disabled={loading}
+          disabled={loading} // Only disable the comment button when adding a comment
         >
           {loading ? "Adding comment..." : "Add Comment"}
         </button>
       </div>
     </div>
   );
+}
+
+function getCookie(name) {
+  if (typeof document === "undefined") {
+    return null;
+  }
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+  return null;
 }
