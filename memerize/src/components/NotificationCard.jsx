@@ -1,23 +1,12 @@
 import { useRouter } from "next/navigation";
 
-export default function NotificationCard({
-  notification,
-  markAsSeen,
-  refetchData,
-}) {
-  const router = useRouter(); // Using Next.js router for manual navigation
+export default function NotificationCard({ notification, markAsSeen }) {
+  const router = useRouter();
 
   const handleNotificationClick = async () => {
-    // Mark the notification as seen
     await markAsSeen(notification._id);
 
-    // Ensure data is re-fetched
-    if (typeof refetchData === "function") {
-      await refetchData(); // Call the refetch function if provided
-    }
-
-    // Use router.push to navigate, this ensures query params are passed correctly
-    router.push(
+    router.replace(
       `/posts/${notification.postUsername}/${notification.slug}?commentId=${notification.commentId}`
     );
   };
@@ -27,7 +16,7 @@ export default function NotificationCard({
       className={`flex items-center gap-3 p-3 rounded-md hover:bg-gray-100 cursor-pointer ${
         notification.isSeen ? "bg-gray-50" : "bg-white"
       }`}
-      onClick={handleNotificationClick} // Trigger navigation and mark as seen on click
+      onClick={handleNotificationClick}
     >
       <div className="flex-1">
         <p

@@ -20,7 +20,7 @@ export default function Navbar() {
   const [notifications, setNotifications] = useState([]);
   const [unseenCount, setUnseenCount] = useState(0);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const router = useRouter();
+  const router = useRouter(); // Added router for handling navigation
   const { data: session } = useSession();
 
   const { user } = useContext(UserContext);
@@ -114,7 +114,7 @@ export default function Navbar() {
         email: session.user.email,
       });
 
-      // Fetch notifikasi untuk pengguna Google OAuth
+      // Fetch notifications for Google OAuth users
       const eventSource = new EventSource(
         `/api/notifications/stream?username=${session.user.email.split("@")[0]}`
       );
@@ -175,7 +175,6 @@ export default function Navbar() {
     } catch (error) {
       console.log(error);
     }
-    router.push("/login");
   };
 
   return (

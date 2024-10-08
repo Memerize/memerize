@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useContext } from "react";
-import { useSearchParams } from "next/navigation"; // Import to listen to query changes
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { MentionsInput, Mention } from "react-mentions";
 import { FaComment, FaRegBookmark, FaBookmark, FaShare } from "react-icons/fa";
@@ -53,18 +53,15 @@ export default function PostDetail({ params }) {
     fetchPost();
   }, [username, slug]);
 
-  // Re-run when query params change (like ?commentId=123)
   useEffect(() => {
-    const commentId = searchParams.get("commentId"); // Get commentId from query params
+    const commentId = searchParams.get("commentId");
     if (commentId) {
-      const element = document.getElementById(commentId); // Find the element by ID
+      const element = document.getElementById(commentId);
       if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" }); // Scroll to it
-        element.classList.add("highlight"); // Optionally highlight it
-        setTimeout(() => element.classList.remove("highlight"), 2000); // Remove highlight after 2 seconds
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     }
-  }, [searchParams, comments]); // Trigger this effect when searchParams or comments change
+  }, [searchParams, comments]);
 
   const checkIfSaved = async (slug) => {
     try {
