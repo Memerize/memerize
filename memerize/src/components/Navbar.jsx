@@ -9,13 +9,8 @@ import memerizeTypeLogo from "../assets/img/memerizeTypeLogo.png";
 import SearchBar from "./SearchBar";
 import Sidebar from "./Sidebar";
 import NotificationCard from "./NotificationCard";
-
-const getCookie = (name) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-  return null;
-};
+import { getCookie } from "cookies-next"; // Untuk cek cookie login manual
+import { useSession, signOut } from "next-auth/react"; // Untuk cek sesi Google OAuth
 
 export default function Navbar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -25,6 +20,7 @@ export default function Navbar() {
   const [unseenCount, setUnseenCount] = useState(0);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const router = useRouter();
+  const { data: session } = useSession();
 
   const fetchUserProfile = async (username) => {
     try {
@@ -91,33 +87,22 @@ export default function Navbar() {
         `/api/notifications/stream?username=${user.username}`
       );
 
-      // Listen for events
       eventSource.onmessage = (event) => {
         const newNotifications = JSON.parse(event.data);
-
-        console.log("New notifications received:", newNotifications); // Debug log
-
-        // Ensure only notifications that have not been seen are processed
         const unseenNotifications = newNotifications.filter(
           (notif) => !notif.isSeen
         );
-
-        // Filter out any notifications that already exist in the state
         const newUniqueNotifications = unseenNotifications.filter(
           (notif) =>
             !notifications.find(
               (existingNotif) => existingNotif._id === notif._id
             )
         );
-
-        // Only update state with unique, unseen notifications
         if (newUniqueNotifications.length > 0) {
           setNotifications((prevNotifications) => [
             ...prevNotifications,
             ...newUniqueNotifications,
           ]);
-
-          // Update unseen count
           setUnseenCount((prev) => prev + newUniqueNotifications.length);
         }
       };
@@ -127,14 +112,55 @@ export default function Navbar() {
         eventSource.close();
       };
 
-      // Clean up the connection when the component unmounts
+      return () => {
+        eventSource.close();
+      };
+    } else if (session) {
+      // Login via Google OAuth (next-auth)
+      setIsLogin(true);
+      setUserProfile({
+        username: session.user.email.split("@")[0],
+        image: session.user.image,
+        email: session.user.email,
+      });
+
+      // Fetch notifikasi untuk pengguna Google OAuth
+      const eventSource = new EventSource(
+        `/api/notifications/stream?username=${session.user.email.split("@")[0]}`
+      );
+
+      eventSource.onmessage = (event) => {
+        const newNotifications = JSON.parse(event.data);
+        const unseenNotifications = newNotifications.filter(
+          (notif) => !notif.isSeen
+        );
+        const newUniqueNotifications = unseenNotifications.filter(
+          (notif) =>
+            !notifications.find(
+              (existingNotif) => existingNotif._id === notif._id
+            )
+        );
+        if (newUniqueNotifications.length > 0) {
+          setNotifications((prevNotifications) => [
+            ...prevNotifications,
+            ...newUniqueNotifications,
+          ]);
+          setUnseenCount((prev) => prev + newUniqueNotifications.length);
+        }
+      };
+
+      eventSource.onerror = (error) => {
+        console.error("SSE error:", error);
+        eventSource.close();
+      };
+
       return () => {
         eventSource.close();
       };
     } else {
       setIsLogin(false);
     }
-  }, [notifications]);
+  }, [notifications, session]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
@@ -147,10 +173,15 @@ export default function Navbar() {
   const handleLogout = () => {
     document.cookie = "Authorization=; Max-Age=0; path=/;";
     document.cookie = "User=; Max-Age=0; path=/;";
+    document.cookie = "next-auth.session-token=; Max-Age=0; path=/;";
 
     setIsLogin(false);
     setUserProfile(null);
-    router.push("/login");
+    if (session) {
+      signOut();
+    } else {
+      router.push("/login");
+    }
   };
 
   return (
@@ -192,10 +223,8 @@ export default function Navbar() {
           </Link>
         </div>
         <div className="flex-none gap-2 flex items-center">
-          {/* Search bar */}
           <SearchBar onSearch={handleSearch} />
 
-          {/* Notifications */}
           {isLogin && (
             <div className="relative">
               <button
@@ -233,7 +262,6 @@ export default function Navbar() {
             </div>
           )}
 
-          {/* User Profile or Login */}
           {isLogin ? (
             <div className="dropdown dropdown-end">
               <button
@@ -283,7 +311,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Sidebar for mobile */}
       {isSidebarOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
