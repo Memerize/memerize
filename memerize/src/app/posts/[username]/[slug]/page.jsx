@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Link from "next/link";
 import { MentionsInput, Mention } from "react-mentions";
 import { FaComment, FaRegBookmark, FaBookmark, FaShare } from "react-icons/fa";
@@ -8,6 +8,7 @@ import { BsArrowUpCircle, BsArrowUpCircleFill } from "react-icons/bs";
 import Loading from "@/app/loading";
 import CommentCard from "@/components/post/CommentCard";
 import { mentionStyle } from "@/components/post/MentionStyle";
+import { UserContext } from "@/context/UserContext";
 
 export default function PostDetail({ params }) {
   const { username, slug } = params;
@@ -25,7 +26,7 @@ export default function PostDetail({ params }) {
   const [loadingPost, setLoadingPost] = useState(true);
   const [users, setUsers] = useState([]);
 
-  const currentUser = getCookie("User") ? JSON.parse(getCookie("User")) : null;
+  const { user: currentUser } = useContext(UserContext);
 
   const fetchPost = async () => {
     try {
@@ -341,14 +342,4 @@ export default function PostDetail({ params }) {
       </div>
     </div>
   );
-}
-
-function getCookie(name) {
-  if (typeof document === "undefined") {
-    return null;
-  }
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-  return null;
 }
