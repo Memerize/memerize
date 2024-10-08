@@ -44,13 +44,11 @@ export default function Home() {
 
   const listenForNewPosts = () => {
     const eventSource = new EventSource("/api/stream/posts");
-    eventSource.onmessage = (event) => {
-      console.log("New posts available:", event.data);
+    eventSource.onmessage = () => {
       setShowModal(true);
     };
 
-    eventSource.onerror = (error) => {
-      console.error("Error listening for new posts", error);
+    eventSource.onerror = () => {
       eventSource.close();
     };
 
