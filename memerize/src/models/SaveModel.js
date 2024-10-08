@@ -9,11 +9,21 @@ export class SaveModel {
     return await this.collection().find({ username }).toArray();
   }
 
-  static async savePost(username, slug) {
-    const existingPost = await this.collection().findOne({ username, slug });
-    if (existingPost) {
-      throw new Error("Post already saved");
+  static async findSaveByUsernameAndSlug(username, slug) {
+    return await this.collection().findOne({ username, slug });
+  }
+
+  static async toggleSavePost(username, slug) {
+    const existingSave = await this.findSaveByUsernameAndSlug(username, slug);
+
+    if (existingSave) {
+      return await this.removeFromSave(username, slug);
+    } else {
+      return await this.savePost(username, slug);
     }
+  }
+
+  static async savePost(username, slug) {
     const createdAt = new Date();
     const updatedAt = new Date();
     return await this.collection().insertOne({
