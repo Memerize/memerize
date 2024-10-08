@@ -11,9 +11,9 @@ import { UserContext } from "@/context/UserContext";
 export default function PostCard({ post, savedPosts }) {
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes.length);
-  const [saved, setSaved] = useState(false); // Track save state
+  const [saved, setSaved] = useState(false);
   const [loadingLike, setLoadingLike] = useState(false);
-  const [loadingSave, setLoadingSave] = useState(false); // Track save action loading state
+  const [loadingSave, setLoadingSave] = useState(false);
   const router = useRouter();
 
   const {
@@ -23,7 +23,7 @@ export default function PostCard({ post, savedPosts }) {
   useEffect(() => {
     if (currentUser) {
       setLiked(post.likes.includes(currentUser.username));
-      checkIfSaved(); // Check if the post is saved when the component loads
+      checkIfSaved();
     }
   }, [savedPosts]);
 
@@ -90,7 +90,6 @@ export default function PostCard({ post, savedPosts }) {
 
     if (loadingSave) return;
 
-    // Optimistically update the UI to reflect the save/unsave change
     setSaved(!saved);
     setLoadingSave(true);
 
@@ -115,7 +114,6 @@ export default function PostCard({ post, savedPosts }) {
       }
     } catch (error) {
       console.error("Error saving/unsaving post:", error);
-      // Revert the save state if there's an error
       setSaved(!saved);
     } finally {
       setLoadingSave(false);
@@ -211,11 +209,4 @@ export default function PostCard({ post, savedPosts }) {
       </div>
     </div>
   );
-}
-
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-  return null;
 }

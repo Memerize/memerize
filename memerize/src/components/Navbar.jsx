@@ -104,8 +104,7 @@ export default function Navbar() {
         }
       };
 
-      eventSource.onerror = (error) => {
-        console.error("SSE error:", error);
+      eventSource.onerror = () => {
         eventSource.close();
       };
 
@@ -146,8 +145,7 @@ export default function Navbar() {
         }
       };
 
-      eventSource.onerror = (error) => {
-        console.error("SSE error:", error);
+      eventSource.onerror = () => {
         eventSource.close();
       };
 

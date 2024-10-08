@@ -3,12 +3,14 @@
 import React, { useEffect, useState } from "react";
 import PostCard from "../components/post/PostCard";
 import Loading from "@/app/loading";
+import ModalNewPosts from "@/components/ModalNewPosts";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
   const [savedPosts, setSavedPosts] = useState([]);
   const [currentFilter, setCurrentFilter] = useState("latest");
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const fetchPosts = async (url) => {
     setLoading(true);
@@ -19,6 +21,7 @@ export default function Home() {
       }
       const json = await response.json();
       setPosts(json);
+      setShowModal(false);
     } catch (error) {
       console.log(error);
     } finally {
@@ -39,9 +42,30 @@ export default function Home() {
     }
   };
 
+  const listenForNewPosts = () => {
+    const eventSource = new EventSource("/api/stream/posts");
+    eventSource.onmessage = () => {
+      setShowModal(true);
+    };
+
+    eventSource.onerror = () => {
+      eventSource.close();
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  };
+
   useEffect(() => {
     fetchPosts("/api/posts");
     fetchSavedPosts();
+
+    const stopListening = listenForNewPosts();
+
+    return () => {
+      stopListening();
+    };
   }, []);
 
   const handleTrendingClick = () => {
@@ -59,8 +83,23 @@ export default function Home() {
     fetchPosts("/api/posts");
   };
 
+  const handleRefetchPosts = () => {
+    fetchPosts("/api/posts");
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen">
+      {/* Modal for new posts */}
+      <ModalNewPosts
+        show={showModal}
+        onClose={handleCloseModal}
+        onFetchNewPosts={handleRefetchPosts}
+      />
+
       <div className="flex justify-center">
         <main className="w-full max-w-5xl p-6">
           <div className="flex justify-center space-x-4 mb-6">
