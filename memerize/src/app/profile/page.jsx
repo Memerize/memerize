@@ -23,7 +23,7 @@ export default function ProfilePage() {
 
   // Fetch user data on component mount
   useEffect(() => {
-
+    
   }, [router, uploading]);
 
   // Function to resize the image using Canvas
@@ -175,7 +175,7 @@ export default function ProfilePage() {
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
       <h1 className="text-3xl text-color1 font-bold mb-6 text-center">
-        {user.name}'s Profile
+        {user.name}&apos;s Profile
       </h1>
       <div className="flex flex-col items-center space-y-6 mb-8">
         <img
