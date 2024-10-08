@@ -25,31 +25,38 @@ export class NotificationModel {
       .toArray();
   }
 
-  static async createNotification(
+  static async createNotification({
     postUsername,
+    mentionUsername,
+    mentionedUsername,
     type,
     message,
     slug,
-    mentionUsername,
-    mentionedUsername
-  ) {
+    commentId,
+    isSeen,
+    createdAt,
+    updatedAt,
+  }) {
+
     if (!Object.values(NotificationType).includes(type)) {
       throw new Error("Invalid notification type");
     }
 
     const newNotification = {
-      postUsername, // Post creator
-      mentionUsername, // The user who is tagging someone
-      mentionedUsername, // The user who got tagged
+      postUsername,
+      mentionUsername,
+      mentionedUsername,
       type,
       message,
       slug,
-      isSeen: false,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      commentId,
+      isSeen,
+      createdAt,
+      updatedAt,
     };
 
     const result = await this.collection().insertOne(newNotification);
+
     return result.insertedId;
   }
 

@@ -21,41 +21,46 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const { mentionedUsername, type, slug, postUsername } = await request.json();
-  const mentionUsername = request.headers.get("x-user-username");
-
-  if (
-    !mentionedUsername ||
-    !type ||
-    !slug ||
-    !mentionUsername ||
-    !postUsername
-  ) {
-    return NextResponse.json(
-      {
-        error:
-          "mentionedUsername, type, mentionUsername, postUsername, and slug are required",
-      },
-      { status: 400 }
-    );
-  }
-
-  const message = `${mentionUsername} tagged you in a comment on a post by ${postUsername}.`;
-
   try {
-    const insertedId = await NotificationModel.createNotification(
+    const { mentionedUsername, type, slug, postUsername, commentId } =
+      await request.json();
+    const mentionUsername = request.headers.get("x-user-username");
+
+    if (
+      !mentionedUsername ||
+      !type ||
+      !slug ||
+      !mentionUsername ||
+      !postUsername ||
+      !commentId
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "mentionedUsername, type, mentionUsername, postUsername, slug, and commentId are required",
+        },
+        { status: 400 }
+      );
+    }
+
+    const message = `${mentionUsername} tagged you in a comment on a post by ${postUsername}.`;
+
+    // Create the notification with commentId included
+    const insertedId = await NotificationModel.createNotification({
       postUsername, // Post creator
-      "mention", // Notification type
+      mentionUsername, // The user who is tagging someone
+      mentionedUsername, // The user who got tagged
+      type,
       message,
       slug,
-      mentionUsername, // User who mentioned
-      mentionedUsername // User who got mentioned
-    );
+      commentId, // Include commentId
+      isSeen: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
     return NextResponse.json({ insertedId });
   } catch (error) {
-    return NextResponse.json(
-      { error: error.message || "Failed to create notification" },
-      { status: 500 }
-    );
+    return handleError(error);
   }
 }

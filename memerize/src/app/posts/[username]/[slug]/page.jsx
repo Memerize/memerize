@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useContext } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { MentionsInput, Mention } from "react-mentions";
 import { FaComment, FaRegBookmark, FaBookmark, FaShare } from "react-icons/fa";
@@ -12,6 +13,7 @@ import { UserContext } from "@/context/UserContext";
 
 export default function PostDetail({ params }) {
   const { username, slug } = params;
+  const searchParams = useSearchParams(); // Get query params from URL
 
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
@@ -25,7 +27,6 @@ export default function PostDetail({ params }) {
   const [loadingSave, setLoadingSave] = useState(false); // For save button
   const [loadingPost, setLoadingPost] = useState(true);
   const [users, setUsers] = useState([]);
-
   const { user: currentUser } = useContext(UserContext);
 
   const fetchPost = async () => {
@@ -52,6 +53,16 @@ export default function PostDetail({ params }) {
     fetchPost();
   }, [username, slug]);
 
+  useEffect(() => {
+    const commentId = searchParams.get("commentId");
+    if (commentId) {
+      const element = document.getElementById(commentId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  }, [searchParams, comments]);
+
   const checkIfSaved = async (slug) => {
     try {
       const response = await fetch(`/api/saves`);
@@ -71,7 +82,7 @@ export default function PostDetail({ params }) {
   const handleLike = async () => {
     if (!currentUser) {
       alert("You need to log in to like this post.");
-      return router.push("/login");
+      return (window.location.href = "/login"); // Redirect to login
     }
 
     setLoadingLike(true);
@@ -97,7 +108,7 @@ export default function PostDetail({ params }) {
   const handleSave = async () => {
     if (!currentUser) {
       alert("You need to log in to save this post.");
-      return router.push("/login");
+      return (window.location.href = "/login"); // Redirect to login
     }
 
     if (loadingSave) return;
@@ -191,6 +202,7 @@ export default function PostDetail({ params }) {
             slug: slug,
             postUsername: post.user?.username,
             mentionedUsername: mentionedUser,
+            commentId: addedComment.commentId,
           }),
         });
       }
@@ -299,13 +311,15 @@ export default function PostDetail({ params }) {
         <div className="space-y-4">
           {comments.length > 0 ? (
             comments.map((comment) => (
-              <CommentCard
-                key={comment.commentId}
-                comment={comment}
-                slug={slug}
-                postUsername={post.user?.username}
-                onReplyAdded={fetchPost}
-              />
+              <div key={comment.commentId} id={comment.commentId}>
+                {/* Add id to the comment element */}
+                <CommentCard
+                  comment={comment}
+                  slug={slug}
+                  postUsername={post.user?.username}
+                  onReplyAdded={fetchPost}
+                />
+              </div>
             ))
           ) : (
             <p className="text-gray-500">No comments yet.</p>
