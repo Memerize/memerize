@@ -25,7 +25,7 @@ async function auth(request) {
     requestHeaders.set("x-user-email", payload.email);
     requestHeaders.set("x-user-username", payload.username);
     requestHeaders.set("x-user-image", payload.image);
-
+    
     return requestHeaders;
   }
 
