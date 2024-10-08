@@ -204,6 +204,159 @@ export class PostModel {
       .toArray();
   }
 
+  static async findBySlugs(slugs) {
+    return await this.collection()
+      .aggregate([
+        {
+          $match: {
+            slug: { $in: slugs }, // Match slugs array
+          },
+        },
+        // Lookup for user who created the post
+        {
+          $lookup: {
+            from: "users", // Assuming the users collection has user profile data
+            localField: "username",
+            foreignField: "username",
+            as: "user",
+          },
+        },
+        {
+          $unwind: "$user", // Ensure that the user data is a single object, not an array
+        },
+        // Lookup for user details in comments
+        {
+          $lookup: {
+            from: "users",
+            localField: "comments.username",
+            foreignField: "username",
+            as: "commentUserDetails",
+          },
+        },
+        // Lookup for user details in replies
+        {
+          $lookup: {
+            from: "users",
+            localField: "comments.replies.username",
+            foreignField: "username",
+            as: "replyUserDetails",
+          },
+        },
+        // Add userImage for comments and replies
+        {
+          $addFields: {
+            comments: {
+              $map: {
+                input: "$comments",
+                as: "comment",
+                in: {
+                  $mergeObjects: [
+                    "$$comment",
+                    {
+                      userImage: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$commentUserDetails",
+                              as: "userDetail",
+                              cond: {
+                                $eq: [
+                                  "$$userDetail.username",
+                                  "$$comment.username",
+                                ],
+                              },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                      replies: {
+                        $map: {
+                          input: "$$comment.replies",
+                          as: "reply",
+                          in: {
+                            $mergeObjects: [
+                              "$$reply",
+                              {
+                                userImage: {
+                                  $arrayElemAt: [
+                                    {
+                                      $filter: {
+                                        input: "$replyUserDetails",
+                                        as: "userDetail",
+                                        cond: {
+                                          $eq: [
+                                            "$$userDetail.username",
+                                            "$$reply.username",
+                                          ],
+                                        },
+                                      },
+                                    },
+                                    0,
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+        // Project the final data
+        {
+          $project: {
+            _id: 1,
+            title: 1,
+            image: 1,
+            tags: 1,
+            slug: 1,
+            likes: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            comments: {
+              commentId: 1,
+              username: 1,
+              content: 1,
+              commentLikes: 1,
+              createdAt: 1,
+              updatedAt: 1,
+              userImage: {
+                _id: 1,
+                email: 1,
+                name: 1,
+                username: 1,
+                image: 1,
+              },
+              replies: {
+                username: 1,
+                content: 1,
+                createdAt: 1,
+                updatedAt: 1,
+                userImage: {
+                  _id: 1,
+                  email: 1,
+                  name: 1,
+                  username: 1,
+                  image: 1,
+                },
+              },
+            },
+            "user._id": 1,
+            "user.name": 1,
+            "user.username": 1,
+            "user.email": 1,
+            "user.image": 1,
+          },
+        },
+      ])
+      .toArray(); // Return all matching posts
+  }
+
   static async findOneByUsernameAndSlug(username, slug) {
     return await this.collection()
       .aggregate([

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { MentionsInput, Mention } from "react-mentions";
-import { FaComment, FaRegBookmark, FaShare } from "react-icons/fa";
+import { FaComment, FaRegBookmark, FaBookmark, FaShare } from "react-icons/fa";
 import { BsArrowUpCircle, BsArrowUpCircleFill } from "react-icons/bs";
 import Loading from "@/app/loading";
 import CommentCard from "@/components/post/CommentCard";
@@ -17,9 +17,11 @@ export default function PostDetail({ params }) {
   const [newComment, setNewComment] = useState("");
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
+  const [saved, setSaved] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false); // For comment submission
   const [loadingLike, setLoadingLike] = useState(false); // For like button
+  const [loadingSave, setLoadingSave] = useState(false); // For save button
   const [loadingPost, setLoadingPost] = useState(true);
   const [users, setUsers] = useState([]);
 
@@ -36,6 +38,7 @@ export default function PostDetail({ params }) {
       setComments(postData.comments || []);
       setLikesCount(postData.likes.length);
       setLiked(postData.likes.includes(currentUser?.username));
+      checkIfSaved(postData.slug);
     } catch (error) {
       console.error("Error fetching post:", error);
       setError("Error loading post.");
@@ -48,13 +51,29 @@ export default function PostDetail({ params }) {
     fetchPost();
   }, [username, slug]);
 
+  const checkIfSaved = async (slug) => {
+    try {
+      const response = await fetch(`/api/saves`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch saved posts");
+      }
+      const savedPosts = await response.json();
+      const isPostSaved = savedPosts.some(
+        (savedPost) => savedPost.slug === slug
+      );
+      setSaved(isPostSaved);
+    } catch (error) {
+      console.error("Error checking if post is saved:", error);
+    }
+  };
+
   const handleLike = async () => {
     if (!currentUser) {
       alert("You need to log in to like this post.");
       return router.push("/login");
     }
 
-    setLoadingLike(true); // Set loading for the like button
+    setLoadingLike(true);
 
     try {
       const response = await fetch(`/api/likes/${slug}`, {
@@ -70,7 +89,46 @@ export default function PostDetail({ params }) {
     } catch (error) {
       console.error("Error liking post:", error);
     } finally {
-      setLoadingLike(false); // Reset loading for the like button
+      setLoadingLike(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!currentUser) {
+      alert("You need to log in to save this post.");
+      return router.push("/login");
+    }
+
+    if (loadingSave) return;
+
+    setLoadingSave(true);
+
+    setSaved(!saved);
+
+    try {
+      const response = await fetch(`/api/saves`, {
+        method: "POST",
+        body: JSON.stringify({ slug }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save/unsave the post");
+      }
+
+      const data = await response.json();
+      if (data.message.includes("removed")) {
+        setSaved(false);
+      } else {
+        setSaved(true);
+      }
+    } catch (error) {
+      console.error("Error saving/unsaving post:", error);
+      setSaved(!saved);
+    } finally {
+      setLoadingSave(false);
     }
   };
 
@@ -93,7 +151,7 @@ export default function PostDetail({ params }) {
       return;
     }
 
-    setLoading(true); // Set loading for comment submission
+    setLoading(true);
     setError(null);
 
     try {
@@ -141,7 +199,7 @@ export default function PostDetail({ params }) {
       setError("Error submitting the comment");
       console.error("Error submitting comment:", error);
     } finally {
-      setLoading(false); // Reset loading for comment submission
+      setLoading(false);
     }
   };
 
@@ -209,7 +267,7 @@ export default function PostDetail({ params }) {
         <button
           className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
           onClick={handleLike}
-          disabled={loadingLike} // Disable the like button while it's loading
+          disabled={loadingLike}
         >
           {liked ? <BsArrowUpCircleFill /> : <BsArrowUpCircle />}
           <span>{likesCount} Upvotes</span>
@@ -220,9 +278,13 @@ export default function PostDetail({ params }) {
           <span>{comments.length} Comments</span>
         </button>
 
-        <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
-          <FaRegBookmark />
-          <span>Save</span>
+        <button
+          className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+          onClick={handleSave}
+          disabled={loadingSave}
+        >
+          {saved ? <FaBookmark /> : <FaRegBookmark />}
+          <span>{saved ? "Saved" : "Save"}</span>
         </button>
 
         <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
@@ -272,7 +334,7 @@ export default function PostDetail({ params }) {
         <button
           onClick={handleAddComment}
           className="mt-2 bg-blue-500 text-white py-1 px-3 rounded"
-          disabled={loading} // Only disable the comment button when adding a comment
+          disabled={loading}
         >
           {loading ? "Adding comment..." : "Add Comment"}
         </button>
