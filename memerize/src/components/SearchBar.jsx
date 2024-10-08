@@ -30,7 +30,7 @@ export default function SearchBar() {
     debounceTimeoutRef.current = setTimeout(async () => {
       const allUsers = await fetchUsers(searchQuery);
       setUsers(allUsers.slice(0, 5));
-    }, 500);
+    }, 200);
   };
 
   useEffect(() => {

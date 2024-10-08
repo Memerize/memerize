@@ -6,7 +6,7 @@ import Loading from "@/app/loading";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
-  const [currentFilter, setCurrentFilter] = useState("fresh");
+  const [currentFilter, setCurrentFilter] = useState("latest");
   const [loading, setLoading] = useState(false);
 
   const fetchPosts = async (url) => {
@@ -39,8 +39,8 @@ export default function Home() {
     fetchPosts("/api/top");
   };
 
-  const handleFreshClick = () => {
-    setCurrentFilter("fresh");
+  const handleLatestClick = () => {
+    setCurrentFilter("latest");
     fetchPosts("/api/posts");
   };
 
@@ -51,13 +51,13 @@ export default function Home() {
           <div className="flex justify-center space-x-4 mb-6">
             <button
               className={`px-6 py-2 rounded-full transition-colors duration-300 ${
-                currentFilter === "fresh"
+                currentFilter === "latest"
                   ? "bg-blue-500 text-white"
                   : "bg-gray-300 text-black hover:bg-gray-400"
               }`}
-              onClick={handleFreshClick}
+              onClick={handleLatestClick}
             >
-              Fresh
+              Latest
             </button>
             <button
               className={`px-6 py-2 rounded-full transition-colors duration-300 ${
@@ -86,12 +86,7 @@ export default function Home() {
           ) : posts.length > 0 ? (
             <div className="grid grid-cols-1 gap-6">
               {posts.map((post) => (
-                <div
-                  key={post._id}
-                  className="bg-white shadow-lg rounded-lg overflow-hidden p-6"
-                >
-                  <PostCard post={post} />
-                </div>
+                <PostCard key={post._id} post={post} />
               ))}
             </div>
           ) : (

@@ -4,11 +4,12 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { FaHome, FaTags, FaImage, FaPen } from "react-icons/fa";
 
 export default function Sidebar({ closeSidebar }) {
-  const [tags, setTags] = useState([]); 
+  const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); 
+  const [error, setError] = useState(null);
   const [isTagsOpen, setIsTagsOpen] = useState(false);
 
   useEffect(() => {
@@ -40,15 +41,16 @@ export default function Sidebar({ closeSidebar }) {
   };
 
   return (
-    <ul className="menu bg-color3 h-full p-4 w-16 md:w-24 lg:w-24 xl:w-64 space-y-2">
+    <ul className="menu bg-color3 h-full p-4 md:w-24 lg:w-24 xl:w-64 space-y-2">
       {/* Link Home */}
       <li>
         <Link
-          className="block text-md text-color2 focus:text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
           href="/"
           onClick={closeSidebar}
+          className="flex items-center space-x-2 text-md text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
         >
-          Home
+          <FaHome className="text-xl" />
+          <span className="inline xl:inline md:hidden">Home</span>
         </Link>
       </li>
 
@@ -56,20 +58,25 @@ export default function Sidebar({ closeSidebar }) {
       <li>
         <button
           onClick={toggleTagsDropdown}
-          className="w-full text-left block text-md text-color2 focus:text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
+          className="flex items-center space-x-2 w-full text-left text-md text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
           aria-haspopup="true"
           aria-expanded={isTagsOpen}
         >
-          Tags
+          <FaTags className="text-xl" />
+          <span className="inline xl:inline md:hidden">Tags</span>
         </button>
         {isTagsOpen && (
           <ul className="mt-2 space-y-1">
             {loading ? (
-              <li className="px-3 py-2 text-sm text-gray-500">Loading...</li>
+              <li className="px-3 py-2 text-sm text-gray-500 flex items-center justify-center">
+                Loading...
+              </li>
             ) : error ? (
-              <li className="px-3 py-2 text-sm text-red-500">{error}</li>
+              <li className="px-3 py-2 text-sm text-red-500 flex items-center justify-center">
+                {error}
+              </li>
             ) : tags.length === 0 ? (
-              <li className="px-3 py-2 text-sm text-gray-500">
+              <li className="px-3 py-2 text-sm text-gray-500 flex items-center justify-center">
                 No tags available
               </li>
             ) : (
@@ -78,9 +85,9 @@ export default function Sidebar({ closeSidebar }) {
                   <Link
                     href={`/posts/tags/${encodeURIComponent(tag.tag)}`}
                     onClick={handleTagClick}
-                    className="block px-3 py-2 text-sm text-color2 hover:bg-color5 focus:bg-color5 rounded"
+                    className="mr-1 px-1 py-1 text-sm text-color2 hover:bg-color5 focus:bg-color5 rounded block"
                   >
-                    #{tag.tag} ({tag.count})
+                    {tag.tag} ({tag.count})
                   </Link>
                 </li>
               ))
@@ -92,22 +99,24 @@ export default function Sidebar({ closeSidebar }) {
       {/* Link Create Meme */}
       <li>
         <Link
-          className="block text-md text-color2 focus:text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
           href="/create-meme"
           onClick={closeSidebar}
+          className="flex items-center space-x-2 text-md text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
         >
-          Create Meme
+          <FaImage className="text-xl" />
+          <span className="inline xl:inline md:hidden">Create Meme</span>
         </Link>
       </li>
 
       {/* Link Create Post */}
       <li>
         <Link
-          className="block text-md text-color2 focus:text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
           href="/create-post"
           onClick={closeSidebar}
+          className="flex w-full items-center space-x-2 text-md text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
         >
-          Create Post
+          <FaPen className="text-xl" />
+          <span className="inline xl:inline md:hidden w-full">Create Post</span>
         </Link>
       </li>
     </ul>

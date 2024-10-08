@@ -1,15 +1,12 @@
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function NotificationCard({ notification, markAsSeen }) {
-  const router = useRouter();
-
   const handleNotificationClick = async (e) => {
     e.preventDefault();
 
     await markAsSeen(notification._id);
 
-    router.push(`/posts/${notification.postUsername}/${notification.slug}`);
+    window.location.href = `/posts/${notification.postUsername}/${notification.slug}`;
   };
 
   return (
