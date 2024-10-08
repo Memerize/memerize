@@ -21,9 +21,6 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
 
-  // Fetch user data on component mount
-  useEffect(() => {}, [router, uploading]);
-
   // Function to resize the image using Canvas
   const resizeImage = (file) => {
     return new Promise((resolve, reject) => {

@@ -135,7 +135,7 @@ const CreateMeme = () => {
       setImage(img);
       let adjustedWidth;
       let adjustedHeight;
-      let maxSize = 600;
+      let maxSize = 550;
       if (img.width > maxSize) {
         adjustedWidth = maxSize;
         adjustedHeight = (adjustedWidth / img.width) * img.height;
@@ -386,24 +386,16 @@ const CreateMeme = () => {
   };
 
   return (
-    <div className="flex flex-col items-center w-full mx-auto">
+    <div className="flex flex-col items-center w-full sm:w-11/12 md:w-10/12 lg:w-9/12 xl:w-8/12 mx-auto">
+      <MemeTemplateSelector
+        loading={loading}
+        setLoading={setLoading}
+        setBackgroundImageUrl={setBackgroundImageUrl}
+      />
       <div
-        className="w-full sm:w-11/12 md:w-10/12 lg:w-9/12 xl:w-8/12 
-    space-y-4 p-1"
-      >
-        <div className="bg-base-100 shadow-md rounded-lg w-full">
-          <MemeTemplateSelector
-            loading={loading}
-            setLoading={setLoading}
-            setBackgroundImageUrl={setBackgroundImageUrl}
-          />
-        </div>
-      </div>
-      <div
-        className="
-        flex flex-col lg:flex-row lg:justify-center lg:items-start 
-    space-y-4 lg:space-y-0 lg:space-x-2 p-1 
-    w-full sm:w-11/12 md:w-10/12 lg:w-9/12 xl:w-8/12
+        className="flex flex-col lg:flex-row lg:justify-center lg:items-start 
+    space-y-4 lg:space-y-0 lg:space-x-2 py-2
+    w-full
       "
         ref={compRef}
       >
@@ -425,7 +417,6 @@ const CreateMeme = () => {
             handleImageClick={handleImageClick}
             imageRefs={imageRefs}
             setIsTransformerActive={setIsTransformerActive}
-            loading={loading}
             setLoading={setLoading}
           />
         </div>

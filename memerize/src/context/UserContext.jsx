@@ -97,8 +97,8 @@ export const UserProvider = ({ children }) => {
         throw new Error("Failed to update user profile.");
       }
 
-      const updatedUser = await response.json();
-      setUser(updatedUser);
+      const res = await response.json();
+      user.image = res.image;
       toast.success("Profile updated successfully!");
     } catch (err) {
       console.error("Error updating user profile:", err);
@@ -114,7 +114,7 @@ export const UserProvider = ({ children }) => {
     router.push("/login");
     toast.success("Logged out successfully!");
   };
-
+  
   return (
     <UserContext.Provider
       value={{
