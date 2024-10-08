@@ -19,7 +19,7 @@ const handler = NextAuth({
       if (account && profile) {
         let userData;
         let username = profile.email.split("@")[0];
-
+        // console.log(profile);
         try {
           // Check if the user already exists by email
           const existingUser = await db
@@ -43,9 +43,7 @@ const handler = NextAuth({
               name: profile.name,
               username: username,
               email: profile.email,
-              image:
-                profile.image ||
-                "https://res.cloudinary.com/dlj1xpqqa/image/upload/v1728276780/k48t01fbihbdgzoa8qer.png",
+              image: profile.picture,
             };
 
             // Insert the new user into the database
@@ -58,9 +56,7 @@ const handler = NextAuth({
           token.name = userData.name;
           token.email = userData.email;
           token.username = userData.username;
-          token.image =
-            userData.image ||
-            "https://res.cloudinary.com/dlj1xpqqa/image/upload/v1728276780/k48t01fbihbdgzoa8qer.png";
+          token.image = userData.image;
           token.accessToken = account.access_token;
           // console.log(token)
         } catch (error) {
