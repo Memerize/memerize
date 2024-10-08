@@ -73,6 +73,7 @@ export default function LoginPage() {
         callbackUrl: "/",
       });
     } catch (error) {
+      console.log(error);
       setErrorMessage("Google login failed");
       toast.error("Google login failed");
     } finally {
@@ -125,7 +126,9 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {errorMessage && <p className="text-red-500 mt-2 text-center">{errorMessage}</p>}
+        {errorMessage && (
+          <p className="text-red-500 mt-2 text-center">{errorMessage}</p>
+        )}
 
         <div className="flex items-center justify-center mt-6">
           <div className="w-full border-t border-gray-300"></div>
