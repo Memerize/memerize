@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { FaComment, FaShare, FaRegBookmark, FaBookmark } from "react-icons/fa";
 import { BsArrowUpCircle, BsArrowUpCircleFill } from "react-icons/bs";
 import { useRouter } from "next/navigation";
+import { useContext } from "react";
+import { UserContext } from "@/context/UserContext";
 
 export default function PostCard({ post, savedPosts }) {
   const [liked, setLiked] = useState(false);
@@ -14,7 +16,9 @@ export default function PostCard({ post, savedPosts }) {
   const [loadingSave, setLoadingSave] = useState(false); // Track save action loading state
   const router = useRouter();
 
-  const currentUser = getCookie("User") ? JSON.parse(getCookie("User")) : null;
+  const {
+    user: currentUser
+  } = useContext(UserContext)
 
   useEffect(() => {
     if (currentUser) {

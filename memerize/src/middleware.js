@@ -8,7 +8,6 @@ async function auth(request) {
   const authCookie = cookies().get("Authorization");
   const googleSessionToken = cookies().get("next-auth.session-token");
 
-  console.log(authCookie, googleSessionToken, " <<<<<<<<<<<< ");
 
   if (!authCookie && !googleSessionToken) {
     throw new CustomError("Invalid token", 401);
