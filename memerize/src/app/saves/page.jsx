@@ -5,13 +5,13 @@ import PostCard from "@/components/post/PostCard";
 
 export default function SavePages() {
   const [saves, setSaves] = useState([]);
+  const [savedPosts, setSavedPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchSaves = async () => {
       try {
-        // Fetch saved posts for the user
         const responseSaves = await fetch("/api/saves", {
           method: "GET",
         });
@@ -22,6 +22,7 @@ export default function SavePages() {
 
         const savesData = await responseSaves.json();
         setSaves(savesData);
+        setSavedPosts(savesData);
       } catch (err) {
         console.error(err);
         setError("Failed to load saved posts");
@@ -47,11 +48,12 @@ export default function SavePages() {
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
-      <h1 className="text-2xl font-bold mb-6">Saved Posts</h1>{" "}
-      {/* Title added here */}
+      <h1 className="text-2xl font-bold mb-6">Saved Posts</h1>
       <div className="space-y-8">
         {saves.length > 0 ? (
-          saves.map((save, index) => <PostCard key={index} post={save} />)
+          saves.map((save) => (
+            <PostCard key={save._id} post={save} savedPosts={savedPosts} /> // Pass savedPosts as prop
+          ))
         ) : (
           <p className="text-gray-500">No saved posts</p>
         )}

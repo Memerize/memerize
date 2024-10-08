@@ -6,6 +6,7 @@ import Loading from "@/app/loading";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
+  const [savedPosts, setSavedPosts] = useState([]);
   const [currentFilter, setCurrentFilter] = useState("latest");
   const [loading, setLoading] = useState(false);
 
@@ -25,8 +26,22 @@ export default function Home() {
     }
   };
 
+  const fetchSavedPosts = async () => {
+    try {
+      const response = await fetch(`/api/saves`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch saved posts");
+      }
+      const saved = await response.json();
+      setSavedPosts(saved);
+    } catch (error) {
+      console.error("Error fetching saved posts:", error);
+    }
+  };
+
   useEffect(() => {
     fetchPosts("/api/posts");
+    fetchSavedPosts();
   }, []);
 
   const handleTrendingClick = () => {
@@ -86,7 +101,7 @@ export default function Home() {
           ) : posts.length > 0 ? (
             <div className="grid grid-cols-1 gap-6">
               {posts.map((post) => (
-                <PostCard key={post._id} post={post} />
+                <PostCard key={post._id} post={post} savedPosts={savedPosts} />
               ))}
             </div>
           ) : (
