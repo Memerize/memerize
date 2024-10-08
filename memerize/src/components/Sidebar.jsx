@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { FaHome, FaTags, FaImage, FaPen, FaRegBookmark } from "react-icons/fa"; // Import FaRegBookmark
+import { FaHome, FaTags, FaImage, FaPen, FaBookmark } from "react-icons/fa"; // Import FaBookmark
 
 export default function Sidebar({ closeSidebar }) {
   const [tags, setTags] = useState([]);
@@ -125,7 +125,7 @@ export default function Sidebar({ closeSidebar }) {
           onClick={closeSidebar}
           className="flex w-full items-center space-x-2 text-md text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
         >
-          <FaRegBookmark className="text-xl" />
+          <FaBookmark className="text-xl" />
           <span className="inline xl:inline md:hidden w-full">Saves</span>
         </Link>
       </li>
