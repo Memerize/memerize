@@ -109,14 +109,17 @@ export default function LoginPage() {
           </button>
         </form>
         {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
-      <div className="text-center mt-4">
-        <p className="text-sm text-black">
-          Do not have an account yet?{" "}
-          <a href="/register" className="text-blue-600 hover:underline font-bold">
-            Register
-          </a>
-        </p>
-      </div>
+        <div className="text-center mt-4">
+          <p className="text-sm text-black">
+            Do not have an account yet?{" "}
+            <a
+              href="/register"
+              className="text-blue-600 hover:underline font-bold"
+            >
+              Register
+            </a>
+          </p>
+        </div>
       </div>
       <ToastContainer />
     </div>

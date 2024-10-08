@@ -85,7 +85,7 @@ export default function Sidebar({ closeSidebar }) {
                   <Link
                     href={`/posts/tags/${encodeURIComponent(tag.tag)}`}
                     onClick={handleTagClick}
-                    className="truncate mr-1 px-1 py-1 text-sm text-color2 hover:bg-color5 focus:bg-color5 rounded block"
+                    className="mr-1 px-1 py-1 text-sm text-color2 hover:bg-color5 focus:bg-color5 rounded block"
                   >
                     {tag.tag} ({tag.count})
                   </Link>
