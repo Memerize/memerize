@@ -9,10 +9,7 @@ export async function GET(request) {
     const savePosts = await SaveModel.findSaveByUsername(username);
 
     if (!savePosts || savePosts.length === 0) {
-      return NextResponse.json(
-        { message: "No saved posts found" },
-        { status: 404 }
-      );
+      return NextResponse.json([]);
     }
 
     const slugs = savePosts.map((item) => item.slug);
