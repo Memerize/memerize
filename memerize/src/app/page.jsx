@@ -86,12 +86,7 @@ export default function Home() {
           ) : posts.length > 0 ? (
             <div className="grid grid-cols-1 gap-6">
               {posts.map((post) => (
-                <div
-                  key={post._id}
-                  className="bg-white shadow-lg rounded-lg overflow-hidden p-6"
-                >
-                  <PostCard post={post} />
-                </div>
+                <PostCard key={post._id} post={post} />
               ))}
             </div>
           ) : (
