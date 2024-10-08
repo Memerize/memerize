@@ -93,7 +93,7 @@ export const UserProvider = ({ children }) => {
     router.push("/login");
     toast.success("Logged out successfully!");
   };
-  console.log(user);
+  
   return (
     <UserContext.Provider
       value={{

@@ -237,7 +237,7 @@ export default function PostDetail({ params }) {
           {comments.length > 0 ? (
             comments.map((comment) => (
               <CommentCard
-                key={comment._id}
+                key={comment.commentId}
                 comment={comment}
                 slug={slug}
                 postUsername={post.user?.username}
