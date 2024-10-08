@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import { FaComment, FaRegBookmark, FaShare } from "react-icons/fa";
 import { BsArrowUpCircle, BsArrowUpCircleFill } from "react-icons/bs";
 import { useRouter } from "next/navigation";
+import { useContext } from "react";
+import { UserContext } from "@/context/UserContext";
 
 export default function PostCard({ post }) {
   const [liked, setLiked] = useState(false);
@@ -12,7 +14,9 @@ export default function PostCard({ post }) {
   const [loadingLike, setLoadingLike] = useState(false);
   const router = useRouter();
 
-  const currentUser = getCookie("User") ? JSON.parse(getCookie("User")) : null;
+  const {
+    user: currentUser
+  } = useContext(UserContext)
 
   useEffect(() => {
     if (currentUser) {
