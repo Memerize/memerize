@@ -8,7 +8,6 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
 
   const validateForm = () => {
@@ -71,7 +70,6 @@ export default function RegisterPage() {
         router.push("/login");
       }, 3000);
     } catch (error) {
-      setErrorMessage(error.message);
       toast.error(error.message || "Registration failed");
     }
   };
@@ -155,7 +153,6 @@ export default function RegisterPage() {
           >
             Register
           </button>
-          {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
         </form>
         <div className="text-center mt-4">
           <p className="text-sm text-black">

@@ -4,14 +4,13 @@ import { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import PostCard from "@/components/post/PostCard";
 import Loading from "@/app/loading";
-import { toast, Toaster } from "sonner"; // Import toast from Sonner
+import { toast, Toaster } from "sonner";
 
 export default function SavePages() {
   const [saves, setSaves] = useState([]);
   const [visibleSaves, setVisibleSaves] = useState([]);
   const [savedPosts, setSavedPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [hasMore, setHasMore] = useState(true);
 
   const postsPerScroll = 2;
@@ -31,10 +30,10 @@ export default function SavePages() {
       setVisibleSaves(savesData.slice(0, postsPerScroll));
       setSavedPosts(savesData);
       setHasMore(savesData.length > postsPerScroll);
-      toast.success("Saved posts loaded successfully!"); // Success toast
+      toast.success("Saved posts loaded successfully!");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load saved posts"); // Error toast
+      toast.error("Failed to load saved posts");
     } finally {
       setLoading(false);
     }
@@ -60,13 +59,6 @@ export default function SavePages() {
     return <p>Loading...</p>;
   }
 
-  if (error) {
-    return (
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
-        <p className="text-red-500">{error}</p>
-      </div>
-    );
-  }
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
 

@@ -4,7 +4,7 @@
 
 import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 import { refreshCacheByTag } from "@/action";
 import { UserContext } from "@/context/UserContext";
 
@@ -16,7 +16,6 @@ export default function ProfilePage() {
     error: userError,
   } = useContext(UserContext);
 
-  const [error, setError] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
@@ -84,12 +83,11 @@ export default function ProfilePage() {
 
   // Handle file selection
   const handleFileChange = (e) => {
-    setError(null);
     const file = e.target.files[0];
     if (file) {
       // Validate file type (optional)
       if (!file.type.startsWith("image/")) {
-        setError("Please select a valid image file.");
+        toast.error("Please select a valid image file.");
         return;
       }
       setSelectedFile(file);
@@ -101,12 +99,11 @@ export default function ProfilePage() {
     e.preventDefault();
 
     if (!selectedFile) {
-      setError("Please select an image to upload.");
+      toast.error("Please select an image to upload.");
       return;
     }
 
     setUploading(true);
-    setError(null);
 
     try {
       // Resize the image
@@ -145,12 +142,14 @@ export default function ProfilePage() {
         toast.error(userError || "Error uploading image.");
       }
 
-      router.refresh();
-      refreshCacheByTag("user");
-      toast.success("Profile image updated successfully!");
+      toast.success('Profile image updated successfully!')
+      setTimeout(() => {
+        router.refresh()
+        refreshCacheByTag('user')
+      }, 2000)
+    
     } catch (err) {
       console.error("Error uploading image:", err);
-      setError(err.message || "Error uploading image.");
       toast.error(err.message || "Error uploading image.");
     } finally {
       setUploading(false);
@@ -185,37 +184,38 @@ export default function ProfilePage() {
           <p className="text-sm text-gray-500">{user?.email}</p>
         </div>
       </div>
-
-      <form onSubmit={handleImageUpload} className="flex flex-col items-center">
-        <div className="w-full mb-4">
-          <label
-            className="block text-sm font-medium text-gray-700 mb-2"
-            htmlFor="profileImage"
-          >
-            Update Profile Image
-          </label>
+            <form onSubmit={handleImageUpload} className="flex flex-col items-center">
+      <div className="w-full mb-4">
+        <label
+          className="block text-sm font-medium text-gray-700 mb-2"
+          htmlFor="profileImage"
+        >
+          Update Profile Image
+        </label>
+        <div className="relative w-full max-w-xs">
           <input
             type="file"
             id="profileImage"
             accept=".jpg,.jpeg,.png"
             onChange={handleFileChange}
-            className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"
+            className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none file:bg-blue-600 file:text-white file:border-none file:mr-4 file:py-2 file:px-4 file:rounded-md hover:file:bg-blue-700"
           />
         </div>
+      </div>
 
-        <button
-          type="submit"
-          className={`w-full px-4 py-2 rounded-md text-white ${
-            uploading
-              ? "bg-gray-500 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700"
-          }`}
-          disabled={uploading}
-        >
-          {uploading ? "Uploading..." : "Update Image"}
-        </button>
-        {error && <p className="text-red-500 mt-2">{error}</p>}
-      </form>
+      <button
+        type="submit"
+        className={`w-full px-4 py-2 rounded-md text-white ${
+          uploading
+            ? "bg-gray-500 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700"
+        }`}
+        disabled={uploading}
+      >
+        {uploading ? "Uploading..." : "Update Image"}
+      </button>
+    </form>
+        <Toaster position="top-right" richColors style={{ marginTop: "40px" }} />
     </div>
   );
 }
