@@ -13,7 +13,8 @@ import { UserContext } from "@/context/UserContext";
 
 export default function PostDetail({ params }) {
   const { username, slug } = params;
-  const searchParams = useSearchParams(); // Get query params from URL
+  const searchParams = useSearchParams();
+  const [commentId] = useState(searchParams.get("commentId"));
 
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
@@ -51,17 +52,18 @@ export default function PostDetail({ params }) {
 
   useEffect(() => {
     fetchPost();
-  }, [username, slug]);
+  }, []);
 
   useEffect(() => {
-    const commentId = searchParams.get("commentId");
-    if (commentId) {
-      const element = document.getElementById(commentId);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+    if (commentId && !loadingPost) {
+      setTimeout(() => {
+        const element = document.getElementById(commentId);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
     }
-  }, [searchParams, comments]);
+  }, [commentId, loadingPost]);
 
   const checkIfSaved = async (slug) => {
     try {
