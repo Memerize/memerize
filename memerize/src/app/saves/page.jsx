@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import PostCard from "@/components/post/PostCard";
 import Loading from "@/app/loading";
+import { toast, Toaster } from "sonner"; // Import toast from Sonner
 
 export default function SavePages() {
   const [saves, setSaves] = useState([]);
@@ -30,9 +31,10 @@ export default function SavePages() {
       setVisibleSaves(savesData.slice(0, postsPerScroll));
       setSavedPosts(savesData);
       setHasMore(savesData.length > postsPerScroll);
+      toast.success("Saved posts loaded successfully!"); // Success toast
     } catch (err) {
       console.error(err);
-      setError("Failed to load saved posts");
+      toast.error("Failed to load saved posts"); // Error toast
     } finally {
       setLoading(false);
     }
@@ -85,6 +87,7 @@ export default function SavePages() {
           )}
         </div>
       </InfiniteScroll>
+      <Toaster position="top-right" richColors style={{ marginTop: "40px" }} />
     </div>
   );
 }

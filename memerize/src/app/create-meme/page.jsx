@@ -6,6 +6,7 @@ import React, { useEffect, useState, useRef } from "react";
 import MemeCanvas from "../../components/create-meme/MemeCanvas";
 import ControlsPanel from "../../components/create-meme/ControlsPanel";
 import MemeTemplateSelector from "@/components/create-meme/MemeTemplateSelector";
+import { toast, Toaster } from "sonner";
 
 const fontOptions = [
   { label: "Impact", value: "Impact" },
@@ -36,7 +37,6 @@ const CreateMeme = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [addedImages, setAddedImages] = useState([]);
   const [imageURL, setImageURL] = useState("");
-  const [addImageUrlError, setAddImageUrlError] = useState("");
 
   // Refs
   const transformerRef = useRef(null);
@@ -56,6 +56,10 @@ const CreateMeme = () => {
       const reader = new FileReader();
       reader.onload = () => {
         setBackgroundImageUrl(reader.result);
+        toast.success("Background image uploaded successfully!"); // Toast for success
+      };
+      reader.onerror = () => {
+        toast.error("Failed to upload background image."); // Toast for error
       };
       reader.readAsDataURL(file);
     }
@@ -66,12 +70,12 @@ const CreateMeme = () => {
       if (imageURL.startsWith("https://") || imageURL.startsWith("http://")) {
         addImageToCanvas(imageURL);
         setImageURL("");
-        setAddImageUrlError("");
+        toast.success("Image added successfully!"); // Toast for success
       } else {
-        setAddImageUrlError("Invalid URL format.");
+        toast.error("Invalid URL format."); // Toast for error
       }
     } else {
-      setAddImageUrlError("Please enter an image URL.");
+      toast.error("Please enter an image URL."); // Toast for error
     }
   };
 
@@ -99,9 +103,11 @@ const CreateMeme = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        // setTimeout(() => {
         addImageToCanvas(reader.result); // Send image to canvas handler
-        // }, 500);
+        toast.success("Image uploaded successfully!"); // Toast for success
+      };
+      reader.onerror = () => {
+        toast.error("Failed to upload image."); // Toast for error
       };
       reader.readAsDataURL(file); // Convert the image to a base64 string
     }
@@ -124,6 +130,7 @@ const CreateMeme = () => {
       setIsTransformerActive(false);
       transformerRef.current?.getLayer()?.batchDraw();
     }
+    toast.success("Image removed successfully!")
   };
 
   // Image loading
@@ -440,13 +447,13 @@ const CreateMeme = () => {
             addedImages={addedImages}
             removeImage={removeImage}
             handleAddImageURL={handleAddImageURL}
-            addImageUrlError={addImageUrlError}
             imageURL={imageURL}
             setImageURL={setImageURL}
             handleBackgroundImageUpload={handleBackgroundImageUpload}
           />
         </div>
       </div>
+      <Toaster position="top-right" richColors style={{ marginTop: "40px" }} />
     </div>
   );
 };

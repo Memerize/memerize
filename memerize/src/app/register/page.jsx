@@ -1,8 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast, Toaster } from "sonner";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -13,42 +12,23 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const validateForm = () => {
+
+    if (name.length < 1) {
+      toast.error('Fill Name')
+      return false;
+    }
     if (!email.includes("@")) {
-      toast.error("Email must email format", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "colored",
-      });
+      toast.error("Email must be in email format");
       return false;
     }
 
     if (password.length < 5) {
-      toast.error("Password must be at least 5 characters", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "colored",
-      });
+      toast.error("Password must be at least 5 characters");
       return false;
     }
 
     if (username.includes(" ")) {
-      toast.error("Username must not contain spaces", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "colored",
-      });
+      toast.error("Username must not contain spaces");
       return false;
     }
 
@@ -73,34 +53,26 @@ export default function RegisterPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.log(errorData)
-        throw new Error(errorData || "Registration failed from API");
+        
+        // Tampilkan toast jika username/email sudah digunakan
+        if (errorData.message === "Username already used") {
+          toast.error("Username already used");
+        } else if (errorData.message === "Email already used") {
+          toast.error("Email already used");
+        } else {
+          throw new Error(errorData.message || "Registration failed");
+        }
+        return; // Hentikan eksekusi jika ada error
       }
 
-      toast.success("Registration successful!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "colored",
-      });
+      toast.success("Registration successful!");
 
       setTimeout(() => {
         router.push("/login");
       }, 3000);
     } catch (error) {
       setErrorMessage(error.message);
-      toast.error(error.message || "Registration failed", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "colored",
-      });
+      toast.error(error.message || "Registration failed");
     }
   };
 
@@ -197,7 +169,7 @@ export default function RegisterPage() {
           </p>
         </div>
       </div>
-      <ToastContainer />
+      <Toaster position="top-right" richColors style={{ marginTop: "40px" }} />
     </div>
   );
 }

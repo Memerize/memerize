@@ -19,7 +19,6 @@ const handler = NextAuth({
       if (account && profile) {
         let userData;
         let username = profile.email.split("@")[0];
-        // console.log(profile);
         try {
           // Check if the user already exists by email
           const existingUser = await db
@@ -35,7 +34,6 @@ const handler = NextAuth({
 
             // If the username already exists, append timestamp to make it unique
             if (existingUsername) {
-              // console.log("USERNAME EXISTED");
               username += Date.now();
             }
 
@@ -49,16 +47,13 @@ const handler = NextAuth({
             // Insert the new user into the database
             await db.collection("users").insertOne(userData);
           } else {
-            // console.log("User already exists");
             userData = existingUser;
           }
-          // console.log(userData)
           token.name = userData.name;
           token.email = userData.email;
           token.username = userData.username;
           token.image = userData.image;
           token.accessToken = account.access_token;
-          // console.log(token)
         } catch (error) {
           console.error("Error saving user to database:", error);
         }

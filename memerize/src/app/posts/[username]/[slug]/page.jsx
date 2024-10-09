@@ -10,6 +10,8 @@ import Loading from "@/app/loading";
 import CommentCard from "@/components/post/CommentCard";
 import { mentionStyle } from "@/components/post/MentionStyle";
 import { UserContext } from "@/context/UserContext";
+import { toast, Toaster } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function PostDetail({ params }) {
   const { username, slug } = params;
@@ -28,6 +30,7 @@ export default function PostDetail({ params }) {
   const [loadingPost, setLoadingPost] = useState(true);
   const [users, setUsers] = useState([]);
   const { user: currentUser } = useContext(UserContext);
+  const router = useRouter()
 
   const fetchPost = async () => {
     try {
@@ -43,7 +46,7 @@ export default function PostDetail({ params }) {
       checkIfSaved(postData.slug);
     } catch (error) {
       console.error("Error fetching post:", error);
-      setError("Error loading post.");
+      toast.error('Error loading post.')
     } finally {
       setLoadingPost(false);
     }
@@ -81,8 +84,13 @@ export default function PostDetail({ params }) {
 
   const handleLike = async () => {
     if (!currentUser) {
-      alert("You need to log in to like this post.");
-      return (window.location.href = "/login"); // Redirect to login
+      toast.error("You need to log in to like this post.");
+      
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 2000);
+      
+      return;
     }
 
     setLoadingLike(true);
@@ -98,8 +106,10 @@ export default function PostDetail({ params }) {
 
       setLiked((prev) => !prev);
       setLikesCount((prev) => (liked ? prev - 1 : prev + 1));
+      toast.success(liked ? "Like removed!" : "Post liked!");
     } catch (error) {
       console.error("Error liking post:", error);
+      toast.error("Failed to like/unlike the post");
     } finally {
       setLoadingLike(false);
     }
@@ -107,8 +117,11 @@ export default function PostDetail({ params }) {
 
   const handleSave = async () => {
     if (!currentUser) {
-      alert("You need to log in to save this post.");
-      return (window.location.href = "/login"); // Redirect to login
+      toast.error("You need to log in to save this post.");
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+      return // Redirect to login
     }
 
     if (loadingSave) return;
@@ -133,11 +146,14 @@ export default function PostDetail({ params }) {
       const data = await response.json();
       if (data.message.includes("removed")) {
         setSaved(false);
+        toast.success("Post unsaved!");
       } else {
         setSaved(true);
+        toast.success("Post saved!");
       }
     } catch (error) {
       console.error("Error saving/unsaving post:", error);
+      toast.error("Failed to save/unsave the post");
       setSaved(!saved);
     } finally {
       setLoadingSave(false);
@@ -159,12 +175,11 @@ export default function PostDetail({ params }) {
 
   const handleAddComment = async () => {
     if (!newComment.trim()) {
-      setError("Comment cannot be empty");
+      toast.error("Comment cannot be empty");
       return;
     }
 
     setLoading(true);
-    setError(null);
 
     try {
       const mentionedUsers = [
@@ -208,9 +223,13 @@ export default function PostDetail({ params }) {
       }
 
       fetchPost();
+      toast.success("Comment added!");
     } catch (error) {
-      setError("Error submitting the comment");
-      console.error("Error submitting comment:", error);
+      toast.error('You need to log in to comment this post.')
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+      return
     } finally {
       setLoading(false);
     }
@@ -240,6 +259,7 @@ export default function PostDetail({ params }) {
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
+      <Toaster position="top-right" richColors style={{ marginTop: "40px" }} />
       <div className="flex items-center space-x-4 mb-6">
         <Link href={`/posts/${post.user.username}`}>
           <img
