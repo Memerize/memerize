@@ -6,9 +6,10 @@ export default function NotificationCard({ notification, markAsSeen }) {
   const handleNotificationClick = async () => {
     await markAsSeen(notification._id);
 
-    router.replace(
+    router.push(
       `/posts/${notification.postUsername}/${notification.slug}?commentId=${notification.commentId}`
     );
+    router.refresh();
   };
 
   return (
