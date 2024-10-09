@@ -294,7 +294,7 @@ export default function PostDetail({ params }) {
       </div>
 
       <div className="mt-8 h-96 overflow-y-auto pr-2">
-        <h3 className="text-xl font-semibold mb-4">Comments</h3>
+        <h3 className="text-xl font-semibold mb-4 text-black">Comments</h3>
         <div className="space-y-4">
           {comments.length > 0 ? (
             comments.map((comment) => (
