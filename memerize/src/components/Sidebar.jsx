@@ -39,13 +39,16 @@ export default function Sidebar({ closeSidebar }) {
   };
 
   return (
-    <ul className="menu bg-color3 h-full p-4 md:w-24 lg:w-24 xl:w-64 space-y-2" style={{ backgroundColor: '#333333' }}>
+    <ul
+      className="menu bg-color3 h-full p-4 md:w-24 lg:w-24 xl:w-64 space-y-2"
+      style={{ backgroundColor: "#333333" }}
+    >
       {/* Link Home */}
       <li>
         <Link
           href="/"
           onClick={closeSidebar}
-          className="flex items-center space-x-2 text-md text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
+          className="flex items-center space-x-2 text-md text-color2 hover:bg-color5 focus:bg-color5 focus:text-color2 rounded px-3 py-2"
         >
           <FaHome className="text-xl" />
           <span className="inline xl:inline md:hidden">Home</span>
@@ -56,7 +59,7 @@ export default function Sidebar({ closeSidebar }) {
       <li>
         <button
           onClick={toggleTagsDropdown}
-          className="flex items-center space-x-2 w-full text-left text-md text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
+          className="flex items-center space-x-2 w-full text-left text-md text-color2 hover:bg-color5 focus:bg-color5 focus:text-color2 rounded px-3 py-2"
           aria-haspopup="true"
           aria-expanded={isTagsOpen}
         >
@@ -99,7 +102,7 @@ export default function Sidebar({ closeSidebar }) {
         <Link
           href="/create-meme"
           onClick={closeSidebar}
-          className="flex items-center space-x-2 text-md text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
+          className="flex items-center space-x-2 text-md text-color2 hover:bg-color5 focus:bg-color5 focus:text-color2 rounded px-3 py-2"
         >
           <FaImage className="text-xl" />
           <span className="inline xl:inline md:hidden">Create Meme</span>
@@ -111,7 +114,7 @@ export default function Sidebar({ closeSidebar }) {
         <Link
           href="/create-post"
           onClick={closeSidebar}
-          className="flex w-full items-center space-x-2 text-md text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
+          className="flex w-full items-center space-x-2 text-md text-color2 hover:bg-color5 focus:bg-color5 focus:text-color2 rounded px-3 py-2"
         >
           <FaPen className="text-xl" />
           <span className="inline xl:inline md:hidden w-full">Create Post</span>
@@ -123,7 +126,7 @@ export default function Sidebar({ closeSidebar }) {
         <Link
           href="/saves" // Adjust the link according to your route
           onClick={closeSidebar}
-          className="flex w-full items-center space-x-2 text-md text-color2 hover:bg-color5 focus:bg-color5 rounded px-3 py-2"
+          className="flex w-full items-center space-x-2 text-md text-color2 hover:bg-color5 focus:bg-color5 focus:text-color2 rounded px-3 py-2"
         >
           <FaBookmark className="text-xl" />
           <span className="inline xl:inline md:hidden w-full">Saves</span>
