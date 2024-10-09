@@ -66,7 +66,7 @@ export default function SearchBar() {
             {users.map((user, index) => (
               <li
                 key={index}
-                className="p-2 hover:bg-gray-200 hover:rounded-md"
+                className="p-2 hover:bg-gray-200 hover:rounded-md text-black" // Set the text color to black
                 onClick={handleClick}
               >
                 <Link href={`/posts/${user.username}`}>{user.username}</Link>

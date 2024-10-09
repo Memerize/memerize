@@ -319,7 +319,7 @@ export default function PostDetail({ params }) {
           onChange={(e, newValue) => setNewComment(newValue)}
           placeholder="Write a comment..."
           className="w-full p-2 border rounded-md"
-          style={mentionStyle}
+          style={{...mentionStyle, color: 'black'}} 
           allowSuggestionsAboveCursor={true}
         >
           <Mention
