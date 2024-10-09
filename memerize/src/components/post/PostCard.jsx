@@ -5,6 +5,8 @@ import { useState, useEffect, useContext } from "react";
 import { FaComment, FaShare, FaRegBookmark, FaBookmark, FaArrowUp } from "react-icons/fa";
 import { BsArrowUpCircle, BsArrowUpCircleFill } from "react-icons/bs";
 import { useRouter } from "next/navigation";
+import { useContext } from "react";
+import { toast, Toaster } from "sonner";
 import { UserContext } from "@/context/UserContext";
 
 export default function PostCard({ post, savedPosts }) {
@@ -56,8 +58,11 @@ export default function PostCard({ post, savedPosts }) {
 
   const handleLike = async () => {
     if (!currentUser) {
-      alert("You need to log in to like this post.");
-      return router.push("/login");
+      toast.error("You need to log in to like this post.");
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+      return;
     }
 
     if (loadingLike) return;
@@ -74,8 +79,10 @@ export default function PostCard({ post, savedPosts }) {
       }
 
       await refetchPost();
+      toast.success(liked ? "Post unliked!" : "Post liked!");
     } catch (error) {
       console.error("Error liking post:", error);
+      toast.error("Failed to like/unlike the post.");
     } finally {
       setLoadingLike(false);
     }
@@ -83,8 +90,11 @@ export default function PostCard({ post, savedPosts }) {
 
   const handleSave = async () => {
     if (!currentUser) {
-      alert("You need to log in to save this post.");
-      return router.push("/login");
+      toast.error("You need to log in to save this post.");
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+      return;
     }
 
     if (loadingSave) return;
@@ -108,12 +118,15 @@ export default function PostCard({ post, savedPosts }) {
       const data = await response.json();
       if (data.message.includes("removed")) {
         setSaved(false);
+        toast.success("Post unsaved!");
       } else {
         setSaved(true);
+        toast.success("Post saved!");
       }
     } catch (error) {
       console.error("Error saving/unsaving post:", error);
       setSaved(!saved);
+      toast.error("Failed to save/unsave the post.");
     } finally {
       setLoadingSave(false);
     }
@@ -264,7 +277,7 @@ export default function PostCard({ post, savedPosts }) {
           </button>
         </div>
       </div>
-
+      <Toaster position="top-right" richColors style={{ marginTop: "40px" }} />
       {/* Share Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

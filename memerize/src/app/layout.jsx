@@ -31,18 +31,17 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-       <SessionProviderWrapper>
-        <UserProvider>
-          <Toast />
-          <Navbar />
-          <div className="flex">
-            <aside className="hidden md:block sticky top-16 h-[calc(100vh-4rem)]">
-              <Sidebar />
-            </aside>
-            <main className="w-full m-8">{children}</main>
-          </div>
-        </UserProvider>
-       </SessionProviderWrapper>
+        <SessionProviderWrapper>
+          <UserProvider>
+            <Navbar />
+            <div className="flex">
+              <aside className="hidden md:block sticky top-16 h-[calc(100vh-4rem)]">
+                <Sidebar />
+              </aside>
+              <main className="w-full m-8">{children}</main>
+            </div>
+          </UserProvider>
+        </SessionProviderWrapper>
       </body>
     </html>
   );
