@@ -4,7 +4,7 @@
 
 import React, { createContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react"; // Import useSession dari next-auth
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 // Create the UserContext
@@ -98,7 +98,6 @@ export const UserProvider = ({ children }) => {
 
       const res = await response.json();
       user.image = res.image;
-      toast.success("Profile updated successfully!");
     } catch (err) {
       console.error("Error updating user profile:", err);
       toast.error(err.message || "Error updating profile.");

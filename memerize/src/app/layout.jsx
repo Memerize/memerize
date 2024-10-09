@@ -4,7 +4,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
-import Toast from "../components/Toast";
 import SessionProviderWrapper from "@/components/SessionProvider";
 import { UserProvider } from "@/context/UserContext";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import InfiniteScrollPosts from "@/components/InfiniteScrollPosts"; // Import new component
+import InfiniteScrollPosts from "@/components/InfiniteScrollPosts";
 import ModalNewPosts from "@/components/ModalNewPosts";
 import Loading from "@/app/loading";
 

@@ -3,6 +3,7 @@ import ReplyCard from "./ReplyCard";
 import { MentionsInput, Mention } from "react-mentions";
 import { mentionStyle } from "@/components/post/MentionStyle";
 import Link from "next/link";
+import { toast, Toaster } from "sonner";
 
 export default function CommentCard({
   comment,
@@ -12,7 +13,6 @@ export default function CommentCard({
 }) {
   const [showReplyBox, setShowReplyBox] = useState(false);
   const [newReply, setNewReply] = useState("");
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
 
@@ -32,6 +32,7 @@ export default function CommentCard({
           setUsers(usersData);
         } catch (error) {
           console.error("Error fetching users:", error);
+          toast.error("Failed to fetch users.");
         }
       };
       fetchUsers();
@@ -42,12 +43,11 @@ export default function CommentCard({
     e.preventDefault();
 
     if (!newReply.trim()) {
-      setError("Reply cannot be empty");
+      toast.error("Reply cannot be empty");
       return;
     }
 
     setLoading(true);
-    setError(null);
 
     try {
       const mentionedUsers = [...newReply.matchAll(/@\[(.*?)\]\((.*?)\)/g)].map(
@@ -94,12 +94,14 @@ export default function CommentCard({
         });
       }
 
+      toast.success("Reply added successfully!"); // Success toast
+
       if (onReplyAdded) {
         onReplyAdded();
       }
     } catch (error) {
       console.error("Error submitting reply or sending notification:", error);
-      setError("Error submitting reply or sending notification");
+      toast.error("Error submitting reply or sending notification"); // Error toast
     } finally {
       setLoading(false);
     }
@@ -204,7 +206,6 @@ export default function CommentCard({
               displayTransform={(id, display) => `${display}`}
             />
           </MentionsInput>
-          {error && <p className="text-red-500">{error}</p>}
           <button
             type="submit"
             className="mt-2 bg-blue-500 text-white py-1 px-3 rounded"

@@ -30,7 +30,6 @@ export default function PostDetail({ params }) {
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [saved, setSaved] = useState(false);
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false); // For comment submission
   const [loadingLike, setLoadingLike] = useState(false); // For like button
   const [loadingSave, setLoadingSave] = useState(false); // For save button
@@ -133,7 +132,7 @@ export default function PostDetail({ params }) {
       setTimeout(() => {
         router.push("/login");
       }, 2000);
-      return // Redirect to login
+      return
     }
 
     if (loadingSave) return;
@@ -447,8 +446,6 @@ export default function PostDetail({ params }) {
             displayTransform={(id, display) => `${display}`}
           />
         </MentionsInput>
-
-        {error && <p className="text-red-500 mt-2">{error}</p>}
 
         <button
           onClick={handleAddComment}
