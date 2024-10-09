@@ -20,16 +20,10 @@ export default function Navbar() {
   const [notifications, setNotifications] = useState([]);
   const [unseenCount, setUnseenCount] = useState(0);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const router = useRouter();
+  const router = useRouter(); // Added router for handling navigation
   const { data: session } = useSession();
 
-  const {
-    user,
-    loading: userLoading,
-    error: userError,
-    updateUser,
-    logout,
-  } = useContext(UserContext);
+  const { user } = useContext(UserContext);
 
   const handleSearch = async (query) => {
     try {
@@ -104,8 +98,7 @@ export default function Navbar() {
         }
       };
 
-      eventSource.onerror = (error) => {
-        console.error("SSE error:", error);
+      eventSource.onerror = () => {
         eventSource.close();
       };
 
@@ -121,7 +114,7 @@ export default function Navbar() {
         email: session.user.email,
       });
 
-      // Fetch notifikasi untuk pengguna Google OAuth
+      // Fetch notifications for Google OAuth users
       const eventSource = new EventSource(
         `/api/notifications/stream?username=${session.user.email.split("@")[0]}`
       );
@@ -146,8 +139,7 @@ export default function Navbar() {
         }
       };
 
-      eventSource.onerror = (error) => {
-        console.error("SSE error:", error);
+      eventSource.onerror = () => {
         eventSource.close();
       };
 
@@ -167,17 +159,21 @@ export default function Navbar() {
     setIsNotificationsOpen((prev) => !prev);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async (e) => {
+    e.preventDefault();
     document.cookie = "Authorization=; Max-Age=0; path=/;";
     document.cookie = "User=; Max-Age=0; path=/;";
     document.cookie = "next-auth.session-token=; Max-Age=0; path=/;";
 
-    setIsLogin(false);
-    setUserProfile(null);
-    if (session) {
-      signOut();
-    } else {
+    try {
+      setIsLogin(false);
+      setUserProfile(null);
+      if (session) {
+        await signOut({ redirect: false });
+      }
       router.push("/login");
+    } catch (error) {
+      console.log(error);
     }
   };
 

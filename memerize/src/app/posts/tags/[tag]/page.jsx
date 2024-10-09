@@ -18,9 +18,7 @@ export default function TagPage() {
   useEffect(() => {
     const fetchPostsByTag = async () => {
       try {
-        const response = await fetch(
-          `/api/posts/tags/${decodeURI(tag)}`
-        );
+        const response = await fetch(`/api/posts/tags/${decodeURI(tag)}`);
         const data = await response.json();
 
         if (response.ok) {
@@ -59,12 +57,7 @@ export default function TagPage() {
           ) : posts.length > 0 ? (
             <div className="grid grid-cols-1 gap-6">
               {posts.map((post) => (
-                <div
-                  key={post._id}
-                  className="bg-white shadow-lg rounded-lg overflow-hidden p-6"
-                >
-                  <PostCard post={post} />
-                </div>
+                <PostCard post={post} key={post._id} />
               ))}
             </div>
           ) : (

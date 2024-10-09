@@ -1,16 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { MentionsInput, Mention } from "react-mentions";
-import { FaComment, FaRegBookmark, FaBookmark, FaShare } from "react-icons/fa";
+import {
+  FaComment,
+  FaRegBookmark,
+  FaBookmark,
+  FaShare,
+  FaArrowUp,
+} from "react-icons/fa";
 import { BsArrowUpCircle, BsArrowUpCircleFill } from "react-icons/bs";
 import Loading from "@/app/loading";
 import CommentCard from "@/components/post/CommentCard";
 import { mentionStyle } from "@/components/post/MentionStyle";
+import { UserContext } from "@/context/UserContext";
+import { toast, Toaster } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function PostDetail({ params }) {
   const { username, slug } = params;
+  const searchParams = useSearchParams();
+  const [commentId] = useState(searchParams.get("commentId"));
 
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
@@ -24,8 +36,12 @@ export default function PostDetail({ params }) {
   const [loadingSave, setLoadingSave] = useState(false); // For save button
   const [loadingPost, setLoadingPost] = useState(true);
   const [users, setUsers] = useState([]);
+  const { user: currentUser } = useContext(UserContext);
+  const router = useRouter()
 
-  const currentUser = getCookie("User") ? JSON.parse(getCookie("User")) : null;
+  // New State Variables for Share Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [copySuccess, setCopySuccess] = useState("");
 
   const fetchPost = async () => {
     try {
@@ -41,7 +57,7 @@ export default function PostDetail({ params }) {
       checkIfSaved(postData.slug);
     } catch (error) {
       console.error("Error fetching post:", error);
-      setError("Error loading post.");
+      toast.error('Error loading post.')
     } finally {
       setLoadingPost(false);
     }
@@ -49,7 +65,18 @@ export default function PostDetail({ params }) {
 
   useEffect(() => {
     fetchPost();
-  }, [username, slug]);
+  }, []);
+
+  useEffect(() => {
+    if (commentId && !loadingPost) {
+      setTimeout(() => {
+        const element = document.getElementById(commentId);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
+    }
+  }, [commentId, loadingPost]);
 
   const checkIfSaved = async (slug) => {
     try {
@@ -69,8 +96,13 @@ export default function PostDetail({ params }) {
 
   const handleLike = async () => {
     if (!currentUser) {
-      alert("You need to log in to like this post.");
-      return router.push("/login");
+      toast.error("You need to log in to like this post.");
+      
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 2000);
+      
+      return;
     }
 
     setLoadingLike(true);
@@ -86,8 +118,10 @@ export default function PostDetail({ params }) {
 
       setLiked((prev) => !prev);
       setLikesCount((prev) => (liked ? prev - 1 : prev + 1));
+      toast.success(liked ? "Like removed!" : "Post liked!");
     } catch (error) {
       console.error("Error liking post:", error);
+      toast.error("Failed to like/unlike the post");
     } finally {
       setLoadingLike(false);
     }
@@ -95,8 +129,11 @@ export default function PostDetail({ params }) {
 
   const handleSave = async () => {
     if (!currentUser) {
-      alert("You need to log in to save this post.");
-      return router.push("/login");
+      toast.error("You need to log in to save this post.");
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+      return // Redirect to login
     }
 
     if (loadingSave) return;
@@ -121,11 +158,14 @@ export default function PostDetail({ params }) {
       const data = await response.json();
       if (data.message.includes("removed")) {
         setSaved(false);
+        toast.success("Post unsaved!");
       } else {
         setSaved(true);
+        toast.success("Post saved!");
       }
     } catch (error) {
       console.error("Error saving/unsaving post:", error);
+      toast.error("Failed to save/unsave the post");
       setSaved(!saved);
     } finally {
       setLoadingSave(false);
@@ -147,12 +187,11 @@ export default function PostDetail({ params }) {
 
   const handleAddComment = async () => {
     if (!newComment.trim()) {
-      setError("Comment cannot be empty");
+      toast.error("Comment cannot be empty");
       return;
     }
 
     setLoading(true);
-    setError(null);
 
     try {
       const mentionedUsers = [
@@ -190,14 +229,19 @@ export default function PostDetail({ params }) {
             slug: slug,
             postUsername: post.user?.username,
             mentionedUsername: mentionedUser,
+            commentId: addedComment.commentId,
           }),
         });
       }
 
       fetchPost();
+      toast.success("Comment added!");
     } catch (error) {
-      setError("Error submitting the comment");
-      console.error("Error submitting comment:", error);
+      toast.error('You need to log in to comment this post.')
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+      return
     } finally {
       setLoading(false);
     }
@@ -217,6 +261,66 @@ export default function PostDetail({ params }) {
       }));
   };
 
+  // Share Modal Functions
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = post.image;
+    link.download = `${post.title}.jpg`; // Adjust the extension based on your image type
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleShare = (platform) => {
+    const shareUrl = encodeURIComponent(
+      `${window.location.origin}/posts/${post.user.username}/${post.slug}`
+    );
+    const shareText = encodeURIComponent(`Check out this post: ${post.title}`);
+
+    let url = "";
+
+    switch (platform) {
+      case "twitter":
+        url = `https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareText}`;
+        break;
+      case "facebook":
+        url = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
+        break;
+      case "pinterest":
+        url = `https://pinterest.com/pin/create/button/?url=${shareUrl}&description=${shareText}`;
+        break;
+      case "reddit":
+        url = `https://www.reddit.com/submit?url=${shareUrl}&title=${shareText}`;
+        break;
+      case "gmail":
+        window.location.href = `mailto:?subject=${shareText}&body=${shareUrl}`;
+        return;
+      case "mail":
+        window.location.href = `mailto:?subject=${shareText}&body=${shareUrl}`;
+        return;
+      default:
+        return;
+    }
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard
+      .writeText(
+        `${window.location.origin}/posts/${post.user.username}/${post.slug}`
+      )
+      .then(() => {
+        setCopySuccess("Copied!");
+        setTimeout(() => setCopySuccess(""), 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+        setCopySuccess("Failed to copy");
+        setTimeout(() => setCopySuccess(""), 2000);
+      });
+  };
+
   if (loadingPost) {
     return <Loading />;
   }
@@ -227,6 +331,10 @@ export default function PostDetail({ params }) {
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
+
+      <Toaster position="top-right" richColors style={{ marginTop: "40px" }} />
+      {/* User Info */}
+
       <div className="flex items-center space-x-4 mb-6">
         <Link href={`/posts/${post.user.username}`}>
           <img
@@ -242,8 +350,10 @@ export default function PostDetail({ params }) {
         </div>
       </div>
 
+      {/* Post Title */}
       <h1 className="text-2xl font-bold mb-4 text-black">{post.title}</h1>
 
+      {/* Post Image */}
       <div className="bg-gray-200 w-full mb-6">
         <img
           src={post.image}
@@ -252,6 +362,7 @@ export default function PostDetail({ params }) {
         />
       </div>
 
+      {/* Tags */}
       <div className="flex flex-wrap mb-4">
         {post.tags.map((tag, index) => (
           <span
@@ -263,6 +374,7 @@ export default function PostDetail({ params }) {
         ))}
       </div>
 
+      {/* Action Buttons */}
       <div className="flex items-center justify-between mb-6">
         <button
           className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
@@ -287,24 +399,30 @@ export default function PostDetail({ params }) {
           <span>{saved ? "Saved" : "Save"}</span>
         </button>
 
-        <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
+        <button
+          className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
+          onClick={() => setIsModalOpen(true)}
+        >
           <FaShare />
           <span>Share</span>
         </button>
       </div>
 
+      {/* Comments Section */}
       <div className="mt-8 h-96 overflow-y-auto pr-2">
         <h3 className="text-xl font-semibold mb-4 text-black">Comments</h3>
         <div className="space-y-4">
           {comments.length > 0 ? (
             comments.map((comment) => (
-              <CommentCard
-                key={comment._id}
-                comment={comment}
-                slug={slug}
-                postUsername={post.user?.username}
-                onReplyAdded={fetchPost}
-              />
+              <div key={comment.commentId} id={comment.commentId}>
+                {/* Add id to the comment element */}
+                <CommentCard
+                  comment={comment}
+                  slug={slug}
+                  postUsername={post.user?.username}
+                  onReplyAdded={fetchPost}
+                />
+              </div>
             ))
           ) : (
             <p className="text-gray-500">No comments yet.</p>
@@ -312,6 +430,7 @@ export default function PostDetail({ params }) {
         </div>
       </div>
 
+      {/* Comment Input */}
       <div className="sticky bottom-0 bg-white p-4 border-t">
         <MentionsInput
           value={newComment}
@@ -339,16 +458,99 @@ export default function PostDetail({ params }) {
           {loading ? "Adding comment..." : "Add Comment"}
         </button>
       </div>
+
+      {/* Share Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-11/12 max-w-md relative">
+            <button
+              className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+              onClick={() => setIsModalOpen(false)}
+            >
+              ✕
+            </button>
+            <h3 className="text-lg font-bold mb-4">Share This Post</h3>
+            <img
+              src={post.image}
+              alt={post.title}
+              className="w-full mb-4 object-contain h-64"
+            />
+
+            {/* Sharing Options */}
+            <div className="flex flex-col space-y-4">
+              {/* Download Button */}
+              <button
+                className="btn btn-primary w-full"
+                onClick={handleDownload}
+              >
+                Download
+              </button>
+
+              {/* Share Buttons */}
+              <div className="flex flex-wrap gap-2 justify-center">
+                <button
+                  className="btn btn-secondary flex items-center space-x-2"
+                  onClick={() => handleShare("twitter")}
+                >
+                  <FaArrowUp />
+                  <span>Share on Twitter</span>
+                </button>
+                <button
+                  className="btn btn-secondary flex items-center space-x-2"
+                  onClick={() => handleShare("facebook")}
+                >
+                  <FaShare />
+                  <span>Share on Facebook</span>
+                </button>
+                <button
+                  className="btn btn-secondary flex items-center space-x-2"
+                  onClick={() => handleShare("pinterest")}
+                >
+                  <FaShare />
+                  <span>Share on Pinterest</span>
+                </button>
+                <button
+                  className="btn btn-secondary flex items-center space-x-2"
+                  onClick={() => handleShare("reddit")}
+                >
+                  <FaShare />
+                  <span>Share on Reddit</span>
+                </button>
+                <button
+                  className="btn btn-secondary flex items-center space-x-2"
+                  onClick={() => handleShare("gmail")}
+                >
+                  <FaShare />
+                  <span>Share via Gmail</span>
+                </button>
+                <button
+                  className="btn btn-secondary flex items-center space-x-2"
+                  onClick={() => handleShare("mail")}
+                >
+                  <FaShare />
+                  <span>Share via Mail</span>
+                </button>
+              </div>
+
+              {/* Image Link and Copy Button */}
+              <div className="flex items-center space-x-2 mt-4">
+                <input
+                  type="text"
+                  readOnly
+                  value={`${window.location.origin}/posts/${post.user.username}/${post.slug}`}
+                  className="flex-1 p-2 border border-gray-300 rounded"
+                />
+                <button
+                  className="btn btn-outline btn-secondary"
+                  onClick={handleCopyLink}
+                >
+                  {copySuccess ? copySuccess : "Copy Link"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
-
-function getCookie(name) {
-  if (typeof document === "undefined") {
-    return null;
-  }
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-  return null;
 }

@@ -1,31 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { FaComment, FaShare, FaRegBookmark, FaBookmark } from "react-icons/fa";
+import { useState, useEffect, useContext } from "react";
+import { FaComment, FaShare, FaRegBookmark, FaBookmark, FaArrowUp } from "react-icons/fa";
 import { BsArrowUpCircle, BsArrowUpCircleFill } from "react-icons/bs";
 import { useRouter } from "next/navigation";
-import { useContext } from "react";
+import { toast, Toaster } from "sonner";
 import { UserContext } from "@/context/UserContext";
 
 export default function PostCard({ post, savedPosts }) {
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likes.length);
-  const [saved, setSaved] = useState(false); // Track save state
+  const [saved, setSaved] = useState(false);
   const [loadingLike, setLoadingLike] = useState(false);
-  const [loadingSave, setLoadingSave] = useState(false); // Track save action loading state
+  const [loadingSave, setLoadingSave] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [copySuccess, setCopySuccess] = useState("");
   const router = useRouter();
 
-  const {
-    user: currentUser
-  } = useContext(UserContext)
+  const { user: currentUser } = useContext(UserContext);
 
   useEffect(() => {
     if (currentUser) {
       setLiked(post.likes.includes(currentUser.username));
-      checkIfSaved(); // Check if the post is saved when the component loads
+      checkIfSaved();
     }
-  }, [savedPosts]);
+  }, [savedPosts, currentUser]);
 
   const checkIfSaved = () => {
     if (Array.isArray(savedPosts)) {
@@ -57,8 +57,11 @@ export default function PostCard({ post, savedPosts }) {
 
   const handleLike = async () => {
     if (!currentUser) {
-      alert("You need to log in to like this post.");
-      return router.push("/login");
+      toast.error("You need to log in to like this post.");
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+      return;
     }
 
     if (loadingLike) return;
@@ -75,8 +78,10 @@ export default function PostCard({ post, savedPosts }) {
       }
 
       await refetchPost();
+      toast.success(liked ? "Post unliked!" : "Post liked!");
     } catch (error) {
       console.error("Error liking post:", error);
+      toast.error("Failed to like/unlike the post.");
     } finally {
       setLoadingLike(false);
     }
@@ -84,13 +89,15 @@ export default function PostCard({ post, savedPosts }) {
 
   const handleSave = async () => {
     if (!currentUser) {
-      alert("You need to log in to save this post.");
-      return router.push("/login");
+      toast.error("You need to log in to save this post.");
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+      return;
     }
 
     if (loadingSave) return;
 
-    // Optimistically update the UI to reflect the save/unsave change
     setSaved(!saved);
     setLoadingSave(true);
 
@@ -110,16 +117,73 @@ export default function PostCard({ post, savedPosts }) {
       const data = await response.json();
       if (data.message.includes("removed")) {
         setSaved(false);
+        toast.success("Post unsaved!");
       } else {
         setSaved(true);
+        toast.success("Post saved!");
       }
     } catch (error) {
       console.error("Error saving/unsaving post:", error);
-      // Revert the save state if there's an error
       setSaved(!saved);
+      toast.error("Failed to save/unsave the post.");
     } finally {
       setLoadingSave(false);
     }
+  };
+
+
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = post.image;
+    link.download = `${post.title}.jpg`; // Adjust the extension based on your image type
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleShare = (platform) => {
+    const shareUrl = encodeURIComponent(`${window.location.origin}/posts/${post.user.username}/${post.slug}`);
+    const shareText = encodeURIComponent(`Check out this post: ${post.title}`);
+
+    let url = "";
+
+    switch (platform) {
+      case "twitter":
+        url = `https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareText}`;
+        break;
+      case "facebook":
+        url = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
+        break;
+      case "pinterest":
+        url = `https://pinterest.com/pin/create/button/?url=${shareUrl}&description=${shareText}`;
+        break;
+      case "reddit":
+        url = `https://www.reddit.com/submit?url=${shareUrl}&title=${shareText}`;
+        break;
+      case "gmail":
+        window.location.href = `mailto:?subject=${shareText}&body=${shareUrl}`;
+        return;
+      case "mail":
+        window.location.href = `mailto:?subject=${shareText}&body=${shareUrl}`;
+        return;
+      default:
+        return;
+    }
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/posts/${post.user.username}/${post.slug}`)
+      .then(() => {
+        setCopySuccess("Copied!");
+        setTimeout(() => setCopySuccess(""), 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+        setCopySuccess("Failed to copy");
+        setTimeout(() => setCopySuccess(""), 2000);
+      });
   };
 
   return (
@@ -203,19 +267,108 @@ export default function PostCard({ post, savedPosts }) {
             {saved ? <FaBookmark /> : <FaRegBookmark />}
             <span>{saved ? "Saved" : "Save"}</span>
           </button>
-          <button className="flex items-center space-x-1 text-blue-600 hover:text-blue-800">
+          <button
+            className="flex items-center space-x-1 text-blue-600 hover:text-blue-800"
+            onClick={() => setIsModalOpen(true)}
+          >
             <FaShare />
             <span>Share</span>
           </button>
         </div>
       </div>
+      <Toaster position="top-right" richColors style={{ marginTop: "40px" }} />
+      {/* Share Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-11/12 max-w-md relative">
+            <button
+              className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+              onClick={() => setIsModalOpen(false)}
+            >
+              ✕
+            </button>
+            <h3 className="text-lg font-bold mb-4">Share This Post</h3>
+            <img
+              src={post.image}
+              alt={post.title}
+              className="w-full mb-4 object-contain h-64"
+            />
+
+            {/* Sharing Options */}
+            <div className="flex flex-col space-y-4">
+              {/* Download Button */}
+              <button
+                className="btn btn-primary w-full"
+                onClick={handleDownload}
+              >
+                Download
+              </button>
+
+              {/* Share Buttons */}
+              <div className="flex flex-wrap gap-2 justify-center">
+                <button
+                  className="btn btn-secondary flex items-center space-x-2"
+                  onClick={() => handleShare("twitter")}
+                >
+                  <FaArrowUp />
+                  <span>Share on Twitter</span>
+                </button>
+                <button
+                  className="btn btn-secondary flex items-center space-x-2"
+                  onClick={() => handleShare("facebook")}
+                >
+                  <FaShare />
+                  <span>Share on Facebook</span>
+                </button>
+                <button
+                  className="btn btn-secondary flex items-center space-x-2"
+                  onClick={() => handleShare("pinterest")}
+                >
+                  <FaShare />
+                  <span>Share on Pinterest</span>
+                </button>
+                <button
+                  className="btn btn-secondary flex items-center space-x-2"
+                  onClick={() => handleShare("reddit")}
+                >
+                  <FaShare />
+                  <span>Share on Reddit</span>
+                </button>
+                <button
+                  className="btn btn-secondary flex items-center space-x-2"
+                  onClick={() => handleShare("gmail")}
+                >
+                  <FaShare />
+                  <span>Share via Gmail</span>
+                </button>
+                <button
+                  className="btn btn-secondary flex items-center space-x-2"
+                  onClick={() => handleShare("mail")}
+                >
+                  <FaShare />
+                  <span>Share via Mail</span>
+                </button>
+              </div>
+
+              {/* Image Link and Copy Button */}
+              <div className="flex items-center space-x-2 mt-4">
+                <input
+                  type="text"
+                  readOnly
+                  value={`${window.location.origin}/posts/${post.user.username}/${post.slug}`}
+                  className="flex-1 p-2 border border-gray-300 rounded"
+                />
+                <button
+                  className="btn btn-outline btn-secondary"
+                  onClick={handleCopyLink}
+                >
+                  {copySuccess ? copySuccess : "Copy Link"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
-
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-  return null;
 }

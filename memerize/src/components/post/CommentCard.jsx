@@ -56,7 +56,7 @@ export default function CommentCard({
 
       // Post the reply
       const response = await fetch(
-        `/api/comments/${slug}/${comment.commentId}`,
+        `/api/comments/${slug}/${comment.commentId}`, // Attach the commentId for replies
         {
           method: "POST",
           headers: {
@@ -77,6 +77,7 @@ export default function CommentCard({
       setNewReply("");
       setShowReplyBox(false);
 
+      // Send a notification for each mentioned user
       for (const mentionedUser of mentionedUsers) {
         await fetch(`/api/notifications`, {
           method: "POST",
@@ -88,6 +89,7 @@ export default function CommentCard({
             slug: slug,
             postUsername: postUsername,
             mentionedUsername: mentionedUser,
+            commentId: comment.commentId,
           }),
         });
       }
@@ -148,7 +150,10 @@ export default function CommentCard({
   };
 
   return (
-    <div className="bg-gray-100 p-4 rounded-md shadow">
+    <div
+      className="bg-gray-100 p-4 rounded-md shadow"
+      id={comment.commentId} // Set commentId as the ID to allow scrolling
+    >
       <div className="flex items-center space-x-4 mb-2">
         <Link href={`/posts/${comment.username}`}>
           <img

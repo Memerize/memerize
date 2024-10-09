@@ -21,9 +21,6 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
 
-  // Fetch user data on component mount
-  useEffect(() => {}, [router, uploading]);
-
   // Function to resize the image using Canvas
   const resizeImage = (file) => {
     return new Promise((resolve, reject) => {
@@ -173,19 +170,19 @@ export default function ProfilePage() {
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
       <h1 className="text-3xl text-color1 font-bold mb-6 text-center">
-        {user.name}&apos;s Profile
+        {user?.name}&apos;s Profile
       </h1>
       <div className="flex flex-col items-center space-y-6 mb-8">
         <img
-          src={user.image || "https://via.placeholder.com/150"}
-          alt={user.username}
+          src={user?.image || "https://via.placeholder.com/150"}
+          alt={user?.username}
           className="w-32 h-32 rounded-full object-cover"
         />
         <div className="text-center">
           <h2 className="text-xl font-semibold text-gray-800">
-            {user.username}
+            {user?.username}
           </h2>
-          <p className="text-sm text-gray-500">{user.email}</p>
+          <p className="text-sm text-gray-500">{user?.email}</p>
         </div>
       </div>
 

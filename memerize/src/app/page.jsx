@@ -1,14 +1,19 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import PostCard from "../components/post/PostCard";
+import InfiniteScrollPosts from "@/components/InfiniteScrollPosts"; // Import new component
+import ModalNewPosts from "@/components/ModalNewPosts";
 import Loading from "@/app/loading";
 
 export default function Home() {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState([]); // All fetched posts
+  const [visiblePosts, setVisiblePosts] = useState([]); // Posts to display incrementally
   const [savedPosts, setSavedPosts] = useState([]);
   const [currentFilter, setCurrentFilter] = useState("latest");
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [hasMore, setHasMore] = useState(true); // For infinite scrolling
+  const postsPerScroll = 2; // Number of posts per scroll
 
   const fetchPosts = async (url) => {
     setLoading(true);
@@ -19,6 +24,9 @@ export default function Home() {
       }
       const json = await response.json();
       setPosts(json);
+      setVisiblePosts(json.slice(0, postsPerScroll)); // Initialize with first 2 posts
+      setHasMore(json.length > postsPerScroll);
+      setShowModal(false);
     } catch (error) {
       console.log(error);
     } finally {
@@ -39,9 +47,30 @@ export default function Home() {
     }
   };
 
+  const listenForNewPosts = () => {
+    const eventSource = new EventSource("/api/stream/posts");
+    eventSource.onmessage = () => {
+      setShowModal(true);
+    };
+
+    eventSource.onerror = () => {
+      eventSource.close();
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  };
+
   useEffect(() => {
     fetchPosts("/api/posts");
     fetchSavedPosts();
+
+    const stopListening = listenForNewPosts();
+
+    return () => {
+      stopListening();
+    };
   }, []);
 
   const handleTrendingClick = () => {
@@ -59,8 +88,36 @@ export default function Home() {
     fetchPosts("/api/posts");
   };
 
+  const handleRefetchPosts = () => {
+    fetchPosts("/api/posts");
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
+
+  const loadMorePosts = () => {
+    const nextPosts = posts.slice(
+      visiblePosts.length,
+      visiblePosts.length + postsPerScroll
+    );
+
+    setVisiblePosts((prevPosts) => [...prevPosts, ...nextPosts]);
+
+    if (visiblePosts.length + nextPosts.length >= posts.length) {
+      setHasMore(false); // No more posts to load
+    }
+  };
+
   return (
     <div className="bg-gray-100 min-h-screen">
+      {/* Modal for new posts */}
+      <ModalNewPosts
+        show={showModal}
+        onClose={handleCloseModal}
+        onFetchNewPosts={handleRefetchPosts}
+      />
+
       <div className="flex justify-center">
         <main className="w-full max-w-5xl p-6">
           <div className="flex justify-center space-x-4 mb-6">
@@ -98,12 +155,13 @@ export default function Home() {
 
           {loading ? (
             <Loading />
-          ) : posts.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6">
-              {posts.map((post) => (
-                <PostCard key={post._id} post={post} savedPosts={savedPosts} />
-              ))}
-            </div>
+          ) : visiblePosts.length > 0 ? (
+            <InfiniteScrollPosts
+              posts={visiblePosts}
+              loadMorePosts={loadMorePosts}
+              hasMore={hasMore}
+              savedPosts={savedPosts}
+            />
           ) : (
             <p className="text-center text-gray-500">No posts available</p>
           )}

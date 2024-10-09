@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 // memerize/src/components/create-meme/MemeCanvas.js
 
-import Loading from "@/app/loading";
 import React, { useState } from "react";
 import { FaArrowUp, FaShare } from "react-icons/fa";
 import {
@@ -28,7 +27,6 @@ const MemeCanvas = ({
   handleImageClick,
   imageRefs,
   setIsTransformerActive,
-  loading,
   setLoading,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -249,7 +247,7 @@ const MemeCanvas = ({
           />
         </Layer>
       </Stage>
-      {loading && <Loading />}
+      {/* {loading && <Loading />} */}
       <button
         className="float-right mt-4 btn btn-success"
         onClick={handleSaveMeme}

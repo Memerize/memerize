@@ -2,8 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast, Toaster } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,7 +12,6 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMessage(null);
 
     const formData = new FormData(e.currentTarget);
     const emailOrUsername = formData.get("emailOrUsername");
@@ -30,7 +28,6 @@ export default function LoginPage() {
 
       if (!response.ok) {
         const data = await response.json();
-        setErrorMessage(data.error || "Login failed");
         toast.error(data.error || "Login failed");
       } else {
         const data = await response.json();
@@ -38,16 +35,7 @@ export default function LoginPage() {
         document.cookie = `Authorization=Bearer ${data.access_token}; path=/`;
         document.cookie = `User=${JSON.stringify(data.user)}; path=/`;
 
-        toast.success("Login successful!", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        });
+        toast.success("Login successful!");
 
         setTimeout(() => {
           router.push("/");
@@ -58,7 +46,6 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.log(error);
-      setErrorMessage("An unexpected error occurred");
       toast.error("An unexpected error occurred");
     } finally {
       setLoading(false);
@@ -74,7 +61,6 @@ export default function LoginPage() {
       });
     } catch (error) {
       console.log(error);
-      setErrorMessage("Google login failed");
       toast.error("Google login failed");
     } finally {
       setLoading(false);
@@ -122,7 +108,7 @@ export default function LoginPage() {
             type="submit"
             className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            {loading ? "Logging in..." : "Login"}
+            Login
           </button>
         </form>
 
@@ -141,7 +127,7 @@ export default function LoginPage() {
             onClick={handleGoogleLogin}
             className="w-full py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700"
           >
-            {loading ? "Logging in with Google..." : "Login with Google"}
+            Login with Google
           </button>
         </div>
 
@@ -152,12 +138,12 @@ export default function LoginPage() {
               href="/register"
               className="text-blue-600 hover:underline font-bold"
             >
-              Register
+              Sign Up
             </a>
           </p>
         </div>
       </div>
-      <ToastContainer />
+      <Toaster position="top-right" richColors style={{ marginTop: "40px" }} />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import React, { useEffect, useState, useRef } from "react";
 import MemeCanvas from "../../components/create-meme/MemeCanvas";
 import ControlsPanel from "../../components/create-meme/ControlsPanel";
 import MemeTemplateSelector from "@/components/create-meme/MemeTemplateSelector";
+import { toast, Toaster } from "sonner";
 
 const fontOptions = [
   { label: "Impact", value: "Impact" },
@@ -36,7 +37,6 @@ const CreateMeme = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [addedImages, setAddedImages] = useState([]);
   const [imageURL, setImageURL] = useState("");
-  const [addImageUrlError, setAddImageUrlError] = useState("");
 
   // Refs
   const transformerRef = useRef(null);
@@ -56,6 +56,10 @@ const CreateMeme = () => {
       const reader = new FileReader();
       reader.onload = () => {
         setBackgroundImageUrl(reader.result);
+        toast.success("Background image uploaded successfully!"); // Toast for success
+      };
+      reader.onerror = () => {
+        toast.error("Failed to upload background image."); // Toast for error
       };
       reader.readAsDataURL(file);
     }
@@ -66,12 +70,12 @@ const CreateMeme = () => {
       if (imageURL.startsWith("https://") || imageURL.startsWith("http://")) {
         addImageToCanvas(imageURL);
         setImageURL("");
-        setAddImageUrlError("");
+        toast.success("Image added successfully!"); // Toast for success
       } else {
-        setAddImageUrlError("Invalid URL format.");
+        toast.error("Invalid URL format."); // Toast for error
       }
     } else {
-      setAddImageUrlError("Please enter an image URL.");
+      toast.error("Please enter an image URL."); // Toast for error
     }
   };
 
@@ -99,9 +103,11 @@ const CreateMeme = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        // setTimeout(() => {
         addImageToCanvas(reader.result); // Send image to canvas handler
-        // }, 500);
+        toast.success("Image uploaded successfully!"); // Toast for success
+      };
+      reader.onerror = () => {
+        toast.error("Failed to upload image."); // Toast for error
       };
       reader.readAsDataURL(file); // Convert the image to a base64 string
     }
@@ -124,6 +130,7 @@ const CreateMeme = () => {
       setIsTransformerActive(false);
       transformerRef.current?.getLayer()?.batchDraw();
     }
+    toast.success("Image removed successfully!")
   };
 
   // Image loading
@@ -135,7 +142,7 @@ const CreateMeme = () => {
       setImage(img);
       let adjustedWidth;
       let adjustedHeight;
-      let maxSize = 600;
+      let maxSize = 550;
       if (img.width > maxSize) {
         adjustedWidth = maxSize;
         adjustedHeight = (adjustedWidth / img.width) * img.height;
@@ -386,24 +393,16 @@ const CreateMeme = () => {
   };
 
   return (
-    <div className="flex flex-col items-center w-full mx-auto">
+    <div className="flex flex-col items-center w-full sm:w-11/12 md:w-10/12 lg:w-9/12 xl:w-8/12 mx-auto">
+      <MemeTemplateSelector
+        loading={loading}
+        setLoading={setLoading}
+        setBackgroundImageUrl={setBackgroundImageUrl}
+      />
       <div
-        className="w-full sm:w-11/12 md:w-10/12 lg:w-9/12 xl:w-8/12 
-    space-y-4 p-1"
-      >
-        <div className="bg-base-100 shadow-md rounded-lg w-full">
-          <MemeTemplateSelector
-            loading={loading}
-            setLoading={setLoading}
-            setBackgroundImageUrl={setBackgroundImageUrl}
-          />
-        </div>
-      </div>
-      <div
-        className="
-        flex flex-col lg:flex-row lg:justify-center lg:items-start 
-    space-y-4 lg:space-y-0 lg:space-x-2 p-1 
-    w-full sm:w-11/12 md:w-10/12 lg:w-9/12 xl:w-8/12
+        className="flex flex-col lg:flex-row lg:justify-center lg:items-start 
+    space-y-4 lg:space-y-0 lg:space-x-2 py-2
+    w-full
       "
         ref={compRef}
       >
@@ -425,7 +424,6 @@ const CreateMeme = () => {
             handleImageClick={handleImageClick}
             imageRefs={imageRefs}
             setIsTransformerActive={setIsTransformerActive}
-            loading={loading}
             setLoading={setLoading}
           />
         </div>
@@ -449,13 +447,13 @@ const CreateMeme = () => {
             addedImages={addedImages}
             removeImage={removeImage}
             handleAddImageURL={handleAddImageURL}
-            addImageUrlError={addImageUrlError}
             imageURL={imageURL}
             setImageURL={setImageURL}
             handleBackgroundImageUpload={handleBackgroundImageUpload}
           />
         </div>
       </div>
+      <Toaster position="top-right" richColors style={{ marginTop: "40px" }} />
     </div>
   );
 };

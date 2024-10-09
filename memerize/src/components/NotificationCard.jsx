@@ -1,12 +1,15 @@
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function NotificationCard({ notification, markAsSeen }) {
-  const handleNotificationClick = async (e) => {
-    e.preventDefault();
+  const router = useRouter();
 
+  const handleNotificationClick = async () => {
     await markAsSeen(notification._id);
 
-    window.location.href = `/posts/${notification.postUsername}/${notification.slug}`;
+    router.push(
+      `/posts/${notification.postUsername}/${notification.slug}?commentId=${notification.commentId}`
+    );
+    router.refresh();
   };
 
   return (
@@ -14,20 +17,16 @@ export default function NotificationCard({ notification, markAsSeen }) {
       className={`flex items-center gap-3 p-3 rounded-md hover:bg-gray-100 cursor-pointer ${
         notification.isSeen ? "bg-gray-50" : "bg-white"
       }`}
+      onClick={handleNotificationClick}
     >
       <div className="flex-1">
-        <Link
-          href={`/posts/${notification.postUsername}/${notification.slug}`}
-          onClick={handleNotificationClick}
+        <p
+          className={`text-sm ${
+            notification.isSeen ? "text-gray-500" : "text-black font-bold"
+          }`}
         >
-          <p
-            className={`text-sm ${
-              notification.isSeen ? "text-gray-500" : "text-black font-bold"
-            }`}
-          >
-            {notification.message}
-          </p>
-        </Link>
+          {notification.message}
+        </p>
         <p className="text-xs text-gray-400">
           {new Date(notification.createdAt).toLocaleString()}
         </p>

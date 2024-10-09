@@ -31,7 +31,7 @@ export const UserProvider = ({ children }) => {
     try {
       // Cek apakah user login dengan manual
       const userCookie = getCookie("User");
-      
+
       if (userCookie) {
         // Pengguna login manual
         const userData = JSON.parse(userCookie);
@@ -43,11 +43,11 @@ export const UserProvider = ({ children }) => {
 
         const userProfile = await response.json();
         setUser(userProfile);
-      } 
+      }
       // Jika login dengan Google (via next-auth session)
       else if (session && status === "authenticated") {
         const googleUser = {
-          username: session.user.email.split("@")[0],
+          username: session.user.username,
           email: session.user.email,
           image: session.user.image,
         };
@@ -57,11 +57,10 @@ export const UserProvider = ({ children }) => {
         if (!response.ok) {
           throw new Error("Failed to fetch Google user profile.");
         }
-
         const userProfile = await response.json();
+        // console.log(userProfile);
         setUser(userProfile);
-      } 
-      else {
+      } else {
         setUser(null);
       }
     } catch (err) {
@@ -97,8 +96,8 @@ export const UserProvider = ({ children }) => {
         throw new Error("Failed to update user profile.");
       }
 
-      const updatedUser = await response.json();
-      setUser(updatedUser);
+      const res = await response.json();
+      user.image = res.image;
       toast.success("Profile updated successfully!");
     } catch (err) {
       console.error("Error updating user profile:", err);
