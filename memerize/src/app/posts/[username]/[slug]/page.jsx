@@ -474,7 +474,9 @@ export default function PostDetail({ params }) {
             >
               ✕
             </button>
-            <h3 className="text-lg font-bold mb-4">Share This Post</h3>
+            <h3 className="text-lg font-bold mb-4" style={{ color: "black" }}>
+              Share This Post
+            </h3>
             <img
               src={post.image}
               alt={post.title}
