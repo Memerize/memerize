@@ -132,7 +132,7 @@ export default function PostDetail({ params }) {
       setTimeout(() => {
         router.push("/login");
       }, 2000);
-      return
+      return;
     }
 
     if (loadingSave) return;
@@ -236,6 +236,7 @@ export default function PostDetail({ params }) {
       fetchPost();
       toast.success("Comment added!");
     } catch (error) {
+      console.log(error);
       toast.error("You need to log in to comment this post.");
       setTimeout(() => {
         router.push("/login");
@@ -445,7 +446,7 @@ export default function PostDetail({ params }) {
           onChange={(e, newValue) => setNewComment(newValue)}
           placeholder="Write a comment..."
           className="w-full p-2 border rounded-md"
-          style={{...mentionStyle, color: 'black'}} 
+          style={{ ...mentionStyle, color: "black" }}
           allowSuggestionsAboveCursor={true}
         >
           <Mention

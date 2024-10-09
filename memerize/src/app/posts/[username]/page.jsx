@@ -19,7 +19,7 @@ export default function UserPage({ params }) {
     const fetchData = async () => {
       try {
         const getUser = await fetch(
-          `http://localhost:3000/api/users/${username}`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${username}`,
           {
             cache: "no-store",
           }
@@ -28,7 +28,7 @@ export default function UserPage({ params }) {
         setUser(userData);
 
         const getPosts = await fetch(
-          `http://localhost:3000/api/posts/${username}`,
+          `${process.env.NEXT_PUBLIC_BASE_URL}/api/posts/${username}`,
           {
             cache: "no-store",
           }

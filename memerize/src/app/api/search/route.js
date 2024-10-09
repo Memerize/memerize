@@ -5,7 +5,6 @@ import { handleError } from "@/helpers/handleError";
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("query");
-  console.log(query, "<< ini querynya");
 
   if (!query) {
     return NextResponse.json([], { status: 200 });

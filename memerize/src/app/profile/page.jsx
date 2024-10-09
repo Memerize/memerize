@@ -1,8 +1,6 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
-
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast, Toaster } from "sonner";
 import { refreshCacheByTag } from "@/action";
@@ -142,12 +140,11 @@ export default function ProfilePage() {
         toast.error(userError || "Error uploading image.");
       }
 
-      toast.success('Profile image updated successfully!')
+      toast.success("Profile image updated successfully!");
       setTimeout(() => {
-        router.refresh()
-        refreshCacheByTag('user')
-      }, 2000)
-    
+        router.refresh();
+        refreshCacheByTag("user");
+      }, 2000);
     } catch (err) {
       console.error("Error uploading image:", err);
       toast.error(err.message || "Error uploading image.");
@@ -184,38 +181,38 @@ export default function ProfilePage() {
           <p className="text-sm text-gray-500">{user?.email}</p>
         </div>
       </div>
-            <form onSubmit={handleImageUpload} className="flex flex-col items-center">
-      <div className="w-full mb-4">
-        <label
-          className="block text-sm font-medium text-gray-700 mb-2"
-          htmlFor="profileImage"
-        >
-          Update Profile Image
-        </label>
-        <div className="relative w-full max-w-xs">
-          <input
-            type="file"
-            id="profileImage"
-            accept=".jpg,.jpeg,.png"
-            onChange={handleFileChange}
-            className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none file:bg-blue-600 file:text-white file:border-none file:mr-4 file:py-2 file:px-4 file:rounded-md hover:file:bg-blue-700"
-          />
+      <form onSubmit={handleImageUpload} className="flex flex-col items-center">
+        <div className="w-full mb-4">
+          <label
+            className="block text-sm font-medium text-gray-700 mb-2"
+            htmlFor="profileImage"
+          >
+            Update Profile Image
+          </label>
+          <div className="relative w-full max-w-xs">
+            <input
+              type="file"
+              id="profileImage"
+              accept=".jpg,.jpeg,.png"
+              onChange={handleFileChange}
+              className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none file:bg-blue-600 file:text-white file:border-none file:mr-4 file:py-2 file:px-4 file:rounded-md hover:file:bg-blue-700"
+            />
+          </div>
         </div>
-      </div>
 
-      <button
-        type="submit"
-        className={`w-full px-4 py-2 rounded-md text-white ${
-          uploading
-            ? "bg-gray-500 cursor-not-allowed"
-            : "bg-blue-600 hover:bg-blue-700"
-        }`}
-        disabled={uploading}
-      >
-        {uploading ? "Uploading..." : "Update Image"}
-      </button>
-    </form>
-        <Toaster position="top-right" richColors style={{ marginTop: "40px" }} />
+        <button
+          type="submit"
+          className={`w-full px-4 py-2 rounded-md text-white ${
+            uploading
+              ? "bg-gray-500 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
+          disabled={uploading}
+        >
+          {uploading ? "Uploading..." : "Update Image"}
+        </button>
+      </form>
+      <Toaster position="top-right" richColors style={{ marginTop: "40px" }} />
     </div>
   );
 }
