@@ -7,6 +7,7 @@ import MemeCanvas from "../../components/create-meme/MemeCanvas";
 import ControlsPanel from "../../components/create-meme/ControlsPanel";
 import MemeTemplateSelector from "@/components/create-meme/MemeTemplateSelector";
 import { toast, Toaster } from "sonner";
+import Loading from "../loading";
 
 const fontOptions = [
   { label: "Impact", value: "Impact" },
@@ -81,6 +82,7 @@ const CreateMeme = () => {
 
   // Function to add image to canvas
   const addImageToCanvas = (src) => {
+    setLoading(true)
     const newImage = {
       id: Date.now(), // Unique ID for each image
       src: src,
@@ -95,10 +97,12 @@ const CreateMeme = () => {
       handleImageClick(newImage.id);
       stageRef.current.batchDraw();
     }, 1000);
+    setLoading(false)
   };
 
   // Handle image upload
   const handleImageUpload = (event) => {
+    setLoading(true)
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -111,6 +115,8 @@ const CreateMeme = () => {
       };
       reader.readAsDataURL(file); // Convert the image to a base64 string
     }
+    setLoading(false)
+
   };
 
   // Function to handle image transformations (drag, scale, rotate)
@@ -130,11 +136,12 @@ const CreateMeme = () => {
       setIsTransformerActive(false);
       transformerRef.current?.getLayer()?.batchDraw();
     }
-    toast.success("Image removed successfully!")
+    toast.success("Image removed successfully!");
   };
 
   // Image loading
   useEffect(() => {
+    setLoading(true)
     const img = new window.Image();
     img.crossOrigin = "anonymous";
     img.src = backgroundImageUrl;
@@ -179,6 +186,7 @@ const CreateMeme = () => {
           fontFamily: "Impact",
         },
       ]);
+      setLoading(false)
     };
   }, [backgroundImageUrl]);
 
@@ -393,68 +401,79 @@ const CreateMeme = () => {
   };
 
   return (
-    <div className="flex flex-col items-center w-full sm:w-11/12 md:w-10/12 lg:w-9/12 xl:w-8/12 mx-auto">
-      <MemeTemplateSelector
-        loading={loading}
-        setLoading={setLoading}
-        setBackgroundImageUrl={setBackgroundImageUrl}
-      />
-      <div
-        className="flex flex-col lg:flex-row lg:justify-center lg:items-start 
+    <>
+      {loading && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50  flex justify-center items-center">
+          <Loading />
+        </div>
+      )}
+      <div className="flex flex-col items-center w-full sm:w-11/12 md:w-10/12 lg:w-9/12 xl:w-8/12 mx-auto">
+        <MemeTemplateSelector
+          loading={loading}
+          setLoading={setLoading}
+          setBackgroundImageUrl={setBackgroundImageUrl}
+        />
+        <div
+          className="flex flex-col lg:flex-row lg:justify-center lg:items-start 
     space-y-4 lg:space-y-0 lg:space-x-2 py-2
     w-full
       "
-        ref={compRef}
-      >
-        {/* Left panel for Canvas */}
-        <div className="flex-[2] w-full relative justify-center items-center text-center bg-base-100 shadow-md rounded-lg p-4">
-          <MemeCanvas
-            image={image}
-            imageDimensions={imageDimensions}
-            texts={texts}
-            handleTextClick={handleTextClick}
-            handleDragEnd={handleDragEnd}
-            handleTextTransform={handleTextTransform}
-            isTransformerActive={isTransformerActive}
-            transformerRef={transformerRef}
-            textRefs={textRefs}
-            stageRef={stageRef}
-            addedImages={addedImages}
-            handleImageDragEnd={handleImageDragEnd}
-            handleImageClick={handleImageClick}
-            imageRefs={imageRefs}
-            setIsTransformerActive={setIsTransformerActive}
-            setLoading={setLoading}
-          />
-        </div>
+          ref={compRef}
+        >
+          {/* Left panel for Canvas */}
+          <div className="flex-[2] w-full relative justify-center items-center text-center bg-base-100 shadow-md rounded-lg p-4">
+            <MemeCanvas
+              image={image}
+              imageDimensions={imageDimensions}
+              texts={texts}
+              handleTextClick={handleTextClick}
+              handleDragEnd={handleDragEnd}
+              handleTextTransform={handleTextTransform}
+              isTransformerActive={isTransformerActive}
+              transformerRef={transformerRef}
+              textRefs={textRefs}
+              stageRef={stageRef}
+              addedImages={addedImages}
+              handleImageDragEnd={handleImageDragEnd}
+              handleImageClick={handleImageClick}
+              imageRefs={imageRefs}
+              setIsTransformerActive={setIsTransformerActive}
+              setLoading={setLoading}
+            />
+          </div>
 
-        {/* Right panel for Controls */}
-        <div className="flex-[1] flex flex-col items-center space-y-4 p-4 bg-base-100 shadow-lg rounded-lg w-full">
-          <ControlsPanel
-            backgroundImageUrl={backgroundImageUrl}
-            setBackgroundImageUrl={setBackgroundImageUrl}
-            fontFamily={fontFamily}
-            setFontFamily={setFontFamily}
-            fontOptions={fontOptions}
-            addText={addText}
-            texts={texts}
-            handleInputChange={handleInputChange}
-            toggleDropdown={toggleDropdown}
-            openDropdown={openDropdown}
-            removeText={removeText}
-            setTexts={setTexts}
-            handleImageUpload={handleImageUpload}
-            addedImages={addedImages}
-            removeImage={removeImage}
-            handleAddImageURL={handleAddImageURL}
-            imageURL={imageURL}
-            setImageURL={setImageURL}
-            handleBackgroundImageUpload={handleBackgroundImageUpload}
-          />
+          {/* Right panel for Controls */}
+          <div className="flex-[1] flex flex-col items-center space-y-4 p-4 bg-base-100 shadow-lg rounded-lg w-full">
+            <ControlsPanel
+              backgroundImageUrl={backgroundImageUrl}
+              setBackgroundImageUrl={setBackgroundImageUrl}
+              fontFamily={fontFamily}
+              setFontFamily={setFontFamily}
+              fontOptions={fontOptions}
+              addText={addText}
+              texts={texts}
+              handleInputChange={handleInputChange}
+              toggleDropdown={toggleDropdown}
+              openDropdown={openDropdown}
+              removeText={removeText}
+              setTexts={setTexts}
+              handleImageUpload={handleImageUpload}
+              addedImages={addedImages}
+              removeImage={removeImage}
+              handleAddImageURL={handleAddImageURL}
+              imageURL={imageURL}
+              setImageURL={setImageURL}
+              handleBackgroundImageUpload={handleBackgroundImageUpload}
+            />
+          </div>
         </div>
+        <Toaster
+          position="top-right"
+          richColors
+          style={{ marginTop: "40px" }}
+        />
       </div>
-      <Toaster position="top-right" richColors style={{ marginTop: "40px" }} />
-    </div>
+    </>
   );
 };
 

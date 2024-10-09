@@ -8,6 +8,9 @@ const config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        impact: ['"Impact"', "sans-serif"],
+      },
       colors: {
         color1: "#231F20", // warna hitam
         color2: "#C9D1D9", // warna text
