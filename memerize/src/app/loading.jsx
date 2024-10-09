@@ -4,8 +4,8 @@ import loadingRacoonGif from "../assets/img/pedro_racoon.gif";
 
 const Loading = () => {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-black p-4 rounded-full flex items-center justify-center">
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="bg-black p-4 rounded-full flex flex-col items-center justify-center">
         <Image
           src={loadingRacoonGif}
           alt="Loading"
@@ -13,6 +13,7 @@ const Loading = () => {
           height={150}
           className="rounded-full shadow-lg object-cover"
         />
+        {/* <h1 className="font-impact">Loading...</h1> */}
       </div>
     </div>
   );

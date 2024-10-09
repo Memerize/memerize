@@ -110,7 +110,7 @@ export default function Home() {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <>
       {/* Modal for new posts */}
       <ModalNewPosts
         show={showModal}
@@ -167,6 +167,6 @@ export default function Home() {
           )}
         </main>
       </div>
-    </div>
+    </>
   );
 }

@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { useState, useEffect, useContext } from "react";
-import { FaComment, FaShare, FaRegBookmark, FaBookmark, FaArrowUp } from "react-icons/fa";
+import {
+  FaComment,
+  FaShare,
+  FaRegBookmark,
+  FaBookmark,
+  FaArrowUp,
+} from "react-icons/fa";
 import { BsArrowUpCircle, BsArrowUpCircleFill } from "react-icons/bs";
 import { useRouter } from "next/navigation";
 import { toast, Toaster } from "sonner";
@@ -131,18 +137,28 @@ export default function PostCard({ post, savedPosts }) {
     }
   };
 
-
-  const handleDownload = () => {
-    const link = document.createElement("a");
-    link.href = post.image;
-    link.download = `${post.title}.jpg`; // Adjust the extension based on your image type
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(post.image);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.setAttribute("download", "meme from memerize.png"); // Set the name for the downloaded file
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Error downloading the meme:", error);
+      toast.error("Failed to download the meme. Please try again.");
+    }
   };
 
   const handleShare = (platform) => {
-    const shareUrl = encodeURIComponent(`${window.location.origin}/posts/${post.user.username}/${post.slug}`);
+    const shareUrl = encodeURIComponent(
+      `${window.location.origin}/posts/${post.user.username}/${post.slug}`
+    );
     const shareText = encodeURIComponent(`Check out this post: ${post.title}`);
 
     let url = "";
@@ -174,7 +190,10 @@ export default function PostCard({ post, savedPosts }) {
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/posts/${post.user.username}/${post.slug}`)
+    navigator.clipboard
+      .writeText(
+        `${window.location.origin}/posts/${post.user.username}/${post.slug}`
+      )
       .then(() => {
         setCopySuccess("Copied!");
         setTimeout(() => setCopySuccess(""), 2000);

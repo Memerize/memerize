@@ -2,7 +2,6 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import Loading from "@/app/loading";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 
@@ -92,8 +91,6 @@ const MemeTemplateSelector = ({
         className="flex overflow-x-scroll 2xl:w-[800px] xl:w-[630px] lg:w-[500px] w-[300px]"
         // style={{width:"800px"}}
       >
-        {loading && <Loading />}
-
         {templates
           .filter((template) => {
             const templateName = template.name || template.id || "";

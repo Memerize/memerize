@@ -39,7 +39,7 @@ export default function Sidebar({ closeSidebar }) {
   };
 
   return (
-    <ul className="menu bg-color3 h-full p-4 md:w-24 lg:w-24 xl:w-64 space-y-2">
+    <ul className="menu bg-color3 h-full p-4 md:w-24 lg:w-24 xl:w-64 space-y-2" style={{ backgroundColor: '#333333' }}>
       {/* Link Home */}
       <li>
         <Link

@@ -179,7 +179,7 @@ export default function Navbar() {
 
   return (
     <>
-      <div className="navbar bg-color4 sticky top-0 z-10 h-16">
+      <div className="navbar bg-[#2E2E2E] sticky top-0 z-10 h-16">
         <div className="flex-1 flex items-center">
           <button
             className="md:hidden mr-4 focus:outline-none"
