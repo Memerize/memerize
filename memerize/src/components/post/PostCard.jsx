@@ -5,7 +5,6 @@ import { useState, useEffect, useContext } from "react";
 import { FaComment, FaShare, FaRegBookmark, FaBookmark, FaArrowUp } from "react-icons/fa";
 import { BsArrowUpCircle, BsArrowUpCircleFill } from "react-icons/bs";
 import { useRouter } from "next/navigation";
-import { useContext } from "react";
 import { toast, Toaster } from "sonner";
 import { UserContext } from "@/context/UserContext";
 
