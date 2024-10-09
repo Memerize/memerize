@@ -94,7 +94,7 @@ const MemeTemplateSelector = ({
         {templates
           .filter((template) => {
             const templateName = template.name || template.id || "";
-            console.log(templateName);
+            // console.log(templateName);
             // activeTab === "memegen"
             //   ? console.log(template.blank)
             //   : console.log(template.url);

@@ -3,7 +3,7 @@ import ReplyCard from "./ReplyCard";
 import { MentionsInput, Mention } from "react-mentions";
 import { mentionStyle } from "@/components/post/MentionStyle";
 import Link from "next/link";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 
 export default function CommentCard({
   comment,
@@ -197,7 +197,7 @@ export default function CommentCard({
             onChange={(e, newValue) => setNewReply(newValue)}
             placeholder="Write a reply..."
             className="w-full p-2 border rounded-md"
-            style={{ ...mentionStyle, input: { color: 'black' } }} // Added text color to black
+            style={{ ...mentionStyle, input: { color: "black" } }} // Added text color to black
             allowSuggestionsAboveCursor={true}
           >
             <Mention

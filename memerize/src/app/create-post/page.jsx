@@ -60,19 +60,12 @@ export default function MemePostForm() {
   // Handle tag addition
   const handleAddition = (tag) => {
     // Prevent adding duplicate tags
-    console.log(
-      selectedTags.find(
-        (existingTag) =>
-          existingTag.text.toLowerCase() === tag.text.toLowerCase()
-      )
-    );
     if (
       selectedTags.find(
         (existingTag) =>
           existingTag.text.toLowerCase() === tag.text.toLowerCase()
       )
     ) {
-      console.log("test");
       toast.error("Tag already added.");
       return;
     }

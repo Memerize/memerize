@@ -10,7 +10,6 @@ export async function fetchUser(username) {
   const response = await fetch(`/api/users/${username}`, {
     next: { tags: ["user"] },
   });
-  console.log(response);
   return response;
 }
 

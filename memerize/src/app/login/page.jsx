@@ -1,17 +1,14 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { toast, Toaster } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
     const formData = new FormData(e.currentTarget);
     const emailOrUsername = formData.get("emailOrUsername");
@@ -47,23 +44,17 @@ export default function LoginPage() {
     } catch (error) {
       console.log(error);
       toast.error("An unexpected error occurred");
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleGoogleLogin = async () => {
-    setLoading(true);
     try {
-      // Menggunakan next-auth untuk sign in dengan Google
       await signIn("google", {
         callbackUrl: "/",
       });
     } catch (error) {
       console.log(error);
       toast.error("Google login failed");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -111,10 +102,6 @@ export default function LoginPage() {
             Login
           </button>
         </form>
-
-        {errorMessage && (
-          <p className="text-red-500 mt-2 text-center">{errorMessage}</p>
-        )}
 
         <div className="flex items-center justify-center mt-6">
           <div className="w-full border-t border-gray-300"></div>
