@@ -37,7 +37,7 @@ export default function PostDetail({ params }) {
   const [loadingPost, setLoadingPost] = useState(true);
   const [users, setUsers] = useState([]);
   const { user: currentUser } = useContext(UserContext);
-  const router = useRouter()
+  const router = useRouter();
 
   // New State Variables for Share Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -57,7 +57,7 @@ export default function PostDetail({ params }) {
       checkIfSaved(postData.slug);
     } catch (error) {
       console.error("Error fetching post:", error);
-      toast.error('Error loading post.')
+      toast.error("Error loading post.");
     } finally {
       setLoadingPost(false);
     }
@@ -97,11 +97,11 @@ export default function PostDetail({ params }) {
   const handleLike = async () => {
     if (!currentUser) {
       toast.error("You need to log in to like this post.");
-      
+
       setTimeout(() => {
         window.location.href = "/login";
       }, 2000);
-      
+
       return;
     }
 
@@ -133,7 +133,7 @@ export default function PostDetail({ params }) {
       setTimeout(() => {
         router.push("/login");
       }, 2000);
-      return // Redirect to login
+      return; // Redirect to login
     }
 
     if (loadingSave) return;
@@ -237,11 +237,11 @@ export default function PostDetail({ params }) {
       fetchPost();
       toast.success("Comment added!");
     } catch (error) {
-      toast.error('You need to log in to comment this post.')
+      toast.error("You need to log in to comment this post.");
       setTimeout(() => {
         router.push("/login");
       }, 2000);
-      return
+      return;
     } finally {
       setLoading(false);
     }
@@ -262,13 +262,22 @@ export default function PostDetail({ params }) {
   };
 
   // Share Modal Functions
-  const handleDownload = () => {
-    const link = document.createElement("a");
-    link.href = post.image;
-    link.download = `${post.title}.jpg`; // Adjust the extension based on your image type
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(post.image);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.setAttribute("download", "meme from memerize.png"); // Set the name for the downloaded file
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Error downloading the meme:", error);
+      toast.error("Failed to download the meme. Please try again.");
+    }
   };
 
   const handleShare = (platform) => {
@@ -331,7 +340,6 @@ export default function PostDetail({ params }) {
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
-
       <Toaster position="top-right" richColors style={{ marginTop: "40px" }} />
       {/* User Info */}
 
