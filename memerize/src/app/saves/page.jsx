@@ -67,10 +67,10 @@ export default function SavePages() {
       </div>
     );
   }
-
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 mt-8">
-      <h1 className="text-2xl font-bold mb-6">Saved Posts</h1>
+
+      <h1 className="text-2xl font-bold mb-6 text-black">Saved Posts</h1>
       <InfiniteScroll
         dataLength={visibleSaves.length}
         next={loadMoreSaves}

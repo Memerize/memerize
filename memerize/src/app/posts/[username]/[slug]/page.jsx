@@ -410,7 +410,7 @@ export default function PostDetail({ params }) {
 
       {/* Comments Section */}
       <div className="mt-8 h-96 overflow-y-auto pr-2">
-        <h3 className="text-xl font-semibold mb-4">Comments</h3>
+        <h3 className="text-xl font-semibold mb-4 text-black">Comments</h3>
         <div className="space-y-4">
           {comments.length > 0 ? (
             comments.map((comment) => (
@@ -438,7 +438,7 @@ export default function PostDetail({ params }) {
           onChange={(e, newValue) => setNewComment(newValue)}
           placeholder="Write a comment..."
           className="w-full p-2 border rounded-md"
-          style={mentionStyle}
+          style={{...mentionStyle, color: 'black'}} 
           allowSuggestionsAboveCursor={true}
         >
           <Mention

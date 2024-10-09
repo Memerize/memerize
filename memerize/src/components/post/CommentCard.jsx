@@ -195,7 +195,7 @@ export default function CommentCard({
             onChange={(e, newValue) => setNewReply(newValue)}
             placeholder="Write a reply..."
             className="w-full p-2 border rounded-md"
-            style={mentionStyle}
+            style={{ ...mentionStyle, input: { color: 'black' } }} // Added text color to black
             allowSuggestionsAboveCursor={true}
           >
             <Mention
