@@ -105,11 +105,11 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="flex items-center justify-center mt-6">
+        {/* <div className="flex items-center justify-center mt-6">
           <div className="w-full border-t border-gray-300"></div>
           <span className="px-4 text-gray-500">Or</span>
           <div className="w-full border-t border-gray-300"></div>
-        </div>
+        </div> */}
 
         {/* <div className="flex flex-col items-center mt-4">
           <button
