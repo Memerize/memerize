@@ -1,5 +1,7 @@
 import { NotificationModel } from "@/models/NotificationModel";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const username = searchParams.get("username");

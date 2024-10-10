@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast, Toaster } from "sonner";
 
+export const dynamic = "force-dynamic";
+
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");

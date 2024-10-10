@@ -3,6 +3,8 @@
 import { PostModel } from "@/models/PostModel";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const tagStats = await PostModel.getTagStatistics();

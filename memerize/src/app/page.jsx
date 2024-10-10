@@ -5,6 +5,8 @@ import InfiniteScrollPosts from "@/components/InfiniteScrollPosts";
 import ModalNewPosts from "@/components/ModalNewPosts";
 import Loading from "@/app/loading";
 
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   const [posts, setPosts] = useState([]); // All fetched posts
   const [visiblePosts, setVisiblePosts] = useState([]); // Posts to display incrementally

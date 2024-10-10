@@ -8,6 +8,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { WithContext as ReactTags } from "react-tag-input";
 
+export const dynamic = "force-dynamic";
+
 const KeyCodes = {
   comma: 188,
   enter: 13,

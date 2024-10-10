@@ -1,8 +1,10 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+// import { signIn } from "next-auth/react";
 import { toast, Toaster } from "sonner";
+
+export const dynamic = "force-dynamic";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -47,16 +49,16 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      await signIn("google", {
-        callbackUrl: "/",
-      });
-    } catch (error) {
-      console.log(error);
-      toast.error("Google login failed");
-    }
-  };
+  // const handleGoogleLogin = async () => {
+  //   try {
+  //     await signIn("google", {
+  //       callbackUrl: "/",
+  //     });
+  //   } catch (error) {
+  //     console.log(error);
+  //     toast.error("Google login failed");
+  //   }
+  // };
 
   return (
     <div className="flex items-center justify-center bg-[var(--background)] text-[var(--foreground)] mt-36">
@@ -103,20 +105,20 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="flex items-center justify-center mt-6">
+        {/* <div className="flex items-center justify-center mt-6">
           <div className="w-full border-t border-gray-300"></div>
           <span className="px-4 text-gray-500">Or</span>
           <div className="w-full border-t border-gray-300"></div>
-        </div>
+        </div> */}
 
-        <div className="flex flex-col items-center mt-4">
+        {/* <div className="flex flex-col items-center mt-4">
           <button
             onClick={handleGoogleLogin}
             className="w-full py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700"
           >
             Login with Google
           </button>
-        </div>
+        </div> */}
 
         <div className="text-center mt-4">
           <p className="text-sm text-black">

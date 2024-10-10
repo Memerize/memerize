@@ -2,7 +2,7 @@ import { jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { CustomError, handleError } from "./helpers/handleError";
-import { getSession } from "next-auth/react";
+// import { getSession } from "next-auth/react";
 
 async function auth(request) {
   const authCookie = cookies().get("Authorization");
@@ -30,32 +30,32 @@ async function auth(request) {
   }
 
   // Google session login via next-auth
-  else if (googleSessionToken) {
-    try {
-      const session = await getSession({
-        req: {
-          headers: {
-            cookie: `next-auth.session-token=${googleSessionToken.value}`,
-          },
-        },
-      });
+  // else if (googleSessionToken) {
+  //   try {
+  //     const session = await getSession({
+  //       req: {
+  //         headers: {
+  //           cookie: `next-auth.session-token=${googleSessionToken.value}`,
+  //         },
+  //       },
+  //     });
 
-      if (!session) {
-        throw new CustomError("Invalid Google session", 401);
-      }
+  //     if (!session) {
+  //       throw new CustomError("Invalid Google session", 401);
+  //     }
 
-      const requestHeaders = new Headers(request.headers);
-      requestHeaders.set("x-user-email", session.user.email);
-      requestHeaders.set("x-user-username", session.user.username);
-      requestHeaders.set("x-user-image", session.user.image);
+  //     const requestHeaders = new Headers(request.headers);
+  //     requestHeaders.set("x-user-email", session.user.email);
+  //     requestHeaders.set("x-user-username", session.user.username);
+  //     requestHeaders.set("x-user-image", session.user.image);
 
-      // console.log(requestHeaders, "Google User Session Headers");
-      return requestHeaders;
-    } catch (error) {
-      console.error("Failed to get session from next-auth", error);
-      throw new CustomError("Invalid Google session", 401);
-    }
-  }
+  //     console.log(requestHeaders, "Google User Session Headers");
+  //     return requestHeaders;
+  //   } catch (error) {
+  //     console.error("Failed to get session from next-auth", error);
+  //     throw new CustomError("Invalid Google session", 401);
+  //   }
+  // }
 }
 
 export async function middleware(request) {
@@ -140,4 +140,5 @@ export const config = {
     "/api/notifications/:path*",
     "/api/likes/:path*",
   ],
+  runtime: "nodejs",
 };
