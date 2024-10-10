@@ -6,6 +6,8 @@ import { toast, Toaster } from "sonner";
 import { refreshCacheByTag } from "@/action";
 import { UserContext } from "@/context/UserContext";
 
+export const dynamic = "force-dynamic";
+
 export default function ProfilePage() {
   const {
     user,

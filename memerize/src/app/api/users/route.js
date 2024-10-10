@@ -2,6 +2,8 @@ import { handleError } from "@/helpers/handleError";
 import { NextResponse } from "next/server";
 import { UserModel } from "@/models/UserModel";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const users = await UserModel.findAll();

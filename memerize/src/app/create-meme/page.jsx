@@ -9,6 +9,8 @@ import MemeTemplateSelector from "@/components/create-meme/MemeTemplateSelector"
 import { toast, Toaster } from "sonner";
 import Loading from "../loading";
 
+export const dynamic = "force-dynamic";
+
 const fontOptions = [
   { label: "Impact", value: "Impact" },
   { label: "Arial", value: "Arial, sans-serif" },

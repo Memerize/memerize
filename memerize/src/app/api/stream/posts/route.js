@@ -1,5 +1,7 @@
 import { PostModel } from "@/models/PostModel";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   return new Response(
     (async function* () {
